@@ -42,6 +42,9 @@
         <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
             <i class="fa-solid fa-print"></i> Cetak Laporan
         </button>
+                <a href="{{ route('laporan.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv"></i> Export Excel/CSV
+                </a>
     </div>
 
     <!-- Report Document Printable Sheet -->

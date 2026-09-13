@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\StockMovement;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
 class ReportController extends Controller
@@ -66,5 +67,44 @@ class ReportController extends Controller
         }
 
         return view('reports.index', compact('type', 'startDate', 'endDate', 'data'));
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $type = $request->get('type', 'tender');
+        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
+
+        $rows = match ($type) {
+            'contract' => Contract::with('client')->whereBetween('start_date', [$startDate, $endDate])->get(),
+            'procurement' => Procurement::with('supplier')->whereBetween('procurement_date', [$startDate, $endDate])->get(),
+            'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(),
+            'stock' => Product::with('stockMovements')->get(),
+            'invoice' => Invoice::whereBetween('invoice_date', [$startDate, $endDate])->get(),
+            'payment' => Payment::whereBetween('payment_date', [$startDate, $endDate])->get(),
+            default => Tender::with('client')->whereBetween('found_date', [$startDate, $endDate])->get(),
+        };
+
+        $filename = 'laporan-' . $type . '-' . $startDate . '-sampai-' . $endDate . '.csv';
+
+        return response()->streamDownload(function () use ($rows, $type) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Laporan', ucfirst($type)]);
+            fputcsv($handle, []);
+
+            foreach ($rows as $row) {
+                fputcsv($handle, match ($type) {
+                    'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status],
+                    'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status],
+                    'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status],
+                    'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock],
+                    'invoice' => [$row->invoice_number, $row->invoice_date, $row->due_date, $row->total_amount, $row->paid_amount, $row->status],
+                    'payment' => [$row->invoice->invoice_number ?? '-', $row->payment_date, $row->amount, $row->payment_method],
+                    default => [$row->tender_number, $row->name, $row->client->name ?? '-', $row->deadline, $row->bid_value, $row->status],
+                });
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

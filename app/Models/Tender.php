@@ -48,6 +48,11 @@ class Tender extends Model
         return $this->hasMany(TenderDocument::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(TenderItem::class);
+    }
+
     public function contract(): HasMany
     {
         return $this->hasMany(Contract::class);

@@ -44,6 +44,7 @@
                         <th class="p-4">Deadline</th>
                         <th class="p-4">Status Pipeline</th>
                         <th class="p-4">Dokumen</th>
+                        <th class="p-4">Kebutuhan Barang</th>
                         <th class="p-4 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -91,6 +92,18 @@
                                     <i class="fa-solid fa-paperclip text-slate-400"></i> {{ $tender->documents->count() }} Dokumen
                                 </span>
                             </td>
+                            <td class="p-4">
+                                @if($tender->items->isNotEmpty())
+                                    <div class="text-xs text-slate-600 space-y-1">
+                                        @foreach($tender->items->take(2) as $item)
+                                            <div>{{ $item->item_name }} <span class="text-slate-400">({{ rtrim(rtrim(number_format($item->quantity, 2, ',', '.'), '0'), ',') }} {{ $item->unit }})</span></div>
+                                        @endforeach
+                                        @if($tender->items->count() > 2)<div class="text-blue-600">+{{ $tender->items->count() - 2 }} item lain</div>@endif
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400">Belum diisi</span>
+                                @endif
+                            </td>
                             <td class="p-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     @if($tender->status === 'Menang' || $tender->result === 'Menang')
@@ -107,7 +120,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="p-8 text-center text-slate-400 text-sm">Belum ada data tender. Silakan tambah tender baru.</td>
+                            <td colspan="8" class="p-8 text-center text-slate-400 text-sm">Belum ada data tender. Silakan tambah tender baru.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -180,6 +193,16 @@
                         <option value="Menang">Menang</option>
                         <option value="Kalah">Kalah</option>
                     </select>
+                </div>
+
+                <div class="border-t pt-4">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-2">Kebutuhan Barang Tender <span class="font-normal normal-case text-slate-400">(opsional)</span></label>
+                    <div class="grid grid-cols-[1fr_90px_90px] gap-2">
+                        <input name="items[0][item_name]" placeholder="Laptop / Printer / ATK" class="px-3 py-2 border rounded-xl text-sm">
+                        <input name="items[0][quantity]" type="number" min="0.01" step="0.01" placeholder="Qty" class="px-3 py-2 border rounded-xl text-sm">
+                        <input name="items[0][unit]" placeholder="Unit" class="px-3 py-2 border rounded-xl text-sm">
+                    </div>
+                    <p class="mt-1 text-[11px] text-slate-400">Tambahkan item lain setelah tender tersimpan melalui modul pengadaan.</p>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-3 border-t">

@@ -17,7 +17,7 @@ class TenderController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Tender::with(['client', 'documents']);
+        $query = Tender::with(['client', 'documents', 'items.product']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -50,12 +50,23 @@ class TenderController extends Controller
             'bid_value' => 'nullable|numeric|min:0',
             'status' => 'required|string',
             'notes' => 'nullable|string',
+            'items' => 'nullable|array',
+            'items.*.product_id' => 'nullable|exists:products,id',
+            'items.*.item_name' => 'required_with:items.*.quantity|nullable|string|max:200',
+            'items.*.quantity' => 'required_with:items.*.item_name|nullable|numeric|min:0.01',
+            'items.*.unit' => 'nullable|string|max:30',
+            'items.*.estimated_price' => 'nullable|numeric|min:0',
+            'items.*.notes' => 'nullable|string',
         ]);
 
         $validated['created_by'] = Auth::id() ?? 1;
         $validated['bid_value'] = $validated['bid_value'] ?? $validated['estimated_value'];
 
-        Tender::create($validated);
+        $items = $validated['items'] ?? [];
+        unset($validated['items']);
+
+        $tender = Tender::create($validated);
+        $tender->items()->createMany(array_values(array_filter($items, fn (array $item) => filled($item['item_name'] ?? null))));
 
         return redirect()->route('tender.index')->with('success', 'Tender baru berhasil ditambahkan.');
     }

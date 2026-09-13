@@ -38,6 +38,7 @@
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFC; color: #1E293B; }
         .sidebar-item-active { background-color: #EFF6FF; color: #2563EB; font-weight: 600; border-right: 3px solid #2563EB; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }">
@@ -162,6 +163,10 @@
                     <!-- Modul Khusus Super Admin (Posisi Paling Bawah) -->
                     @if($isSuperAdmin)
                         <div class="pt-3 pb-1 px-3 text-[11px] font-semibold text-purple-600 uppercase tracking-wider">Pengaturan Admin</div>
+                        <a href="{{ route('users.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('users.*') ? 'sidebar-item-active' : '' }}">
+                            <i class="fa-solid fa-users-gear w-6 text-center text-purple-600"></i>
+                            <span>Manajemen User</span>
+                        </a>
                         <a href="{{ route('partner-logos.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('partner-logos.*') ? 'sidebar-item-active' : '' }}">
                             <i class="fa-solid fa-images w-6 text-center text-purple-600"></i>
                             <span>Kelola Logo Klien</span>

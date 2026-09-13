@@ -14,6 +14,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ServiceJobController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TenderController;
+use App\Http\Controllers\UserManagementController;
 use App\Models\PartnerLogo;
 use Illuminate\Support\Facades\Route;
 
@@ -107,10 +108,15 @@ Route::middleware(['auth'])->group(function () {
     // Modul Laporan (Super Admin & Management)
     Route::middleware(['role:super_admin,management'])->group(function () {
         Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/export', [ReportController::class, 'export'])->name('laporan.export');
     });
 
     // Modul Khusus Super Admin (Kelola Logo Klien Landing Page)
     Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+
         Route::get('/partner-logos', [PartnerLogoController::class, 'index'])->name('partner-logos.index');
         Route::post('/partner-logos', [PartnerLogoController::class, 'store'])->name('partner-logos.store');
         Route::put('/partner-logos/{partnerLogo}', [PartnerLogoController::class, 'update'])->name('partner-logos.update');
