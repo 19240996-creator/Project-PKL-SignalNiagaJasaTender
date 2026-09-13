@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Permission;
 use App\Models\PartnerLogo;
 use App\Models\Procurement;
 use App\Models\ProcurementItem;
@@ -66,6 +67,22 @@ class DatabaseSeeder extends Seeder
                 ]
             );
         }
+
+        $permissionNames = ['users.manage', 'reports.view', 'reports.export', 'tenders.manage', 'services.manage', 'sales.manage', 'finance.manage'];
+        foreach ($permissionNames as $permissionName) {
+            Permission::firstOrCreate(['name' => $permissionName]);
+        }
+        $rolePermissions = [
+            'management' => ['reports.view', 'reports.export'],
+            'tender_officer' => ['tenders.manage'],
+            'service_officer' => ['services.manage'],
+            'sales' => ['sales.manage'],
+            'finance' => ['finance.manage'],
+        ];
+        foreach ($rolePermissions as $roleName => $permissions) {
+            Role::find($rolesMap[$roleName])->permissions()->sync(Permission::whereIn('name', $permissions)->pluck('id'));
+        }
+        Role::find($rolesMap['super_admin'])->permissions()->sync(Permission::pluck('id'));
 
         // 3. Seed Master Clients
         $clients = [

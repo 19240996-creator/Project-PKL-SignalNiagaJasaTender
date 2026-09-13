@@ -103,6 +103,10 @@
                             <i class="fa-solid fa-building-user w-6 text-center text-slate-400 {{ request()->routeIs('clients.*') ? 'text-blue-600' : '' }}"></i>
                             <span>Data Klien</span>
                         </a>
+                        <a href="{{ route('commercial.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors {{ request()->routeIs('commercial.*') ? 'sidebar-item-active' : '' }}">
+                            <i class="fa-solid fa-file-invoice w-6 text-center text-slate-400"></i>
+                            <span>Quotation & Order</span>
+                        </a>
                     @endif
 
                     <!-- Modul Perdagangan & Warehouse -->
@@ -135,6 +139,10 @@
                             <i class="fa-solid fa-cart-shopping w-6 text-center text-slate-400 {{ request()->routeIs('sales.*') ? 'text-blue-600' : '' }}"></i>
                             <span>Transaksi Penjualan</span>
                         </a>
+                        <a href="{{ route('commercial.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors {{ request()->routeIs('commercial.*') ? 'sidebar-item-active' : '' }}">
+                            <i class="fa-solid fa-file-invoice w-6 text-center text-slate-400"></i>
+                            <span>Quotation & Order</span>
+                        </a>
                     @endif
 
                     <!-- Modul Finance -->
@@ -166,6 +174,10 @@
                         <a href="{{ route('users.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('users.*') ? 'sidebar-item-active' : '' }}">
                             <i class="fa-solid fa-users-gear w-6 text-center text-purple-600"></i>
                             <span>Manajemen User</span>
+                        </a>
+                        <a href="{{ route('permissions.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('permissions.*') ? 'sidebar-item-active' : '' }}">
+                            <i class="fa-solid fa-key w-6 text-center text-purple-600"></i>
+                            <span>Permission Role</span>
                         </a>
                         <a href="{{ route('partner-logos.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('partner-logos.*') ? 'sidebar-item-active' : '' }}">
                             <i class="fa-solid fa-images w-6 text-center text-purple-600"></i>

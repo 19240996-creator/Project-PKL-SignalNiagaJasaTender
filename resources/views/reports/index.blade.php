@@ -45,6 +45,8 @@
                 <a href="{{ route('laporan.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
                     <i class="fa-solid fa-file-csv"></i> Export Excel/CSV
                 </a>
+                <a href="{{ route('laporan.export.pdf', request()->query()) }}" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                <a href="{{ route('laporan.export.xlsx', request()->query()) }}" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> XLSX</a>
     </div>
 
     <!-- Report Document Printable Sheet -->

@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CommercialDocumentController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PartnerLogoController;
+use App\Http\Controllers\PermissionManagementController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProcurementController;
 use App\Http\Controllers\ProductController;
@@ -69,6 +71,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
     });
 
+    // Quotation and Customer Order (Service Officer & Sales)
+    Route::middleware(['role:super_admin,service_officer,sales'])->group(function () {
+        Route::get('/commercial-documents', [CommercialDocumentController::class, 'index'])->name('commercial.index');
+        Route::post('/commercial-documents/service-quotation', [CommercialDocumentController::class, 'storeServiceQuotation'])->name('commercial.service.store');
+        Route::post('/commercial-documents/sales-quotation', [CommercialDocumentController::class, 'storeSalesQuotation'])->name('commercial.sales.store');
+        Route::post('/commercial-documents/customer-order', [CommercialDocumentController::class, 'storeOrder'])->name('commercial.order.store');
+        Route::post('/commercial-documents/customer-order/{order}/convert', [CommercialDocumentController::class, 'convertOrder'])->name('commercial.order.convert');
+    });
+
     // Modul Supplier & Pengadaan (Super Admin & Purchasing)
     Route::middleware(['role:super_admin,purchasing'])->group(function () {
         Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
@@ -107,15 +118,19 @@ Route::middleware(['auth'])->group(function () {
 
     // Modul Laporan (Super Admin & Management)
     Route::middleware(['role:super_admin,management'])->group(function () {
-        Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
-        Route::get('/laporan/export', [ReportController::class, 'export'])->name('laporan.export');
+        Route::get('/laporan', [ReportController::class, 'index'])->middleware('permission:reports.view')->name('laporan.index');
+        Route::get('/laporan/export', [ReportController::class, 'export'])->middleware('permission:reports.export')->name('laporan.export');
+        Route::get('/laporan/export/pdf', [ReportController::class, 'exportPdf'])->middleware('permission:reports.export')->name('laporan.export.pdf');
+        Route::get('/laporan/export/xlsx', [ReportController::class, 'exportXlsx'])->middleware('permission:reports.export')->name('laporan.export.xlsx');
     });
 
     // Modul Khusus Super Admin (Kelola Logo Klien Landing Page)
     Route::middleware(['role:super_admin'])->group(function () {
-        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
-        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+        Route::get('/users', [UserManagementController::class, 'index'])->middleware('permission:users.manage')->name('users.index');
+        Route::post('/users', [UserManagementController::class, 'store'])->middleware('permission:users.manage')->name('users.store');
+        Route::put('/users/{user}', [UserManagementController::class, 'update'])->middleware('permission:users.manage')->name('users.update');
+        Route::get('/permissions', [PermissionManagementController::class, 'index'])->middleware('permission:users.manage')->name('permissions.index');
+        Route::put('/permissions/{role}', [PermissionManagementController::class, 'update'])->middleware('permission:users.manage')->name('permissions.update');
 
         Route::get('/partner-logos', [PartnerLogoController::class, 'index'])->name('partner-logos.index');
         Route::post('/partner-logos', [PartnerLogoController::class, 'store'])->name('partner-logos.store');
