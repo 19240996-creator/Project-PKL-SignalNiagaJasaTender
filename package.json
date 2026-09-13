@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "concurrently -k \"php artisan serve --host=127.0.0.1 --port=8000\" \"vite --host=127.0.0.1\"",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "axios": "^1.1.2",
+        "concurrently": "^8.2.2",
+        "laravel-vite-plugin": "^0.7.2",
+        "vite": "^4.0.0"
+    }
+}
