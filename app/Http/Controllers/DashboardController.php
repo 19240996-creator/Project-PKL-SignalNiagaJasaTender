@@ -63,6 +63,7 @@ class DashboardController extends Controller
         // Recent Activity
         $recentTenders = Tender::with('client')->latest()->take(5)->get();
         $recentSales = Sale::latest()->take(5)->get();
+        $notifications = $request->user()->unreadNotifications()->latest()->take(5)->get();
 
         return view('dashboard', compact(
             'tendersActive',
@@ -82,7 +83,8 @@ class DashboardController extends Controller
             'lowStockProducts',
             'topSuppliers',
             'recentTenders',
-            'recentSales'
+            'recentSales',
+            'notifications'
         ));
     }
 }

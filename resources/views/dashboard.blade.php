@@ -6,6 +6,23 @@
 @section('content')
 <div class="space-y-6">
 
+    @if($notifications->isNotEmpty())
+        <div class="bg-white rounded-2xl p-5 border border-amber-200 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-bell text-amber-600"></i>
+                <h3 class="font-bold text-slate-800">Notifikasi Terbaru</h3>
+            </div>
+            <div class="space-y-2">
+                @foreach($notifications as $notification)
+                    <div class="rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700">
+                        <div class="font-semibold">{{ $notification->data['title'] ?? 'Notifikasi' }}</div>
+                        <div class="text-xs text-slate-600">{{ $notification->data['message'] ?? '' }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <!-- KPI Cards Overview Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
