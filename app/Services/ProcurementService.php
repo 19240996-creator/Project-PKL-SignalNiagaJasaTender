@@ -55,4 +55,30 @@ class ProcurementService
             return $procurement;
         });
     }
+
+    public function receiveProcurement(Procurement $procurement, int $userId): Procurement
+    {
+        return DB::transaction(function () use ($procurement, $userId) {
+            if ($procurement->status === 'Received') {
+                return $procurement;
+            }
+
+            foreach ($procurement->items as $item) {
+                StockMovement::create([
+                    'product_id' => $item->product_id,
+                    'movement_type' => 'IN',
+                    'quantity' => $item->quantity,
+                    'reference_type' => 'Procurement',
+                    'reference_id' => $procurement->id,
+                    'movement_date' => now(),
+                    'notes' => 'Penerimaan pengadaan ' . $procurement->procurement_number,
+                    'created_by' => $userId,
+                ]);
+            }
+
+            $procurement->update(['status' => 'Received']);
+
+            return $procurement->fresh();
+        });
+    }
 }

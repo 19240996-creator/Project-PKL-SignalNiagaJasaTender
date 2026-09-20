@@ -32,6 +32,11 @@
                 <input type="date" name="end_date" value="{{ $endDate }}" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
             </div>
 
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari</label>
+                <input type="search" name="search" value="{{ $search }}" placeholder="Nomor atau nama" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
+            </div>
+
             <div class="self-end">
                 <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl">
                     <i class="fa-solid fa-filter"></i> Tampilkan
@@ -263,6 +268,12 @@
                 </table>
             @endif
         </div>
+
+        @if(method_exists($data, 'links'))
+            <div class="border-t border-slate-100 pt-4 print:hidden">
+                {{ $data->links() }}
+            </div>
+        @endif
 
     </div>
 

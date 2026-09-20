@@ -4,10 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
+use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Procurement;
 use App\Models\Sale;
+use App\Models\Supplier;
 use App\Models\Tender;
+use App\Services\PaymentService;
+use App\Services\ProcurementService;
 use App\Services\SalesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -88,6 +94,13 @@ class BusinessApiController extends Controller
         return response()->json($tender->fresh()->load('client'));
     }
 
+    public function destroyTender(Tender $tender): JsonResponse
+    {
+        $tender->delete();
+
+        return response()->json(null, 204);
+    }
+
     public function contracts(Request $request): JsonResponse
     {
         return response()->json(Contract::with(['client', 'tender'])->latest()->paginate($request->integer('per_page', 15)));
@@ -113,6 +126,31 @@ class BusinessApiController extends Controller
         return response()->json(Contract::create($validated)->load(['client', 'tender']), 201);
     }
 
+    public function showContract(Contract $contract): JsonResponse
+    {
+        return response()->json($contract->load(['client', 'tender', 'serviceJobs']));
+    }
+
+    public function updateContract(Request $request, Contract $contract): JsonResponse
+    {
+        $validated = $request->validate([
+            'contract_number' => ['sometimes', 'string', 'max:50', 'unique:contracts,contract_number,' . $contract->id],
+            'client_id' => ['sometimes', 'exists:clients,id'],
+            'start_date' => ['sometimes', 'date'],
+            'end_date' => ['sometimes', 'date', 'after_or_equal:start_date'],
+            'contract_value' => ['sometimes', 'numeric', 'min:0'],
+            'fee_percentage' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'status' => ['sometimes', 'string', 'max:20'],
+            'notes' => ['sometimes', 'nullable', 'string'],
+        ]);
+        if (array_key_exists('contract_value', $validated) || array_key_exists('fee_percentage', $validated)) {
+            $validated['fee_amount'] = ($validated['contract_value'] ?? $contract->contract_value) * ($validated['fee_percentage'] ?? $contract->fee_percentage) / 100;
+        }
+        $contract->update($validated);
+
+        return response()->json($contract->fresh()->load(['client', 'tender']));
+    }
+
     public function products(Request $request): JsonResponse
     {
         return response()->json(Product::where('is_active', true)->latest()->paginate($request->integer('per_page', 15)));
@@ -131,6 +169,28 @@ class BusinessApiController extends Controller
         ]);
 
         return response()->json(Product::create($validated), 201);
+    }
+
+    public function showProduct(Product $product): JsonResponse
+    {
+        return response()->json($product->load('stockMovements'));
+    }
+
+    public function updateProduct(Request $request, Product $product): JsonResponse
+    {
+        $validated = $request->validate([
+            'sku' => ['sometimes', 'string', 'max:50', 'unique:products,sku,' . $product->id],
+            'name' => ['sometimes', 'string', 'max:200'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'unit' => ['sometimes', 'string', 'max:30'],
+            'purchase_price' => ['sometimes', 'numeric', 'min:0'],
+            'selling_price' => ['sometimes', 'numeric', 'min:0'],
+            'minimum_stock' => ['sometimes', 'numeric', 'min:0'],
+            'is_active' => ['sometimes', 'boolean'],
+        ]);
+        $product->update($validated);
+
+        return response()->json($product->fresh());
     }
 
     public function sales(Request $request): JsonResponse
@@ -155,5 +215,69 @@ class BusinessApiController extends Controller
         $sale = $salesService->createSale($validated, $validated['items'], $request->user()->id);
 
         return response()->json($sale->load(['items.product', 'invoices']), 201);
+    }
+
+    public function showSale(Sale $sale): JsonResponse
+    {
+        return response()->json($sale->load(['items.product', 'invoices.payments']));
+    }
+
+    public function clients(Request $request): JsonResponse
+    {
+        return response()->json(Client::latest()->paginate($request->integer('per_page', 15)));
+    }
+
+    public function suppliers(Request $request): JsonResponse
+    {
+        return response()->json(Supplier::latest()->paginate($request->integer('per_page', 15)));
+    }
+
+    public function procurements(Request $request): JsonResponse
+    {
+        return response()->json(Procurement::with(['supplier', 'tender', 'items.product'])->latest()->paginate($request->integer('per_page', 15)));
+    }
+
+    public function storeProcurement(Request $request, ProcurementService $service): JsonResponse
+    {
+        $validated = $request->validate([
+            'procurement_number' => ['nullable', 'string', 'max:50', 'unique:procurements,procurement_number'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'tender_id' => ['nullable', 'exists:tenders,id'],
+            'procurement_date' => ['required', 'date'],
+            'status' => ['required', 'in:Processing,Received'],
+            'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.price' => ['required', 'numeric', 'min:0'],
+        ]);
+        $items = $validated['items'];
+        unset($validated['items']);
+
+        return response()->json($service->createProcurement($validated, $items, $request->user()->id)->load(['supplier', 'items.product']), 201);
+    }
+
+    public function invoices(Request $request): JsonResponse
+    {
+        return response()->json(Invoice::with(['serviceJob.contract', 'sale', 'payments'])->latest()->paginate($request->integer('per_page', 15)));
+    }
+
+    public function payments(Request $request): JsonResponse
+    {
+        return response()->json(Payment::with('invoice')->latest()->paginate($request->integer('per_page', 15)));
+    }
+
+    public function storePayment(Request $request, PaymentService $service): JsonResponse
+    {
+        $validated = $request->validate([
+            'invoice_id' => ['required', 'exists:invoices,id'],
+            'payment_date' => ['required', 'date'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'payment_method' => ['required', 'string', 'max:30'],
+            'reference_number' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        return response()->json($service->recordPayment($validated, $request->user()->id)->load('invoice'), 201);
     }
 }

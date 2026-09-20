@@ -35,10 +35,14 @@ Route::get('/', function () {
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->middleware('guest')->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware(['guest', 'throttle:6,1'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->middleware('guest')->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
 Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected System Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'audit'])->group(function () {
 
     // Dashboard (Super Admin & Management & fallback for logged-in users)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -75,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:super_admin,service_officer,sales'])->group(function () {
         Route::get('/commercial-documents', [CommercialDocumentController::class, 'index'])->name('commercial.index');
         Route::post('/commercial-documents/service-quotation', [CommercialDocumentController::class, 'storeServiceQuotation'])->name('commercial.service.store');
+        Route::post('/commercial-documents/service-quotation/{quotation}/convert', [CommercialDocumentController::class, 'convertServiceQuotation'])->name('commercial.service.convert');
         Route::post('/commercial-documents/sales-quotation', [CommercialDocumentController::class, 'storeSalesQuotation'])->name('commercial.sales.store');
         Route::post('/commercial-documents/customer-order', [CommercialDocumentController::class, 'storeOrder'])->name('commercial.order.store');
         Route::post('/commercial-documents/customer-order/{order}/convert', [CommercialDocumentController::class, 'convertOrder'])->name('commercial.order.convert');
@@ -89,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/procurements', [ProcurementController::class, 'index'])->name('procurements.index');
         Route::post('/procurements', [ProcurementController::class, 'store'])->name('procurements.store');
+        Route::post('/procurements/{procurement}/receive', [ProcurementController::class, 'receive'])->name('procurements.receive');
     });
 
     // Modul Produk & Warehouse (Super Admin & Warehouse)

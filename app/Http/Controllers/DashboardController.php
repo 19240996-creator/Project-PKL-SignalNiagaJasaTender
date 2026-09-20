@@ -27,6 +27,7 @@ class DashboardController extends Controller
         // Upcoming Deadlines (within 14 days)
         $upcomingDeadlines = Tender::whereNotNull('deadline')
             ->where('deadline', '>=', now())
+            ->where('deadline', '<=', now()->addDays(14))
             ->whereNotIn('status', ['Selesai', 'Batal', 'Menang', 'Kalah'])
             ->orderBy('deadline', 'asc')
             ->take(5)

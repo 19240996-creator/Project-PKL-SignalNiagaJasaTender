@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\StockMovement;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +87,12 @@ class ProductController extends Controller
             'quantity' => 'required|numeric|min:0.01',
             'notes' => 'required|string',
         ]);
+
+        if ($validated['movement_type'] === 'OUT' && $validated['quantity'] > $product->stock) {
+            throw ValidationException::withMessages([
+                'quantity' => "Stok {$product->name} tidak mencukupi. Tersedia: {$product->stock}.",
+            ]);
+        }
 
         StockMovement::create([
             'product_id' => $product->id,

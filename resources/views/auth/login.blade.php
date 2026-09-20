@@ -85,6 +85,8 @@
                     </button>
                 </form>
 
+                <a href="{{ route('password.request') }}" class="block mt-4 text-center text-xs font-semibold text-blue-600 hover:text-blue-800">Lupa password?</a>
+
                 <div class="relative my-6">
                     <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
                     <div class="relative flex justify-center text-[11px] uppercase"><span class="bg-white px-2 text-slate-400 font-bold">Daftar Akun Kredensial Per Role</span></div>

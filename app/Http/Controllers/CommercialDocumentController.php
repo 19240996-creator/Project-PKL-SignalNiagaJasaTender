@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Contract;
 use App\Models\CustomerOrder;
 use App\Models\Product;
 use App\Models\SalesQuotation;
@@ -79,5 +80,35 @@ class CommercialDocumentController extends Controller
         $order->update(['status' => 'Processed']);
 
         return back()->with('success', "Customer order {$order->order_number} dikonversi menjadi penjualan {$sale->sale_number}.");
+    }
+
+    public function convertServiceQuotation(Request $request, ServiceQuotation $quotation): RedirectResponse
+    {
+        abort_unless($quotation->status === 'Approved', 422, 'Quotation jasa harus berstatus Approved.');
+        abort_if(Contract::where('notes', 'like', '%Quotation: ' . $quotation->quotation_number . '%')->exists(), 422, 'Quotation ini sudah memiliki kontrak.');
+
+        $validated = $request->validate([
+            'contract_number' => ['required', 'string', 'max:50', 'unique:contracts,contract_number'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'fee_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+        $feePercentage = $validated['fee_percentage'] ?? 0;
+        $contractValue = $quotation->total_amount;
+
+        Contract::create([
+            'client_id' => $quotation->client_id,
+            'contract_number' => $validated['contract_number'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'contract_value' => $contractValue,
+            'fee_percentage' => $feePercentage,
+            'fee_amount' => $contractValue * $feePercentage / 100,
+            'status' => 'Aktif',
+            'notes' => 'Dikonversi dari Quotation: ' . $quotation->quotation_number,
+            'created_by' => $request->user()->id,
+        ]);
+
+        return back()->with('success', "Quotation {$quotation->quotation_number} berhasil dikonversi menjadi kontrak.");
     }
 }

@@ -54,4 +54,15 @@ class ProcurementController extends Controller
             return redirect()->back()->with('error', $e->getMessage())->withInput();
         }
     }
+
+    public function receive(Procurement $procurement, ProcurementService $service): RedirectResponse
+    {
+        try {
+            $service->receiveProcurement($procurement, Auth::id() ?? 1);
+
+            return redirect()->route('procurements.index')->with('success', "Pengadaan {$procurement->procurement_number} berhasil diterima dan stok diperbarui.");
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 }

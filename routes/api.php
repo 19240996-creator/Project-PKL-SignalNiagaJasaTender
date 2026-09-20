@@ -26,13 +26,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tenders', [BusinessApiController::class, 'storeTender']);
     Route::get('/tenders/{tender}', [BusinessApiController::class, 'showTender']);
     Route::put('/tenders/{tender}', [BusinessApiController::class, 'updateTender']);
+    Route::delete('/tenders/{tender}', [BusinessApiController::class, 'destroyTender']);
 
     Route::get('/contracts', [BusinessApiController::class, 'contracts']);
     Route::post('/contracts', [BusinessApiController::class, 'storeContract']);
+    Route::get('/contracts/{contract}', [BusinessApiController::class, 'showContract']);
+    Route::put('/contracts/{contract}', [BusinessApiController::class, 'updateContract']);
 
     Route::get('/products', [BusinessApiController::class, 'products']);
     Route::post('/products', [BusinessApiController::class, 'storeProduct']);
+    Route::get('/products/{product}', [BusinessApiController::class, 'showProduct']);
+    Route::put('/products/{product}', [BusinessApiController::class, 'updateProduct']);
 
     Route::get('/sales', [BusinessApiController::class, 'sales']);
     Route::post('/sales', [BusinessApiController::class, 'storeSale']);
+    Route::get('/sales/{sale}', [BusinessApiController::class, 'showSale']);
+
+    Route::get('/clients', [BusinessApiController::class, 'clients']);
+    Route::get('/suppliers', [BusinessApiController::class, 'suppliers']);
+    Route::get('/procurements', [BusinessApiController::class, 'procurements']);
+    Route::post('/procurements', [BusinessApiController::class, 'storeProcurement']);
+    Route::get('/invoices', [BusinessApiController::class, 'invoices']);
+    Route::get('/payments', [BusinessApiController::class, 'payments']);
+    Route::post('/payments', [BusinessApiController::class, 'storePayment']);
 });

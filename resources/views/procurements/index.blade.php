@@ -50,6 +50,12 @@
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $prc->status === 'Received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
                                     {{ $prc->status === 'Received' ? 'Diterima (+Stok)' : $prc->status }}
                                 </span>
+                                @if($prc->status !== 'Received')
+                                    <form action="{{ route('procurements.receive', $prc) }}" method="POST" class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Konfirmasi Diterima</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

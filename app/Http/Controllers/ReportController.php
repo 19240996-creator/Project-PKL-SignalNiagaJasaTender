@@ -24,6 +24,7 @@ class ReportController extends Controller
         $type = $request->get('type', 'tender');
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
+        $search = $request->get('search');
 
         $data = [];
 
@@ -31,45 +32,57 @@ class ReportController extends Controller
             case 'tender':
                 $data = Tender::with('client')
                     ->whereBetween('found_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
+                        $q->where('tender_number', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
+                    }))->paginate(15)->withQueryString();
                 break;
 
             case 'contract':
                 $data = Contract::with('client')
                     ->whereBetween('start_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
+                        $q->where('contract_number', 'like', "%{$search}%");
+                    }))->paginate(15)->withQueryString();
                 break;
 
             case 'procurement':
                 $data = Procurement::with(['supplier', 'items.product'])
                     ->whereBetween('procurement_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->where('procurement_number', 'like', "%{$search}%"))
+                    ->paginate(15)->withQueryString();
                 break;
 
             case 'sales':
                 $data = Sale::with(['items.product'])
                     ->whereBetween('sale_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
+                        $q->where('sale_number', 'like', "%{$search}%")->orWhere('customer_name', 'like', "%{$search}%");
+                    }))->paginate(15)->withQueryString();
                 break;
 
             case 'stock':
-                $data = Product::with('stockMovements')->get();
+                $data = Product::with('stockMovements')
+                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
+                        $q->where('sku', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
+                    }))->paginate(15)->withQueryString();
                 break;
 
             case 'invoice':
                 $data = Invoice::with(['payments'])
                     ->whereBetween('invoice_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->where('invoice_number', 'like', "%{$search}%"))
+                    ->paginate(15)->withQueryString();
                 break;
 
             case 'payment':
                 $data = Payment::with(['invoice'])
                     ->whereBetween('payment_date', [$startDate, $endDate])
-                    ->get();
+                    ->when($search, fn ($query) => $query->whereHas('invoice', fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")))
+                    ->paginate(15)->withQueryString();
                 break;
         }
 
-        return view('reports.index', compact('type', 'startDate', 'endDate', 'data'));
+        return view('reports.index', compact('type', 'startDate', 'endDate', 'search', 'data'));
     }
 
     public function export(Request $request): StreamedResponse
