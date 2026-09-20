@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany as HasManyRelation;
 
 class Tender extends Model
 {
@@ -56,6 +57,16 @@ class Tender extends Model
     public function contract(): HasMany
     {
         return $this->hasMany(Contract::class);
+    }
+
+    public function tenderStatus(): BelongsTo
+    {
+        return $this->belongsTo(TenderStatus::class, 'status_id');
+    }
+
+    public function evaluations(): HasManyRelation
+    {
+        return $this->hasMany(TenderEvaluation::class);
     }
 
     public function procurements(): HasMany

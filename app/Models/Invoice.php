@@ -14,6 +14,7 @@ class Invoice extends Model
     protected $fillable = [
         'invoice_number',
         'service_job_id',
+        'service_bill_id',
         'sale_id',
         'invoice_date',
         'due_date',
@@ -38,6 +39,16 @@ class Invoice extends Model
     public function serviceJob(): BelongsTo
     {
         return $this->belongsTo(ServiceJob::class);
+    }
+
+    public function serviceBill(): BelongsTo
+    {
+        return $this->belongsTo(ServiceBill::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
     }
 
     public function sale(): BelongsTo

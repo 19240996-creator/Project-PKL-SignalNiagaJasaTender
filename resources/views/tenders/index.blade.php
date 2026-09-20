@@ -115,6 +115,23 @@
                                     <button @click="selectedTender = {{ $tender }}; uploadModal = true" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition" title="Upload Dokumen">
                                         <i class="fa-solid fa-upload"></i>
                                     </button>
+
+                                    @if($tender->status === 'Evaluasi')
+                                        <details class="text-left">
+                                            <summary class="cursor-pointer px-2.5 py-1 bg-amber-100 text-amber-800 text-xs rounded-lg">Evaluasi</summary>
+                                            <form action="{{ route('tender.evaluations.store', $tender) }}" method="POST" class="absolute z-10 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 text-left shadow-xl">
+                                                @csrf
+                                                <input type="number" name="score" min="0" max="100" step="0.01" placeholder="Nilai 0-100" class="mb-2 w-full rounded-lg border p-2 text-xs">
+                                                <select name="decision" required class="mb-2 w-full rounded-lg border p-2 text-xs">
+                                                    <option value="Proceed">Lanjut</option>
+                                                    <option value="Hold">Tunda</option>
+                                                    <option value="Reject">Tolak</option>
+                                                </select>
+                                                <textarea name="notes" placeholder="Catatan evaluasi" class="mb-2 w-full rounded-lg border p-2 text-xs"></textarea>
+                                                <button class="w-full rounded-lg bg-amber-600 px-2 py-1.5 text-xs font-semibold text-white">Simpan Evaluasi</button>
+                                            </form>
+                                        </details>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -67,7 +68,7 @@ class SalesService
             $taxAmount = $totalAmount * 0.11; // 11% PPN
             $grandTotal = $totalAmount + $taxAmount;
 
-            Invoice::create([
+            $invoice = Invoice::create([
                 'invoice_number' => 'INV-SLS-' . date('Ymd') . '-' . rand(100, 999),
                 'sale_id' => $sale->id,
                 'invoice_date' => now()->toDateString(),
@@ -80,6 +81,17 @@ class SalesService
                 'notes' => 'Invoice untuk Penjualan ' . $sale->sale_number,
                 'created_by' => $userId,
             ]);
+
+            foreach ($items as $item) {
+                $product = Product::findOrFail($item['product_id']);
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'description' => $product->name,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'subtotal' => $item['quantity'] * $item['price'],
+                ]);
+            }
 
             return $sale;
         });

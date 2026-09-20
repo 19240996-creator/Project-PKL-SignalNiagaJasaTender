@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\Tender;
 use App\Models\TenderDocument;
+use App\Models\TenderEvaluation;
 use App\Services\TenderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -117,6 +118,26 @@ class TenderController extends Controller
         ]);
 
         return redirect()->route('tender.index')->with('success', 'Dokumen tender berhasil diunggah.');
+    }
+
+    public function storeEvaluation(Request $request, Tender $tender): RedirectResponse
+    {
+        $validated = $request->validate([
+            'score' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'decision' => ['required', 'in:Proceed,Hold,Reject'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        TenderEvaluation::create([
+            'tender_id' => $tender->id,
+            'evaluator_id' => Auth::id() ?? 1,
+            'score' => $validated['score'] ?? null,
+            'decision' => $validated['decision'],
+            'notes' => $validated['notes'] ?? null,
+            'evaluated_at' => now(),
+        ]);
+
+        return redirect()->route('tender.index')->with('success', 'Evaluasi tender berhasil dicatat.');
     }
 
     public function convertToContract(Request $request, Tender $tender, TenderService $service): RedirectResponse
