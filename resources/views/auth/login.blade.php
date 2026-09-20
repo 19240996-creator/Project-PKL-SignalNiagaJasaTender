@@ -3,119 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Hak Akses — SignalNiagaJasaTender</title>
+    <title>Masuk | SignalNiagaJasaTender</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>body { font-family: 'Outfit', sans-serif; }</style>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .login-grid { background-color: #0d2b5c; background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 34px 34px; }
+        .form-shell { box-shadow: 0 24px 80px rgba(15, 23, 42, .08); }
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4" x-data="{ email: '', password: '', showPassword: false }">
-    <div class="max-w-5xl w-full grid md:grid-cols-12 bg-white rounded-2xl shadow-2xl overflow-hidden">
-        
-        <!-- Left Side: Branding -->
-        <div class="md:col-span-5 bg-gradient-to-br from-blue-900 to-indigo-950 p-8 text-white flex flex-col justify-between">
-            <div>
-                <a href="{{ route('home') }}" class="flex items-center space-x-3 mb-8 group" title="Kembali ke Beranda">
-                    <div class="w-10 h-10 rounded-xl bg-blue-600 group-hover:bg-blue-500 flex items-center justify-center font-bold text-white text-xl shadow-lg transition-transform group-hover:scale-105">
-                        S
-                    </div>
-                    <div>
-                        <span class="font-bold text-xl tracking-tight block group-hover:text-blue-200 transition">SignalNiaga</span>
-                        <span class="text-xs text-blue-400 font-medium tracking-wide uppercase">PT Signal Panca Utama</span>
-                    </div>
-                </a>
+<body class="min-h-screen bg-[#f4f8ff] text-slate-900" x-data="loginForm()">
+    <main class="min-h-screen lg:grid lg:grid-cols-[minmax(420px,0.9fr)_minmax(500px,1.1fr)]">
+        <section class="login-grid relative hidden overflow-hidden px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
+            <a href="{{ route('home') }}" class="relative z-10 inline-flex w-fit items-center gap-3" title="Kembali ke beranda">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3b8cff] text-lg font-extrabold shadow-lg shadow-blue-950/30">S</span>
+                <span><span class="block text-lg font-extrabold tracking-tight">SignalNiaga</span><span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200">PT Signal Panca Utama</span></span>
+            </a>
 
-                <h2 class="text-2xl font-bold leading-tight mb-4">Sistem Autentikasi & Hak Akses Per Role</h2>
-                <p class="text-slate-300 text-xs leading-relaxed mb-6">
-                    Setiap peran memiliki kredensial email & password sendiri. <b class="text-blue-400">Super Admin</b> memiliki wewenang akses penuh ke seluruh modul sistem.
-                </p>
-
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition backdrop-blur-sm">
-                    <i class="fa-solid fa-house text-blue-400"></i> Kembali ke Beranda Website
-                </a>
+            <div class="relative z-10 max-w-md py-12">
+                <p class="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-blue-200">Business management system</p>
+                <h1 class="text-4xl font-extrabold leading-tight tracking-[-0.03em] xl:text-5xl">Satu ruang kerja untuk bisnis yang terus bergerak.</h1>
+                <p class="mt-6 max-w-sm text-sm leading-7 text-blue-100/75">Kelola tender, pekerjaan jasa, perdagangan, dan arus transaksi perusahaan dalam satu tempat yang terhubung.</p>
+                <div class="mt-9 flex items-center gap-3 text-xs font-semibold text-blue-100/80"><span class="h-2 w-2 rounded-full bg-[#8fc1ff] shadow-[0_0_0_4px_rgba(143,193,255,.15)]"></span>Ruang kerja internal PT Signal Panca Utama</div>
             </div>
 
-            <div class="pt-6 border-t border-slate-800 text-[11px] text-slate-400">
-                &copy; {{ date('Y') }} PT Signal Panca Utama. Multi-Role RBAC System.
-            </div>
-        </div>
+            <div class="relative z-10 flex items-center justify-between border-t border-white/15 pt-5 text-[11px] text-blue-100/60"><span>© {{ date('Y') }} PT Signal Panca Utama</span><span>Internal workspace</span></div>
+        </section>
 
-        <!-- Right Side: Login Form & Account List -->
-        <div class="md:col-span-7 p-6 md:p-8 flex flex-col justify-between max-h-[90vh] overflow-y-auto">
-            <div>
-                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-xs font-bold transition">
-                        <i class="fa-solid fa-arrow-left"></i> Kembali ke Halaman Utama
-                    </a>
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Portal Autentikasi</span>
+        <section class="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-12 xl:px-20">
+            <div class="form-shell w-full max-w-[460px] rounded-2xl bg-white p-6 sm:p-9 lg:bg-transparent lg:p-0 lg:shadow-none">
+                <div class="mb-10 flex items-center justify-between lg:hidden">
+                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#155eef] font-extrabold text-white shadow-md shadow-blue-600/20">S</span><span class="text-base font-extrabold tracking-tight text-[#0d2b5c]">SignalNiaga</span></a>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-400">Internal</span>
                 </div>
 
-                <h3 class="text-2xl font-bold text-slate-800 mb-1">Masuk dengan Email & Password</h3>
-                <p class="text-slate-500 text-xs mb-6">Masukkan email dan password akun sesuai hak akses Anda.</p>
+                <div class="mb-9">
+                    <div class="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-blue-500"><span class="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i class="fa-solid fa-shield-halved"></i></span>Secure internal access</div>
+                    <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#155eef]">Selamat datang kembali</p>
+                    <h2 class="text-3xl font-extrabold tracking-[-0.03em] text-[#0d2b5c]">Masuk ke ruang kerja</h2>
+                    <p class="mt-3 text-sm leading-6 text-slate-500">Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.</p>
+                </div>
 
+                @if(session('status'))
+                    <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('status') }}</div>
+                @endif
                 @if($errors->any())
-                    <div class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
-                        {{ $errors->first() }}
-                    </div>
+                    <div class="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Login belum berhasil.</p><p class="mt-1 text-xs">{{ $errors->first() }}</p></div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" class="space-y-4">
+                <form action="{{ route('login') }}" method="POST" class="space-y-5" @submit="submitForm">
                     @csrf
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alamat Email</label>
-                        <input type="email" name="email" required x-model="email" placeholder="superadmin@signalpanca.co.id" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">Alamat email</label>
+                        <div class="relative"><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transition" :class="emailFocused ? 'text-blue-600' : 'text-slate-400'"></i><input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus placeholder="nama@perusahaan.co.id" @focus="emailFocused = true" @blur="emailFocused = false" @input="validateEmail" class="h-12 w-full rounded-lg border bg-white pl-11 pr-11 text-sm outline-none transition placeholder:text-slate-400" :class="emailError ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10' : 'border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10'"><span x-show="emailValid" x-cloak class="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500"><i class="fa-solid fa-circle-check"></i></span></div>
+                        <p x-show="emailError" x-cloak class="mt-1.5 text-xs text-rose-600">Masukkan alamat email yang valid.</p>
                     </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Password</label>
-                        <div class="relative">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" required x-model="password" placeholder="••••••••" class="w-full px-4 py-2.5 pr-10 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none text-sm p-1" title="Tampilkan/Sembunyikan Password">
-                                <i class="fa-solid" :class="showPassword ? 'fa-eye-slash text-blue-600' : 'fa-eye'"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors text-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i> Login Masuk Sistem
-                    </button>
+                    <div><div class="mb-2 flex items-center justify-between"><label for="password" class="block text-sm font-semibold text-slate-700">Password</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Lupa password?</a></div><div class="relative"><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transition" :class="passwordFocused ? 'text-blue-600' : 'text-slate-400'"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required placeholder="Masukkan password" @focus="passwordFocused = true" @blur="passwordFocused = false" @input="passwordTouched = true" class="h-12 w-full rounded-lg border border-slate-300 bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div><p x-show="passwordTouched && !passwordFilled" x-cloak class="mt-1.5 text-xs text-rose-600">Password wajib diisi.</p></div>
+                    <label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-blue-200 text-blue-600 focus:ring-blue-600">Ingat saya di perangkat ini</label>
+                    <button type="submit" :disabled="loading" class="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#155eef] px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-[#124dcc] focus:outline-none focus:ring-4 focus:ring-blue-600/20 disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk ke dashboard'"></span></button>
                 </form>
 
-                <a href="{{ route('password.request') }}" class="block mt-4 text-center text-xs font-semibold text-blue-600 hover:text-blue-800">Lupa password?</a>
-
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
-                    <div class="relative flex justify-center text-[11px] uppercase"><span class="bg-white px-2 text-slate-400 font-bold">Daftar Akun Kredensial Per Role</span></div>
-                </div>
-
-                <!-- Account Credentials Cards -->
-                <div class="space-y-2 text-xs">
-                    @foreach($accounts as $acc)
-                        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between hover:border-blue-300 transition">
-                            <div class="space-y-0.5">
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $acc['badge'] }}">
-                                        {{ $acc['label'] }}
-                                    </span>
-                                    @if($acc['role'] === 'super_admin')
-                                        <span class="text-[10px] font-bold text-purple-700">(Akses Penuh)</span>
-                                    @endif
-                                </div>
-                                <div class="font-mono text-slate-700 text-xs font-bold">{{ $acc['email'] }}</div>
-                                <div class="text-[11px] text-slate-400">Password: <span class="font-mono font-bold text-slate-600">password</span></div>
-                            </div>
-                            <button type="button" @click="email = '{{ $acc['email'] }}'; password = 'password'" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-blue-50 hover:text-blue-600 text-slate-700 font-semibold rounded-lg shadow-sm text-xs transition">
-                                Pilih Akun
-                            </button>
-                        </div>
-                    @endforeach
-                </div>
+                <div class="mt-10 border-t border-blue-100 pt-5 text-center text-xs leading-5 text-slate-400">Akses sistem dikelola oleh administrator perusahaan.<br><a href="{{ route('home') }}" class="font-semibold text-[#155eef] hover:text-[#0d2b5c]">Kembali ke halaman utama</a></div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 </body>
+<script>
+    function loginForm() {
+        return {
+            showPassword: false,
+            emailFocused: false,
+            passwordFocused: false,
+            emailValid: false,
+            emailError: false,
+            passwordTouched: false,
+            loading: false,
+            get passwordFilled() { return document.getElementById('password')?.value.length > 0; },
+            validateEmail(event) {
+                const value = event.target.value.trim();
+                this.emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                this.emailError = value.length > 0 && !this.emailValid;
+            },
+            submitForm(event) {
+                const email = document.getElementById('email')?.value.trim();
+                const password = document.getElementById('password')?.value;
+                this.emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                this.emailError = !this.emailValid;
+                this.passwordTouched = true;
+                if (!this.emailValid || !password) {
+                    event.preventDefault();
+                    return;
+                }
+                this.loading = true;
+            }
+        };
+    }
+</script>
 </html>

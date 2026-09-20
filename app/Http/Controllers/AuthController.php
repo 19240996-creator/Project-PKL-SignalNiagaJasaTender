@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -66,13 +68,41 @@ class AuthController extends Controller
     public function sendResetLink(Request $request): RedirectResponse
     {
         $validated = $request->validate(['email' => ['required', 'email']]);
-        $status = Password::sendResetLink($validated);
+
+        if (app()->environment(['local', 'testing'])) {
+            $user = User::where('email', $validated['email'])->first();
+
+            if (!$user) {
+                return back()->withErrors(['email' => 'Email tersebut belum terdaftar.'])->withInput();
+            }
+
+            $token = Password::broker()->createToken($user);
+
+            return back()->with([
+                'status' => 'Tautan reset siap digunakan.',
+                'reset_email' => $user->email,
+                'reset_url' => URL::route('password.reset', ['token' => $token, 'email' => $user->email]),
+            ]);
+        }
+
+        try {
+            return $this->sendResetLinkByEmail($validated);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors(['email' => 'Tautan reset gagal dikirim. Periksa konfigurasi email server.'])->withInput();
+        }
+    }
+
+    private function sendResetLinkByEmail(array $credentials): RedirectResponse
+    {
+        $status = Password::sendResetLink($credentials);
 
         if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', __($status));
         }
 
-        return back()->withErrors(['email' => __($status)]);
+        return back()->withErrors(['email' => __($status)])->withInput($credentials);
     }
 
     public function showResetPasswordForm(string $token): View

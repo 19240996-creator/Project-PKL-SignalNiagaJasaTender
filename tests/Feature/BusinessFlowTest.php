@@ -17,6 +17,7 @@ use App\Services\SalesService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class BusinessFlowTest extends TestCase
@@ -85,6 +86,27 @@ class BusinessFlowTest extends TestCase
         $this->artisan('tenders:deadline-reminders')->assertSuccessful();
 
         Notification::assertSentTo($user, TenderDeadlineReminder::class);
+    }
+
+    public function test_local_password_reset_link_can_be_used(): void
+    {
+        [$user] = $this->foundation();
+
+        $response = $this->post(route('password.email'), ['email' => $user->email]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('reset_url');
+
+        $token = Password::broker()->createToken($user);
+        $resetResponse = $this->post(route('password.update'), [
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'new-password-123',
+            'password_confirmation' => 'new-password-123',
+        ]);
+
+        $resetResponse->assertRedirect(route('login'));
+        $this->assertTrue(Hash::check('new-password-123', $user->fresh()->password));
     }
 
     private function foundation(): array

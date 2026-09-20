@@ -104,7 +104,7 @@
                             <span>Data Klien</span>
                         </a>
                         <a href="{{ route('commercial.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors {{ request()->routeIs('commercial.*') ? 'sidebar-item-active' : '' }}">
-                            <i class="fa-solid fa-file-invoice w-6 text-center text-slate-400"></i>
+                            <i class="fa-solid fa-file-invoice w-6 text-center text-slate-400 {{ request()->routeIs('commercial.*') ? 'text-blue-600' : '' }}"></i>
                             <span>Quotation & Order</span>
                         </a>
                     @endif
@@ -257,11 +257,44 @@
                     </div>
                 @endif
 
+                @if($errors->any())
+                    <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-800 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-circle-exclamation mt-0.5 text-rose-600"></i>
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold">Periksa kembali data yang diisi.</div>
+                                <ul class="mt-1 list-disc pl-5 text-xs space-y-0.5">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-rose-500 hover:text-rose-700" title="Tutup pesan">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
         </div>
     </div>
 
     @yield('scripts')
+    <script>
+        document.addEventListener('submit', function (event) {
+            const form = event.target;
+            if (!form.matches('form') || form.dataset.noLoading === 'true') return;
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (!submitButton) return;
+
+            submitButton.disabled = true;
+            submitButton.classList.add('opacity-70', 'cursor-not-allowed');
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+        });
+    </script>
 </body>
 </html>

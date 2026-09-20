@@ -80,7 +80,7 @@
 
             <form action="{{ route('sales.store') }}" method="POST" class="space-y-4">
                 @csrf
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Pelanggan / Perusahaan</label>
                         <input type="text" name="customer_name" required placeholder="PT Mega Utama..." class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -91,7 +91,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tanggal Penjualan</label>
                         <input type="date" name="sale_date" required value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -109,9 +109,9 @@
 
                 <div class="border-t pt-3">
                     <label class="block text-xs font-bold text-slate-800 uppercase mb-2">Item Barang yang Dijual</label>
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-12 gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-                            <div class="col-span-6">
+                    <div id="sale-items" class="space-y-3">
+                        <div class="sale-item-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                            <div class="sm:col-span-6">
                                 <label class="block font-semibold text-slate-600 mb-1">Produk (Stok Tersedia)</label>
                                 <select name="items[0][product_id]" required class="w-full p-2 border rounded-lg bg-white">
                                     @foreach($products as $p)
@@ -119,16 +119,17 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-span-3">
+                            <div class="sm:col-span-3">
                                 <label class="block font-semibold text-slate-600 mb-1">Qty Jual</label>
-                                <input type="number" step="0.01" name="items[0][quantity]" required value="2" class="w-full p-2 border rounded-lg">
+                                <input type="number" step="0.01" name="items[0][quantity]" required min="0.01" placeholder="Qty" class="w-full p-2 border rounded-lg">
                             </div>
-                            <div class="col-span-3">
+                            <div class="sm:col-span-3">
                                 <label class="block font-semibold text-slate-600 mb-1">Harga Jual (Rp)</label>
-                                <input type="number" name="items[0][price]" required value="9500000" class="w-full p-2 border rounded-lg">
+                                <input type="number" name="items[0][price]" required min="0" placeholder="Harga jual" class="w-full p-2 border rounded-lg">
                             </div>
                         </div>
                     </div>
+                    <button type="button" onclick="addSaleItem()" class="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-800"><i class="fa-solid fa-plus"></i> Tambah item barang</button>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-3 border-t">
@@ -140,4 +141,23 @@
     </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function addSaleItem() {
+        const container = document.getElementById('sale-items');
+        const index = container.querySelectorAll('.sale-item-row').length;
+        const row = container.querySelector('.sale-item-row').cloneNode(true);
+        row.innerHTML = row.innerHTML.replaceAll('[0]', '[' + index + ']');
+        row.querySelectorAll('input').forEach((input) => input.value = '');
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'sm:col-span-12 text-right text-xs font-semibold text-rose-600 hover:text-rose-800';
+        remove.innerHTML = '<i class="fa-solid fa-trash"></i> Hapus item';
+        remove.onclick = () => row.remove();
+        row.appendChild(remove);
+        container.appendChild(row);
+    }
+</script>
 @endsection
