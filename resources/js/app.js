@@ -15,7 +15,7 @@ if (landingPage) {
 			const introTimeline = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
 			introTimeline
-				.from('[data-landing-header]', { y: -24, autoAlpha: 0, duration: 0.7 })
+				.from('[data-landing-header]', { y: -24, autoAlpha: 0, duration: 0.7, clearProps: 'transform,opacity,visibility' })
 				.from('[data-hero-item]', { y: 28, autoAlpha: 0, duration: 0.7, stagger: 0.1 }, '-=0.35')
 				.from('[data-stat-card]', { y: 22, autoAlpha: 0, duration: 0.55, stagger: 0.08 }, '-=0.35');
 
@@ -33,6 +33,7 @@ if (landingPage) {
 					},
 				});
 			});
+
 		}, landingPage);
 
 		window.addEventListener('pagehide', () => context.revert(), { once: true });

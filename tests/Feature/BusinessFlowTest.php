@@ -109,6 +109,28 @@ class BusinessFlowTest extends TestCase
         $this->assertTrue(Hash::check('new-password-123', $user->fresh()->password));
     }
 
+    public function test_user_delete_requires_matching_email_confirmation(): void
+    {
+        [$admin] = $this->foundation();
+        $target = User::create([
+            'name' => 'Target User',
+            'email' => 'target@example.com',
+            'password' => Hash::make('password'),
+            'role_id' => $admin->role_id,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('users.destroy', $target), ['email_confirmation' => 'wrong@example.com'])
+            ->assertRedirect(route('users.index'));
+        $this->assertDatabaseHas('users', ['id' => $target->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('users.destroy', $target), ['email_confirmation' => $target->email])
+            ->assertRedirect(route('users.index'));
+        $this->assertDatabaseMissing('users', ['id' => $target->id]);
+    }
+
     private function foundation(): array
     {
         $role = Role::create(['name' => 'super_admin']);

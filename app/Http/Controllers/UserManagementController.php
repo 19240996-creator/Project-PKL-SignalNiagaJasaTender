@@ -71,4 +71,23 @@ class UserManagementController extends Controller
 
         return to_route('users.index')->with('success', 'User berhasil diperbarui.');
     }
+
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        if ($user->is(auth()->user())) {
+            return to_route('users.index')->with('error', 'Akun yang sedang digunakan tidak dapat dihapus.');
+        }
+
+        $validated = $request->validate([
+            'email_confirmation' => ['required', 'email'],
+        ]);
+
+        if (strcasecmp($validated['email_confirmation'], $user->email) !== 0) {
+            return to_route('users.index')->with('error', 'Konfirmasi email tidak sesuai. Akun tidak dihapus.');
+        }
+
+        $user->delete();
+
+        return to_route('users.index')->with('success', 'Akun user berhasil dihapus.');
+    }
 }

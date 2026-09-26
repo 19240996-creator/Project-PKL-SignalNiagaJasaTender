@@ -136,6 +136,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::get('/users', [UserManagementController::class, 'index'])->middleware('permission:users.manage')->name('users.index');
         Route::post('/users', [UserManagementController::class, 'store'])->middleware('permission:users.manage')->name('users.store');
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->middleware('permission:users.manage')->name('users.update');
+        Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->middleware('permission:users.manage')->name('users.destroy');
         Route::get('/permissions', [PermissionManagementController::class, 'index'])->middleware('permission:users.manage')->name('permissions.index');
         Route::put('/permissions/{role}', [PermissionManagementController::class, 'update'])->middleware('permission:users.manage')->name('permissions.update');
 
