@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @vite('resources/js/app.js')
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #FFFFFF; color: #0F172A; }
         
@@ -49,10 +50,10 @@
         }
     </style>
 </head>
-<body class="bg-white antialiased selection:bg-blue-600 selection:text-white" x-data="{ mobileMenu: false }">
+<body class="bg-white antialiased selection:bg-blue-600 selection:text-white" x-data="{ mobileMenu: false }" data-landing-page>
 
     <!-- Header Navigation -->
-    <header class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-sm">
+    <header class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-sm" data-landing-header>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             
             <!-- Brand Logo -->
@@ -110,24 +111,24 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
             
             <!-- Badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-xs font-semibold text-blue-800 mb-6 shadow-sm">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/80 border border-blue-200 text-xs font-semibold text-blue-800 mb-6 shadow-sm" data-hero-item>
                 <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                 <span>PT Signal Panca Utama — System Information Enterprise</span>
             </div>
 
             <!-- Main Title -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight max-w-4xl mx-auto mb-6">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight max-w-4xl mx-auto mb-6" data-hero-item>
                 Portal Pengadaan Bisnis Terintegrasi<br>
                 <span class="text-blue-600">Tender &bull; Jasa &bull; Perdagangan Barang</span>
             </h1>
 
             <!-- Subtitle -->
-            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal" data-hero-item>
                 Platform manajemen internal perusahaan untuk menghubungkan alur pengadaan tender instansi, pelaksanaan pekerjaan jasa, stok persediaan barang, hingga invoice dan laporan bisnis.
             </p>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4" data-hero-item>
                 <a href="{{ route('login') }}" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Portal Login
                 </a>
@@ -138,19 +139,19 @@
 
             <!-- Stats Bar -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 p-6 rounded-2xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50">
-                <div class="p-3 border-r border-slate-100 last:border-r-0">
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
                     <div class="text-3xl font-extrabold text-blue-600">50+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Tender Dimenangkan</div>
                 </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0">
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
                     <div class="text-3xl font-extrabold text-emerald-600">100+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Mitra Kerjasama</div>
                 </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0">
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
                     <div class="text-3xl font-extrabold text-purple-600">Rp 25M+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Nilai Kontrak Terkelola</div>
                 </div>
-                <div class="p-3">
+                <div class="p-3" data-stat-card>
                     <div class="text-3xl font-extrabold text-amber-600">99.8%</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Ketepatan Waktu</div>
                 </div>
@@ -160,8 +161,8 @@
     </section>
 
     <!-- Client Logo Marquee Slider Section (Persis Gaya pengadaan.com) -->
-    <section id="klien-slider" class="py-16 bg-white border-y border-slate-200 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
+    <section id="klien-slider" class="py-16 bg-white border-y border-slate-200 overflow-hidden" data-reveal-section>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10" data-reveal-item>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 PT Signal Panca Utama telah dipercaya oleh berbagai klien dari
             </h2>
@@ -244,15 +245,15 @@
     </section>
 
     <!-- Ruang Lingkup KBLI Section -->
-    <section id="kbli" class="py-20 bg-slate-50 border-b border-slate-200">
+    <section id="kbli" class="py-20 bg-slate-50 border-b border-slate-200" data-reveal-section>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="text-center max-w-2xl mx-auto mb-14" data-reveal-item>
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Kualifikasi Resmi</span>
                 <h2 class="text-3xl font-bold text-slate-900">Ruang Lingkup KBLI PT Signal Panca Utama</h2>
                 <p class="text-sm text-slate-600 mt-2">Disesuaikan dengan Klasifikasi Baku Lapangan Usaha Indonesia resmi perusahaan.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5" data-reveal-item>
                 <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46100</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perdagangan Balas Jasa (Fee)</h3>
@@ -287,15 +288,15 @@
     </section>
 
     <!-- Tiga Domain Utama Section -->
-    <section id="domain" class="py-24 bg-white">
+    <section id="domain" class="py-24 bg-white" data-reveal-section>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16">
+            <div class="text-center max-w-2xl mx-auto mb-16" data-reveal-item>
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Tiga Pillar Bisnis</span>
                 <h2 class="text-3xl font-bold text-slate-900">Pengelolaan Bisnis Terpusat</h2>
                 <p class="text-sm text-slate-600 mt-2">Menghubungkan seluruh proses dari pencarian tender hingga pelunasan pembayaran.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-reveal-item>
                 
                 <!-- Domain 1: Tender -->
                 <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
@@ -356,15 +357,15 @@
     </section>
 
     <!-- Alur Integrasi Flowchart Section -->
-    <section id="alur" class="py-20 bg-slate-50 border-t border-slate-200">
+    <section id="alur" class="py-20 bg-slate-50 border-t border-slate-200" data-reveal-section>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14">
+            <div class="text-center max-w-2xl mx-auto mb-14" data-reveal-item>
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Proses Bisnis</span>
                 <h2 class="text-3xl font-bold text-slate-900">Alur Bisnis Terintegrasi End-to-End</h2>
                 <p class="text-sm text-slate-600 mt-2">Seluruh transaksi terhubung untuk transparansi & auditabilitas data.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center" data-reveal-item>
                 
                 <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative">
                     <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-600/30">1</div>
