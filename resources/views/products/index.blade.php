@@ -33,26 +33,34 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($products as $p)
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 font-mono font-bold text-blue-600">{{ $p->sku }}</td>
+                            <td class="p-4 font-mono font-bold text-blue-600 whitespace-nowrap">{{ $p->sku }}</td>
                             <td class="p-4">
                                 <div class="font-bold text-slate-800">{{ $p->name }}</div>
                                 <div class="text-xs text-slate-500"><i class="fa-solid fa-tag"></i> {{ $p->category ?? 'Umum' }}</div>
                             </td>
-                            <td class="p-4 text-slate-700">Rp {{ number_format($p->purchase_price, 0, ',', '.') }}</td>
-                            <td class="p-4 font-bold text-emerald-600">Rp {{ number_format($p->selling_price, 0, ',', '.') }}</td>
-                            <td class="p-4">
-                                <div class="font-bold text-base {{ $p->isLowStock() ? 'text-rose-600' : 'text-slate-800' }}">
-                                    {{ number_format($p->stock, 0) }} {{ $p->unit }}
-                                </div>
-                                <div class="mt-0.5">
+                            <td class="p-4 text-slate-700 whitespace-nowrap">Rp {{ number_format($p->purchase_price, 0, ',', '.') }}</td>
+                            <td class="p-4 font-bold text-emerald-600 whitespace-nowrap">Rp {{ number_format($p->selling_price, 0, ',', '.') }}</td>
+                            <td class="p-4 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-base {{ $p->isLowStock() ? 'text-rose-600' : 'text-slate-900' }}">
+                                        {{ number_format($p->stock, 0) }}
+                                    </span>
+                                    <span class="text-xs font-medium text-slate-500">{{ $p->unit }}</span>
                                     @if($p->isLowStock())
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">Stok Menipis</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Stok Menipis
+                                        </span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Aman (Min {{ number_format($p->minimum_stock, 0) }})</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aman
+                                        </span>
                                     @endif
                                 </div>
+                                <div class="text-[11px] text-slate-400 mt-1">
+                                    Batas minimum: {{ number_format($p->minimum_stock, 0) }} {{ $p->unit }}
+                                </div>
                             </td>
-                            <td class="p-4 text-center">
+                            <td class="p-4 text-center whitespace-nowrap">
                                 <div class="flex justify-center gap-2">
                                     <button @click="selectedProduct = {{ $p }}; adjustModal = true" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition" title="Penyesuaian Stok">
                                         <i class="fa-solid fa-boxes-packing"></i> Adjust Stok

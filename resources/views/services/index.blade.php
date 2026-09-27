@@ -21,27 +21,27 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-                        <th class="p-4">No. Job</th>
+                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 text-xs">
+                        <th class="p-4 whitespace-nowrap">No. Job</th>
                         <th class="p-4">Nama Pekerjaan & Kontrak</th>
                         <th class="p-4">Klien</th>
-                        <th class="p-4">Progress (%)</th>
-                        <th class="p-4">Status</th>
-                        <th class="p-4 text-center">Aksi</th>
+                        <th class="p-4 whitespace-nowrap w-44">Progress (%)</th>
+                        <th class="p-4 text-center whitespace-nowrap">Status</th>
+                        <th class="p-4 text-center whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($serviceJobs as $job)
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 font-mono font-bold text-blue-600">{{ $job->job_number }}</td>
+                            <td class="p-4 font-mono font-bold text-blue-600 whitespace-nowrap">{{ $job->job_number }}</td>
                             <td class="p-4">
                                 <div class="font-bold text-slate-800">{{ $job->name }}</div>
-                                <div class="text-xs text-slate-500">Kontrak: {{ $job->contract->contract_number ?? '-' }}</div>
+                                <div class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-file-contract text-slate-400"></i> Kontrak: {{ $job->contract->contract_number ?? '-' }}</div>
                             </td>
                             <td class="p-4 font-medium text-slate-700">
                                 {{ $job->contract->client->name ?? '-' }}
                             </td>
-                            <td class="p-4 w-48">
+                            <td class="p-4 whitespace-nowrap w-44">
                                 <div class="flex items-center justify-between text-xs mb-1 font-semibold text-slate-700">
                                     <span>{{ $job->progress }}%</span>
                                 </div>
@@ -49,13 +49,31 @@
                                     <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: {{ $job->progress }}%"></div>
                                 </div>
                             </td>
-                            <td class="p-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $job->status === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-50 text-blue-700' }}">
-                                    {{ $job->status }}
-                                </span>
+                            <td class="p-4 text-center whitespace-nowrap">
+                                @if($job->status === 'Selesai')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Selesai
+                                    </span>
+                                @elseif($job->status === 'Dalam Pelaksanaan')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Dalam Pelaksanaan
+                                    </span>
+                                @elseif($job->status === 'Tertunda')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Tertunda
+                                    </span>
+                                @elseif($job->status === 'Dibatalkan')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Dibatalkan
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> {{ $job->status }}
+                                    </span>
+                                @endif
                             </td>
-                            <td class="p-4 text-center">
-                                <button @click="selectedJob = {{ $job }}; billModal = true" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-lg shadow transition" title="Terbitkan Tagihan / Invoice Jasa">
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <button @click="selectedJob = {{ $job }}; billModal = true" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-xl shadow-sm transition inline-flex items-center gap-1.5" title="Terbitkan Tagihan / Invoice Jasa">
                                     <i class="fa-solid fa-file-invoice"></i> Terbitkan Tagihan
                                 </button>
                             </td>

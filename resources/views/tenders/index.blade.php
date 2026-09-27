@@ -4,7 +4,7 @@
 @section('header-title', 'Pipeline & Dokumen Tender')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModal: false, uploadModal: false, convertModal: false, selectedTender: null }">
+<div class="space-y-6" x-data="{ createModal: false, uploadModal: false, convertModal: false, evaluationModal: false, selectedTender: null }">
 
     <!-- Action & Filter Bar -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
@@ -104,34 +104,23 @@
                                     <span class="text-xs text-slate-400">Belum diisi</span>
                                 @endif
                             </td>
-                            <td class="p-4 text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    @if($tender->status === 'Menang' || $tender->result === 'Menang')
-                                        <button @click="selectedTender = {{ $tender }}; convertModal = true" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow transition" title="Konversi ke Kontrak Jasa">
-                                            <i class="fa-solid fa-file-signature"></i> Buat Kontrak
-                                        </button>
-                                    @endif
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center justify-center gap-2">
+                                    <div class="w-32 flex justify-center">
+                                        @if($tender->status === 'Menang' || $tender->result === 'Menang')
+                                            <button @click="selectedTender = {{ $tender }}; convertModal = true" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Konversi ke Kontrak Jasa">
+                                                <i class="fa-solid fa-file-signature text-[11px]"></i> Buat Kontrak
+                                            </button>
+                                        @elseif($tender->status === 'Evaluasi')
+                                            <button type="button" @click="selectedTender = {{ $tender }}; evaluationModal = true" class="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-lg shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Form Evaluasi Tender">
+                                                <i class="fa-solid fa-clipboard-check text-[11px]"></i> Evaluasi
+                                            </button>
+                                        @endif
+                                    </div>
 
-                                    <button @click="selectedTender = {{ $tender }}; uploadModal = true" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition" title="Upload Dokumen">
+                                    <button @click="selectedTender = {{ $tender }}; uploadModal = true" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition" title="Upload Dokumen">
                                         <i class="fa-solid fa-upload"></i>
                                     </button>
-
-                                    @if($tender->status === 'Evaluasi')
-                                        <details class="text-left">
-                                            <summary class="cursor-pointer px-2.5 py-1 bg-amber-100 text-amber-800 text-xs rounded-lg">Evaluasi</summary>
-                                            <form action="{{ route('tender.evaluations.store', $tender) }}" method="POST" class="absolute z-10 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 text-left shadow-xl">
-                                                @csrf
-                                                <input type="number" name="score" min="0" max="100" step="0.01" placeholder="Nilai 0-100" class="mb-2 w-full rounded-lg border p-2 text-xs">
-                                                <select name="decision" required class="mb-2 w-full rounded-lg border p-2 text-xs">
-                                                    <option value="Proceed">Lanjut</option>
-                                                    <option value="Hold">Tunda</option>
-                                                    <option value="Reject">Tolak</option>
-                                                </select>
-                                                <textarea name="notes" placeholder="Catatan evaluasi" class="mb-2 w-full rounded-lg border p-2 text-xs"></textarea>
-                                                <button class="w-full rounded-lg bg-amber-600 px-2 py-1.5 text-xs font-semibold text-white">Simpan Evaluasi</button>
-                                            </form>
-                                        </details>
-                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -298,6 +287,51 @@
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" @click="uploadModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow">Upload File</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Evaluation Tender -->
+    <div x-show="evaluationModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-clipboard-check text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Evaluasi Tender</h3>
+                        <p class="text-xs text-slate-500 font-mono" x-text="selectedTender ? selectedTender.tender_number : ''"></p>
+                    </div>
+                </div>
+                <button type="button" @click="evaluationModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form x-bind:action="'/tender/' + (selectedTender ? selectedTender.id : 0) + '/evaluations'" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Skor Evaluasi (0 - 100)</label>
+                    <input type="number" name="score" min="0" max="100" step="0.01" required placeholder="Contoh: 85.5" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Keputusan Evaluasi</label>
+                    <select name="decision" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                        <option value="Proceed">Lanjut (Proceed ke Penawaran)</option>
+                        <option value="Hold">Tunda (Hold / Butuh Klarifikasi)</option>
+                        <option value="Reject">Tolak (Reject / Tidak Memenuhi Syarat)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan Teknis & Komersial</label>
+                    <textarea name="notes" rows="3" placeholder="Tuliskan catatan kelayakan tender..." class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" @click="evaluationModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm rounded-xl shadow">Simpan Evaluasi</button>
                 </div>
             </form>
         </div>

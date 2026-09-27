@@ -149,7 +149,10 @@
                         <p class="text-xs text-slate-500">Produk yang berada di bawah stok minimum</p>
                     </div>
                 </div>
-                <a href="{{ route('products.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">Kelola Stok &rarr;</a>
+                <a href="{{ route('products.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
+                    <span>Kelola Stok</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
+                </a>
             </div>
 
             @if(count($lowStockProducts) > 0)
@@ -172,7 +175,9 @@
                                     <td class="p-2.5 font-bold text-rose-600">{{ number_format($p->stock, 0) }} {{ $p->unit }}</td>
                                     <td class="p-2.5 text-slate-500">{{ number_format($p->minimum_stock, 0) }} {{ $p->unit }}</td>
                                     <td class="p-2.5">
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">Restock Restock</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Perlu Restock
+                                        </span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -262,7 +267,10 @@
                         <p class="text-xs text-slate-500">Berdasarkan volume penjualan barang</p>
                     </div>
                 </div>
-                <a href="{{ route('sales.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">Lihat Penjualan &rarr;</a>
+                <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-semibold text-xs border border-slate-200 hover:border-emerald-200 transition shadow-sm group">
+                    <span>Lihat Penjualan</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5"></i>
+                </a>
             </div>
 
             <div class="space-y-3">
@@ -298,7 +306,10 @@
                         <p class="text-xs text-slate-500">Barang paling sering digunakan dalam tender</p>
                     </div>
                 </div>
-                <a href="{{ route('tender.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">Lihat Tender &rarr;</a>
+                <a href="{{ route('tender.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
+                    <span>Lihat Tender</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
+                </a>
             </div>
 
             <div class="space-y-3">

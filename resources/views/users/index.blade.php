@@ -22,15 +22,47 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead class="bg-slate-50 text-slate-500">
-                    <tr><th class="p-4">User</th><th class="p-4">Role</th><th class="p-4">Status</th><th class="p-4">Aksi</th></tr>
+                    <tr>
+                        <th class="p-4">User</th>
+                        <th class="p-4">Role</th>
+                        <th class="p-4 text-center whitespace-nowrap w-32">Status</th>
+                        <th class="p-4 text-center whitespace-nowrap w-44">Aksi</th>
+                    </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($users as $user)
-                        <tr>
-                            <td class="p-4"><div class="font-semibold text-slate-800">{{ $user->name }}</div><div class="text-xs text-slate-500">{{ $user->email }}</div></td>
-                            <td class="p-4 text-slate-600">{{ ucwords(str_replace('_', ' ', $user->role->name ?? '-')) }}</td>
-                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ $user->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
-                            <td class="p-4"><div class="flex items-center gap-4"><button type="button" @click="editUser = {{ $user->toJson() }}; showPassword = false; showConfirmation = false; open = true" class="text-blue-600 hover:underline font-semibold">Edit</button><button type="button" @click="deleteUser = {{ $user->toJson() }}; typedEmail = ''; deleteOpen = true" class="text-rose-600 hover:underline font-semibold" :disabled="{{ $user->id === auth()->id() ? 'true' : 'false' }}" {{ $user->id === auth()->id() ? 'title="Akun yang sedang digunakan tidak dapat dihapus"' : '' }}>Hapus</button></div></td>
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="p-4">
+                                <div class="font-semibold text-slate-800">{{ $user->name }}</div>
+                                <div class="text-xs text-slate-500">{{ $user->email }}</div>
+                            </td>
+                            <td class="p-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ ucwords(str_replace('_', ' ', $user->role->name ?? '-')) }}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center justify-center gap-1.5 w-24 py-1 rounded-full text-xs font-semibold border {{ $user->is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $user->is_active ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                    {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center justify-center gap-2">
+                                    <button type="button" @click="editUser = {{ $user->toJson() }}; showPassword = false; showConfirmation = false; open = true" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs rounded-xl border border-blue-200 transition inline-flex items-center gap-1.5 shadow-sm" title="Edit Akun">
+                                        <i class="fa-solid fa-pen-to-square text-[11px]"></i> Edit
+                                    </button>
+                                    @if($user->id !== auth()->id())
+                                        <button type="button" @click="deleteUser = {{ $user->toJson() }}; typedEmail = ''; deleteOpen = true" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs rounded-xl border border-rose-200 transition inline-flex items-center gap-1.5 shadow-sm" title="Hapus Akun">
+                                            <i class="fa-solid fa-trash text-[11px]"></i> Hapus
+                                        </button>
+                                    @else
+                                        <span class="px-3 py-1.5 bg-slate-100 text-slate-400 font-medium text-xs rounded-xl border border-slate-200 inline-flex items-center gap-1.5 cursor-not-allowed" title="Akun yang sedang login">
+                                            <i class="fa-solid fa-lock text-[10px]"></i> Anda
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="p-8 text-center text-slate-500">Belum ada user.</td></tr>

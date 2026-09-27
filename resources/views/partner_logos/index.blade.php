@@ -38,7 +38,7 @@
                         <th class="p-4">Nama Klien / Perusahaan</th>
                         <th class="p-4">Kategori</th>
                         <th class="p-4">Tipe Media</th>
-                        <th class="p-4">Status Tampil</th>
+                        <th class="p-4 text-center whitespace-nowrap">Status Tampil</th>
                         <th class="p-4 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -68,8 +68,9 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="p-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $pl->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }}">
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $pl->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $pl->is_active ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                                     {{ $pl->is_active ? 'Aktif (Tampil)' : 'Nonaktif' }}
                                 </span>
                             </td>

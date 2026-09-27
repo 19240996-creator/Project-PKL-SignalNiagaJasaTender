@@ -30,21 +30,21 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-                        <th class="p-4">No. Invoice</th>
+                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 text-xs">
+                        <th class="p-4 whitespace-nowrap">No. Invoice</th>
                         <th class="p-4">Sumber Transaksi</th>
-                        <th class="p-4">Tanggal & Due Date</th>
-                        <th class="p-4">Total Tagihan</th>
-                        <th class="p-4">Telah Dibayar</th>
-                        <th class="p-4">Sisa Piutang</th>
-                        <th class="p-4">Status</th>
-                        <th class="p-4 text-center">Aksi</th>
+                        <th class="p-4 whitespace-nowrap">Tanggal & Due Date</th>
+                        <th class="p-4 whitespace-nowrap">Total Tagihan</th>
+                        <th class="p-4 whitespace-nowrap">Telah Dibayar</th>
+                        <th class="p-4 whitespace-nowrap">Sisa Piutang</th>
+                        <th class="p-4 text-center whitespace-nowrap">Status</th>
+                        <th class="p-4 text-center whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($invoices as $inv)
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 font-mono font-bold text-blue-600">
+                            <td class="p-4 font-mono font-bold text-blue-600 whitespace-nowrap">
                                 <a href="{{ route('invoices.show', $inv->id) }}" class="hover:underline">{{ $inv->invoice_number }}</a>
                             </td>
                             <td class="p-4 text-xs">
@@ -58,37 +58,43 @@
                                     <div class="text-slate-400">Tagihan Umum</div>
                                 @endif
                             </td>
-                            <td class="p-4 text-xs text-slate-600">
+                            <td class="p-4 text-xs text-slate-600 whitespace-nowrap">
                                 <div>Tgl: {{ \Carbon\Carbon::parse($inv->invoice_date)->format('d M Y') }}</div>
                                 <div class="font-semibold text-rose-600">Due: {{ \Carbon\Carbon::parse($inv->due_date)->format('d M Y') }}</div>
                             </td>
-                            <td class="p-4 font-bold text-slate-800">Rp {{ number_format($inv->total_amount, 0, ',', '.') }}</td>
-                            <td class="p-4 text-emerald-600 font-semibold">Rp {{ number_format($inv->paid_amount, 0, ',', '.') }}</td>
-                            <td class="p-4 font-bold text-rose-600">
+                            <td class="p-4 font-bold text-slate-800 whitespace-nowrap">Rp {{ number_format($inv->total_amount, 0, ',', '.') }}</td>
+                            <td class="p-4 text-emerald-600 font-semibold whitespace-nowrap">Rp {{ number_format($inv->paid_amount, 0, ',', '.') }}</td>
+                            <td class="p-4 font-bold text-rose-600 whitespace-nowrap">
                                 Rp {{ number_format($inv->remaining_balance, 0, ',', '.') }}
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 text-center whitespace-nowrap">
                                 @php
-                                    $statusClass = match($inv->status) {
-                                        'Paid' => 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
-                                        'Partial' => 'bg-amber-100 text-amber-800 border-amber-300',
-                                        'Issued' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                        'Overdue' => 'bg-rose-100 text-rose-800 border-rose-300 font-bold',
-                                        default => 'bg-slate-100 text-slate-700'
+                                    $statusConfig = match($inv->status) {
+                                        'Paid' => ['bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200', 'dot' => 'bg-emerald-500', 'label' => 'Lunas'],
+                                        'Partial' => ['bg' => 'bg-amber-50 text-amber-700 border-amber-200', 'dot' => 'bg-amber-500', 'label' => 'Sebagian'],
+                                        'Issued' => ['bg' => 'bg-blue-50 text-blue-700 border-blue-200', 'dot' => 'bg-blue-500 animate-pulse', 'label' => 'Belum Lunas'],
+                                        'Overdue' => ['bg' => 'bg-rose-50 text-rose-700 border-rose-200 font-bold', 'dot' => 'bg-rose-500 animate-pulse', 'label' => 'Jatuh Tempo'],
+                                        default => ['bg' => 'bg-slate-50 text-slate-700 border-slate-200', 'dot' => 'bg-slate-400', 'label' => $inv->status]
                                     };
                                 @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-medium border {{ $statusClass }}">
-                                    {{ $inv->status }}
+                                <span class="inline-flex items-center justify-center gap-1.5 w-28 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['bg'] }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $statusConfig['dot'] }}"></span>
+                                    {{ $statusConfig['label'] }}
                                 </span>
                             </td>
-                            <td class="p-4 text-center">
-                                @if($inv->status !== 'Paid')
-                                    <button @click="selectedInvoice = {{ $inv }}; payModal = true" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow transition" title="Catat Pembayaran">
-                                        <i class="fa-solid fa-hand-holding-dollar"></i> Bayar
-                                    </button>
-                                @else
-                                    <span class="text-xs text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Lunas</span>
-                                @endif
+                            <td class="p-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center justify-center gap-2">
+                                    <div class="w-20 flex justify-center">
+                                        @if($inv->status !== 'Paid')
+                                            <button @click="selectedInvoice = {{ $inv }}; payModal = true" class="w-full px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Catat Pembayaran">
+                                                <i class="fa-solid fa-hand-holding-dollar text-[11px]"></i> Bayar
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('invoices.show', $inv->id) }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition inline-flex items-center gap-1.5" title="Lihat Detail Invoice">
+                                        <i class="fa-solid fa-file-invoice text-[11px]"></i> Detail
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
