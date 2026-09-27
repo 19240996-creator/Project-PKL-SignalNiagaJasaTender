@@ -107,4 +107,11 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', 'Penyesuaian stok produk berhasil dicatat.');
     }
+
+    public function destroy(Product $product): RedirectResponse
+    {
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus. Aktivitasnya sudah dicatat di log.');
+    }
 }

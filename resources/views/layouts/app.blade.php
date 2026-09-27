@@ -183,6 +183,10 @@
                             <i class="fa-solid fa-images w-6 text-center text-purple-600"></i>
                             <span>Kelola Logo Klien</span>
                         </a>
+                        <a href="{{ route('activity-logs.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors {{ request()->routeIs('activity-logs.*') ? 'sidebar-item-active' : '' }}">
+                            <i class="fa-solid fa-clock-rotate-left w-6 text-center text-purple-600"></i>
+                            <span>Log Aktivitas</span>
+                        </a>
                     @endif
                 </nav>
             </div>

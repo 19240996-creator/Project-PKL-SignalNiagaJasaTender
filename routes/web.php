@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommercialDocumentController;
 use App\Http\Controllers\ContractController;
@@ -106,6 +107,11 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
     });
 
+    // Only Super Admin can permanently remove a product from the catalog.
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    });
+
     // Modul Penjualan / Trade (Super Admin & Sales)
     Route::middleware(['role:super_admin,sales'])->group(function () {
         Route::get('/perdagangan', [SalesController::class, 'index'])->name('perdagangan.index');
@@ -133,6 +139,8 @@ Route::middleware(['auth', 'audit'])->group(function () {
 
     // Modul Khusus Super Admin (Kelola Logo Klien Landing Page)
     Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/activity-logs/data', [ActivityLogController::class, 'data'])->name('activity-logs.data');
         Route::get('/users', [UserManagementController::class, 'index'])->middleware('permission:users.manage')->name('users.index');
         Route::post('/users', [UserManagementController::class, 'store'])->middleware('permission:users.manage')->name('users.store');
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->middleware('permission:users.manage')->name('users.update');

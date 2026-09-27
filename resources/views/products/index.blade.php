@@ -4,7 +4,7 @@
 @section('header-title', 'Persediaan Stok Barang & Katalog Produk')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModal: false, adjustModal: false, selectedProduct: null }">
+<div class="space-y-6" x-data="{ createModal: false, adjustModal: false, deleteModal: false, selectedProduct: null }">
 
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
         <form method="GET" action="{{ route('products.index') }}" class="flex items-center gap-3 w-full md:w-auto">
@@ -27,7 +27,7 @@
                         <th class="p-4">Harga Beli</th>
                         <th class="p-4">Harga Jual</th>
                         <th class="p-4">Stok Saat Ini</th>
-                        <th class="p-4 text-center">Aksi Stok</th>
+                        <th class="p-4 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -53,9 +53,16 @@
                                 </div>
                             </td>
                             <td class="p-4 text-center">
-                                <button @click="selectedProduct = {{ $p }}; adjustModal = true" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition" title="Penyesuaian Stok">
-                                    <i class="fa-solid fa-boxes-packing"></i> Adjust Stok
-                                </button>
+                                <div class="flex justify-center gap-2">
+                                    <button @click="selectedProduct = {{ $p }}; adjustModal = true" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition" title="Penyesuaian Stok">
+                                        <i class="fa-solid fa-boxes-packing"></i> Adjust Stok
+                                    </button>
+                                    @if(auth()->user()->role?->name === 'super_admin')
+                                        <button type="button" @click="selectedProduct = {{ $p }}; deleteModal = true" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs rounded-lg transition" title="Hapus Produk">
+                                            <i class="fa-solid fa-trash"></i> Hapus
+                                        </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -68,6 +75,47 @@
         </div>
         <div class="p-4 border-t border-slate-100">
             {{ $products->links() }}
+        </div>
+    </div>
+
+    <!-- Modal Delete Product -->
+    <div x-show="deleteModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="deleteModal = false">
+        <div @click.outside="deleteModal = false" class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Hapus produk?</h3>
+                        <p class="text-xs font-medium text-slate-400">Konfirmasi tindakan administrator</p>
+                    </div>
+                </div>
+                <button type="button" @click="deleteModal = false" class="text-slate-400 transition hover:text-slate-700" aria-label="Tutup konfirmasi hapus">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 px-6 py-5">
+                <p class="text-sm leading-6 text-slate-600">
+                    Anda akan menghapus produk <strong class="text-slate-900" x-text="selectedProduct?.name"></strong> dari katalog.
+                </p>
+                <div class="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-amber-800">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <p class="text-xs leading-5">Tindakan ini akan dicatat ke log audit beserta data produk sebelum dihapus.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+                <button type="button" @click="deleteModal = false" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">Batal</button>
+                <form x-bind:action="selectedProduct ? '/products/' + selectedProduct.id : '#'" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Hapus Produk
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
