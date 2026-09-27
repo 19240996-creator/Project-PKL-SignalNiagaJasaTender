@@ -23,6 +23,45 @@
         </div>
     @endif
 
+    <!-- Filter Bar Periode (PRD FR-02) -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                <i class="fa-solid fa-calendar-days text-sm"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-slate-700 block">Periode Data Dashboard</span>
+                <span class="text-[11px] text-slate-500">
+                    @if($period === 'today') Hari Ini ({{ now()->format('d M Y') }})
+                    @elseif($period === 'week') Minggu Ini
+                    @elseif($period === 'month') Bulan Ini ({{ now()->format('F Y') }})
+                    @elseif($period === 'year') Tahun Ini ({{ now()->format('Y') }})
+                    @elseif($period === 'custom' && $startDate) {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                    @else Semua Waktu (Kumulatif)
+                    @endif
+                </span>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-center gap-2 w-full md:w-auto" x-data="{ showCustom: '{{ $period }}' === 'custom' }">
+            <select name="period" @change="showCustom = ($event.target.value === 'custom'); if(!showCustom) $el.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Semua Waktu</option>
+                <option value="today" {{ $period === 'today' ? 'selected' : '' }}>Hari Ini</option>
+                <option value="week" {{ $period === 'week' ? 'selected' : '' }}>Minggu Ini</option>
+                <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Bulan Ini</option>
+                <option value="year" {{ $period === 'year' ? 'selected' : '' }}>Tahun Ini</option>
+                <option value="custom" {{ $period === 'custom' ? 'selected' : '' }}>Rentang Kustom</option>
+            </select>
+
+            <div x-show="showCustom" x-cloak class="flex items-center gap-1.5">
+                <input type="date" name="start_date" value="{{ request('start_date') }}" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs outline-none">
+                <span class="text-xs text-slate-400">-</span>
+                <input type="date" name="end_date" value="{{ request('end_date') }}" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs outline-none">
+                <button type="submit" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">Terapkan</button>
+            </div>
+        </form>
+    </div>
+
     <!-- KPI Cards Overview Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 
@@ -203,6 +242,83 @@
             <h4 class="font-bold text-slate-800 text-base mb-4">Distribusi Status Tender</h4>
             <div class="h-64 flex items-center justify-center">
                 <canvas id="tenderStatusChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Widgets: Top Selling Products & Top Tender Items (PRD Seksi 9 & 22) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Widget 1: Top Selling Products -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-fire text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-base">Produk Terlaris</h4>
+                        <p class="text-xs text-slate-500">Berdasarkan volume penjualan barang</p>
+                    </div>
+                </div>
+                <a href="{{ route('sales.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">Lihat Penjualan &rarr;</a>
+            </div>
+
+            <div class="space-y-3">
+                @forelse($topSellingProducts as $p)
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                        <div class="min-w-0">
+                            <span class="font-mono text-[10px] text-slate-400 block">{{ $p->sku }}</span>
+                            <span class="font-bold text-slate-800 block truncate">{{ $p->name }}</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                {{ number_format($p->total_sold ?? 0, 0) }} {{ $p->unit }}
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl">
+                        Belum ada data penjualan tercatat.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- Widget 2: Top Tender Items (PRD Seksi 22 poin 9) -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-boxes-packing text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-base">Kebutuhan Barang Tender Terbanyak</h4>
+                        <p class="text-xs text-slate-500">Barang paling sering digunakan dalam tender</p>
+                    </div>
+                </div>
+                <a href="{{ route('tender.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">Lihat Tender &rarr;</a>
+            </div>
+
+            <div class="space-y-3">
+                @forelse($topTenderItems as $p)
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                        <div class="min-w-0">
+                            <span class="font-mono text-[10px] text-slate-400 block">{{ $p->sku }}</span>
+                            <span class="font-bold text-slate-800 block truncate">{{ $p->name }}</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                                {{ number_format($p->total_tender_needed ?? 0, 0) }} {{ $p->unit }}
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl">
+                        Belum ada data kebutuhan barang tender.
+                    </div>
+                @endforelse
             </div>
         </div>
 

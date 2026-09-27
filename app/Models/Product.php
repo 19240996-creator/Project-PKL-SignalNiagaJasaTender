@@ -35,6 +35,16 @@ class Product extends Model
         return $this->hasMany(StockMovement::class);
     }
 
+    public function salesItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
+    public function tenderItems(): HasMany
+    {
+        return $this->hasMany(TenderItem::class);
+    }
+
     public function productCategory(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');

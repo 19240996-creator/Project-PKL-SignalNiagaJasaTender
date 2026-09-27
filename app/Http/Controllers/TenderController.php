@@ -74,6 +74,12 @@ class TenderController extends Controller
 
     public function update(Request $request, Tender $tender): RedirectResponse
     {
+        $user = Auth::user();
+        $isSuperAdmin = ($user && $user->role && $user->role->name === 'super_admin');
+        if (!$isSuperAdmin && in_array($tender->status, ['Selesai', 'Menang', 'Kalah', 'Batal'], true)) {
+            return redirect()->route('tender.index')->with('error', 'Tender dengan status selesai/terminal tidak dapat diubah oleh pengguna biasa.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:200',
             'client_id' => 'required|exists:clients,id',

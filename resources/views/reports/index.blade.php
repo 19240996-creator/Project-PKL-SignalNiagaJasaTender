@@ -14,6 +14,7 @@
                 <select name="type" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                     <option value="tender" {{ $type === 'tender' ? 'selected' : '' }}>Laporan Tender</option>
                     <option value="contract" {{ $type === 'contract' ? 'selected' : '' }}>Laporan Kontrak Jasa</option>
+                    <option value="jasa" {{ $type === 'jasa' ? 'selected' : '' }}>Laporan Pekerjaan Jasa</option>
                     <option value="procurement" {{ $type === 'procurement' ? 'selected' : '' }}>Laporan Pengadaan Barang</option>
                     <option value="sales" {{ $type === 'sales' ? 'selected' : '' }}>Laporan Penjualan Perdagangan</option>
                     <option value="stock" {{ $type === 'stock' ? 'selected' : '' }}>Laporan Persediaan Stok</option>
@@ -124,6 +125,40 @@
                             </tr>
                         @empty
                             <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data kontrak pada periode ini.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            @elseif($type === 'jasa')
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
+                            <th class="p-3">No. Job</th>
+                            <th class="p-3">Nama Pekerjaan</th>
+                            <th class="p-3">Klien</th>
+                            <th class="p-3">No. Kontrak</th>
+                            <th class="p-3 text-center">Progress</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($data as $j)
+                            <tr>
+                                <td class="p-3 font-mono font-bold text-blue-600">{{ $j->job_number }}</td>
+                                <td class="p-3 font-medium">{{ $j->name }}</td>
+                                <td class="p-3">{{ $j->contract->client->name ?? '-' }}</td>
+                                <td class="p-3 font-mono text-slate-500">{{ $j->contract->contract_number ?? '-' }}</td>
+                                <td class="p-3 text-center">
+                                    <div class="inline-flex items-center gap-2">
+                                        <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $j->progress }}%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-700">{{ $j->progress }}%</span>
+                                    </div>
+                                </td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-slate-100 text-slate-700">{{ $j->status }}</span></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="p-6 text-center text-slate-400">Tidak ada data pekerjaan jasa pada periode ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

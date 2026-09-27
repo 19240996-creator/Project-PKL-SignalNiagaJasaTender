@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Procurement;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\ServiceJob;
 use App\Models\StockMovement;
 use App\Models\Tender;
 use Illuminate\Http\Request;
@@ -42,6 +43,14 @@ class ReportController extends Controller
                     ->whereBetween('start_date', [$startDate, $endDate])
                     ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
                         $q->where('contract_number', 'like', "%{$search}%");
+                    }))->paginate(15)->withQueryString();
+                break;
+
+            case 'jasa':
+                $data = ServiceJob::with('contract.client')
+                    ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
+                        $q->where('job_number', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
                     }))->paginate(15)->withQueryString();
                 break;
 
@@ -93,6 +102,7 @@ class ReportController extends Controller
 
         $rows = match ($type) {
             'contract' => Contract::with('client')->whereBetween('start_date', [$startDate, $endDate])->get(),
+            'jasa' => ServiceJob::with('contract.client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])->get(),
             'procurement' => Procurement::with('supplier')->whereBetween('procurement_date', [$startDate, $endDate])->get(),
             'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(),
             'stock' => Product::with('stockMovements')->get(),
@@ -111,6 +121,7 @@ class ReportController extends Controller
             foreach ($rows as $row) {
                 fputcsv($handle, match ($type) {
                     'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status],
+                    'jasa' => [$row->job_number, $row->name, $row->contract->client->name ?? '-', $row->progress . '%', $row->status],
                     'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status],
                     'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status],
                     'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock],
@@ -158,18 +169,41 @@ class ReportController extends Controller
     {
         return match ($type) {
             'contract' => Contract::with('client')->whereBetween('start_date', [$startDate, $endDate])->get(),
+            'jasa' => ServiceJob::with('contract.client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])->get(),
             'procurement' => Procurement::with('supplier')->whereBetween('procurement_date', [$startDate, $endDate])->get(),
-            'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(), 'stock' => Product::all(),
-            'invoice' => Invoice::whereBetween('invoice_date', [$startDate, $endDate])->get(), 'payment' => Payment::with('invoice')->whereBetween('payment_date', [$startDate, $endDate])->get(),
+            'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(),
+            'stock' => Product::all(),
+            'invoice' => Invoice::whereBetween('invoice_date', [$startDate, $endDate])->get(),
+            'payment' => Payment::with('invoice')->whereBetween('payment_date', [$startDate, $endDate])->get(),
             default => Tender::with('client')->whereBetween('found_date', [$startDate, $endDate])->get(),
         };
     }
 
-    public function exportHeaders(string $type): array { return match ($type) {
-        'contract' => ['Nomor', 'Klien', 'Mulai', 'Selesai', 'Nilai', 'Status'], 'procurement' => ['Nomor', 'Supplier', 'Tanggal', 'Total', 'Status'], 'sales' => ['Nomor', 'Pelanggan', 'Tanggal', 'Total', 'Status'], 'stock' => ['SKU', 'Produk', 'Stok', 'Minimum'], 'invoice' => ['Nomor', 'Tanggal', 'Jatuh Tempo', 'Total', 'Terbayar', 'Status'], 'payment' => ['Invoice', 'Tanggal', 'Jumlah', 'Metode'], default => ['Nomor', 'Nama', 'Klien', 'Deadline', 'Penawaran', 'Status'],
-    }; }
+    public function exportHeaders(string $type): array
+    {
+        return match ($type) {
+            'contract' => ['Nomor Kontrak', 'Klien', 'Mulai', 'Selesai', 'Nilai', 'Status'],
+            'jasa' => ['Nomor Job', 'Nama Pekerjaan', 'Klien', 'Progress', 'Status'],
+            'procurement' => ['Nomor', 'Supplier', 'Tanggal', 'Total', 'Status'],
+            'sales' => ['Nomor', 'Pelanggan', 'Tanggal', 'Total', 'Status'],
+            'stock' => ['SKU', 'Produk', 'Stok', 'Minimum'],
+            'invoice' => ['Nomor', 'Tanggal', 'Jatuh Tempo', 'Total', 'Terbayar', 'Status'],
+            'payment' => ['Invoice', 'Tanggal', 'Jumlah', 'Metode'],
+            default => ['Nomor', 'Nama', 'Klien', 'Deadline', 'Penawaran', 'Status'],
+        };
+    }
 
-    public function exportValues(string $type, $rows): array { return $rows->map(fn ($row) => match ($type) {
-        'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status], 'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status], 'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status], 'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock], 'invoice' => [$row->invoice_number, $row->invoice_date, $row->due_date, $row->total_amount, $row->paid_amount, $row->status], 'payment' => [$row->invoice->invoice_number ?? '-', $row->payment_date, $row->amount, $row->payment_method], default => [$row->tender_number, $row->name, $row->client->name ?? '-', $row->deadline, $row->bid_value, $row->status],
-    })->all(); }
+    public function exportValues(string $type, $rows): array
+    {
+        return $rows->map(fn ($row) => match ($type) {
+            'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status],
+            'jasa' => [$row->job_number, $row->name, $row->contract->client->name ?? '-', $row->progress . '%', $row->status],
+            'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status],
+            'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status],
+            'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock],
+            'invoice' => [$row->invoice_number, $row->invoice_date, $row->due_date, $row->total_amount, $row->paid_amount, $row->status],
+            'payment' => [$row->invoice->invoice_number ?? '-', $row->payment_date, $row->amount, $row->payment_method],
+            default => [$row->tender_number, $row->name, $row->client->name ?? '-', $row->deadline, $row->bid_value, $row->status],
+        })->all();
+    }
 }
