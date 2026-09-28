@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SignalNiagaJasaTender') — PT Signal Panca Utama</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,8 +57,8 @@
                 <!-- Brand Header -->
                 <div class="h-16 flex items-center px-6 border-b border-slate-100 bg-slate-900 text-white justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow">
-                            S
+                        <div class="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
+                            <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
                         </div>
                         <div>
                             <span class="font-bold text-base tracking-tight text-white block leading-none">SignalNiaga</span>

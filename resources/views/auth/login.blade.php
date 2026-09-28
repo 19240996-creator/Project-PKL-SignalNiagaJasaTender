@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk | SignalNiagaJasaTender</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +33,9 @@
     <main class="min-h-screen lg:grid lg:grid-cols-[minmax(420px,0.9fr)_minmax(500px,1.1fr)]">
         <section class="login-grid relative hidden overflow-hidden px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
             <a href="{{ route('home') }}" class="relative z-10 inline-flex w-fit items-center gap-3" title="Kembali ke beranda">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3b8cff] text-lg font-extrabold shadow-lg shadow-blue-950/30">S</span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-lg shadow-blue-950/30">
+                    <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
+                </span>
                 <span><span class="block text-lg font-extrabold tracking-tight">SignalNiaga</span><span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200">PT Signal Panca Utama</span></span>
             </a>
 
@@ -54,7 +57,7 @@
         <section class="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-12 xl:px-20">
             <div class="form-shell login-form-card w-full max-w-[460px] rounded-2xl bg-white p-6 sm:p-9 lg:p-10">
                 <div class="mb-10 flex items-center justify-between lg:hidden">
-                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#155eef] font-extrabold text-white shadow-md shadow-blue-600/20">S</span><span class="text-base font-extrabold tracking-tight text-[#0d2b5c]">SignalNiaga</span></a>
+                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-1 shadow-md shadow-blue-600/20 border border-slate-100"><img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain"></span><span class="text-base font-extrabold tracking-tight text-[#0d2b5c]">SignalNiaga</span></a>
                     <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-400">Internal</span>
                 </div>
 

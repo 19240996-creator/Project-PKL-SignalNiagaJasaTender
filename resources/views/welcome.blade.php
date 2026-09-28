@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SignalNiagaJasaTender — PT Signal Panca Utama</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,8 +31,8 @@
     </script>
     <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Alpine.js CDN -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- AOS CDN CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     @vite('resources/js/app.js')
     <style>
         :root {
@@ -219,9 +220,7 @@
             
             <!-- Brand Logo -->
             <a href="#" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-xl shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform">
-                    S
-                </div>
+                <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-10 w-auto object-contain group-hover:scale-105 transition-transform">
                 <div>
                     <span class="font-bold text-xl tracking-tight text-slate-900 block leading-none">SignalNiaga</span>
                     <span class="text-[10px] text-blue-600 font-bold tracking-wider uppercase">PT Signal Panca Utama</span>
@@ -262,7 +261,7 @@
             <a href="#domain" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Domain Bisnis</a>
             <a href="#alur" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Alur Integrasi</a>
             <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <a href="{{ route('login') }}" class="landing-action w-full py-2.5 text-center bg-blue-600 text-white font-semibold rounded-xl block text-sm shadow">Masuk Portal Login</a>
+                <a href="{{ route('login') }}" class="landing-action w-full py-2.5 text-center bg-blue-600 text-white font-semibold rounded-xl block text-sm shadow">Masuk</a>
             </div>
         </div>
     </header>
@@ -270,31 +269,31 @@
     <!-- Hero Section -->
     <section id="beranda" class="hero-modern relative pt-32 pb-20 md:pt-40 md:pb-24 overflow-hidden">
         <div class="hero-layout max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="hero-copy">
-                <h1 class="font-extrabold tracking-tight text-slate-900" data-hero-item>
+            <div class="hero-copy" data-aos="fade-up" data-aos-duration="800">
+                <h1 class="font-extrabold tracking-tight text-slate-900">
                     Satu ruang kerja untuk bisnis yang terus bergerak
                     <span>Tender, jasa, dan perdagangan.</span>
                 </h1>
 
             <!-- Subtitle -->
-            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal" data-hero-item>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal" data-aos="fade-up" data-aos-delay="100">
                 Platform manajemen internal perusahaan untuk menghubungkan alur pengadaan tender instansi, pelaksanaan pekerjaan jasa, stok persediaan barang, hingga invoice dan laporan bisnis.
             </p>
 
             <!-- Action Buttons -->
-            <div class="hero-actions flex flex-col sm:flex-row items-center justify-center gap-4" data-hero-item>
+            <div class="hero-actions flex flex-col sm:flex-row items-center justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
                 <a href="{{ route('login') }}" class="landing-action w-full sm:w-auto px-8 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Masuk ke Portal Login
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk 
                 </a>
                 <a href="#domain" class="landing-action w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-layer-group"></i> Jelajahi Modul Sistem
                 </a>
             </div>
 
-                <div class="hero-note"><i class="fa-solid fa-circle-check"></i><span>Data lebih rapi. Keputusan lebih cepat. Tim lebih selaras.</span></div>
+                <div class="hero-note" data-aos="fade-up" data-aos-delay="250"><i class="fa-solid fa-circle-check"></i><span>Data lebih rapi. Keputusan lebih cepat. Tim lebih selaras.</span></div>
             </div>
 
-            <div class="hero-visual" data-hero-item aria-label="Preview alur kerja SignalNiaga">
+            <div class="hero-visual" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150" aria-label="Preview alur kerja SignalNiaga">
                 <div class="workflow-window">
                     <div class="workflow-topbar"><div class="workflow-dots"><i></i><i></i><i></i></div><small>SignalNiaga Workspace</small></div>
                     <div class="workflow-content">
@@ -312,19 +311,19 @@
 
             <!-- Stats Bar -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 p-6 rounded-2xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50 col-span-full">
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="0">
                     <div class="text-3xl font-extrabold text-blue-600">50+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Tender Dimenangkan</div>
                 </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="100">
                     <div class="text-3xl font-extrabold text-emerald-600">100+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Mitra Kerjasama</div>
                 </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-stat-card>
+                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="200">
                     <div class="text-3xl font-extrabold text-purple-600">Rp 25M+</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Nilai Kontrak Terkelola</div>
                 </div>
-                <div class="p-3" data-stat-card>
+                <div class="p-3" data-aos="fade-up" data-aos-delay="300">
                     <div class="text-3xl font-extrabold text-amber-600">99.8%</div>
                     <div class="text-xs font-semibold text-slate-500 mt-1">Ketepatan Waktu</div>
                 </div>
@@ -334,15 +333,15 @@
     </section>
 
     <!-- Client Logo Marquee Slider Section (Persis Gaya pengadaan.com) -->
-    <section id="klien-slider" class="py-16 bg-white border-y border-slate-200 overflow-hidden" data-reveal-section>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10" data-reveal-item>
+    <section id="klien-slider" class="py-16 bg-white border-y border-slate-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10" data-aos="fade-up">
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 PT Signal Panca Utama telah dipercaya oleh berbagai klien dari
             </h2>
         </div>
 
         <!-- Infinite Auto-Sliding Marquee Track -->
-        <div class="relative w-full overflow-hidden flex">
+        <div class="relative w-full overflow-hidden flex" data-aos="fade-up" data-aos-delay="150">
             <!-- Left & Right Fade Shadows -->
             <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
             <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
@@ -418,40 +417,40 @@
     </section>
 
     <!-- Ruang Lingkup KBLI Section -->
-    <section id="kbli" class="py-20 bg-slate-50 border-b border-slate-200" data-reveal-section>
+    <section id="kbli" class="py-20 bg-slate-50 border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14" data-reveal-item>
+            <div class="text-center max-w-2xl mx-auto mb-14" data-aos="fade-up">
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Kualifikasi Resmi</span>
                 <h2 class="text-3xl font-bold text-slate-900">Ruang Lingkup KBLI PT Signal Panca Utama</h2>
                 <p class="text-sm text-slate-600 mt-2">Disesuaikan dengan Klasifikasi Baku Lapangan Usaha Indonesia resmi perusahaan.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5" data-reveal-item>
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="0">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46100</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perdagangan Balas Jasa (Fee)</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar atas dasar balas jasa atau kontrak kerja.</p>
                 </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="100">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46422</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Percetakan & Penerbitan</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar barang percetakan berbagai bentuk.</p>
                 </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="200">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46499</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perlengkapan Rumah Tangga</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar perlengkapan & perabotan kantor/rumah.</p>
                 </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="300">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46511</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Komputer & IT Equipment</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar komputer, laptop, server, & perangkat IT.</p>
                 </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group">
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="400">
                     <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46900</span>
                     <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perdagangan Macam Barang</h3>
                     <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar berbagai macam barang pengadaan umum.</p>
@@ -461,18 +460,18 @@
     </section>
 
     <!-- Tiga Domain Utama Section -->
-    <section id="domain" class="py-24 bg-white" data-reveal-section>
+    <section id="domain" class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16" data-reveal-item>
+            <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Tiga Pillar Bisnis</span>
                 <h2 class="text-3xl font-bold text-slate-900">Pengelolaan Bisnis Terpusat</h2>
                 <p class="text-sm text-slate-600 mt-2">Menghubungkan seluruh proses dari pencarian tender hingga pelunasan pembayaran.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-reveal-item>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
                 <!-- Domain 1: Tender -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="0">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-2xl mb-6">
                             <i class="fa-solid fa-trophy"></i>
@@ -490,7 +489,7 @@
                 </div>
 
                 <!-- Domain 2: Jasa -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="150">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-2xl mb-6">
                             <i class="fa-solid fa-briefcase"></i>
@@ -508,7 +507,7 @@
                 </div>
 
                 <!-- Domain 3: Perdagangan -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-purple-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md">
+                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-purple-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="300">
                     <div>
                         <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-2xl mb-6">
                             <i class="fa-solid fa-cart-shopping"></i>
@@ -530,35 +529,35 @@
     </section>
 
     <!-- Alur Integrasi Flowchart Section -->
-    <section id="alur" class="py-20 bg-slate-50 border-t border-slate-200" data-reveal-section>
+    <section id="alur" class="py-20 bg-slate-50 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14" data-reveal-item>
+            <div class="text-center max-w-2xl mx-auto mb-14" data-aos="fade-up">
                 <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Proses Bisnis</span>
                 <h2 class="text-3xl font-bold text-slate-900">Alur Bisnis Terintegrasi End-to-End</h2>
                 <p class="text-sm text-slate-600 mt-2">Seluruh transaksi terhubung untuk transparansi & auditabilitas data.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center" data-reveal-item>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
                 
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative">
+                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="0">
                     <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-600/30">1</div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">Tender Menang</h4>
                     <p class="text-xs text-slate-500 leading-relaxed">Tender dimenangkan dan dikonversi otomatis menjadi Kontrak Jasa.</p>
                 </div>
 
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative">
+                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-indigo-600/30">2</div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">Pengadaan Barang</h4>
                     <p class="text-xs text-slate-500 leading-relaxed">Barang diterima dari supplier langsung menambah stok persediaan.</p>
                 </div>
 
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative">
+                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-9 h-9 rounded-full bg-purple-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-purple-600/30">3</div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">Penjualan & Stok</h4>
                     <p class="text-xs text-slate-500 leading-relaxed">Transaksi penjualan memvalidasi & mengurangi stok secara akurat.</p>
                 </div>
 
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative">
+                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-emerald-600/30">4</div>
                     <h4 class="font-bold text-slate-900 text-base mb-1">Invoice & Pelunasan</h4>
                     <p class="text-xs text-slate-500 leading-relaxed">Tagihan diterbitkan & pembayaran terupdate otomatis dalam laporan.</p>
@@ -569,11 +568,13 @@
     </section>
 
     <!-- Footer Section -->
-    <footer id="kontak" class="bg-slate-900 text-slate-400 text-xs py-14 border-t border-slate-800">
+    <footer id="kontak" class="bg-slate-900 text-slate-400 text-xs py-14 border-t border-slate-800" data-aos="fade-up">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="md:col-span-2 space-y-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-base">S</div>
+                    <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm">
+                        <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
+                    </div>
                     <span class="font-bold text-xl text-white">PT Signal Panca Utama</span>
                 </div>
                 <p class="max-w-md leading-relaxed text-slate-400">
@@ -599,7 +600,7 @@
                 <h4 class="font-bold text-white text-sm mb-3">Akses Sistem</h4>
                 <p class="mb-3 text-slate-400">Masuk ke dalam portal manajemen internal perusahaan.</p>
                 <a href="{{ route('login') }}" class="landing-action px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl inline-block shadow-md">
-                    Masuk Portal Login &rarr;
+                    Masuk &rarr;
                 </a>
             </div>
         </div>
@@ -609,5 +610,19 @@
         </div>
     </footer>
 
+    <!-- AOS JS CDN Fallback & Init -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 750,
+                    easing: 'ease-out-cubic',
+                    once: true,
+                    offset: 80
+                });
+            }
+        });
+    </script>
 </body>
 </html>

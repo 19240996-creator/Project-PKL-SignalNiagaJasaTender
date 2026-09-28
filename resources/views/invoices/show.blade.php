@@ -22,9 +22,7 @@
         <div class="flex justify-between items-start border-b border-slate-200 pb-6">
             <div>
                 <div class="flex items-center space-x-3 mb-2">
-                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-lg">
-                        S
-                    </div>
+                    <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-9 w-auto object-contain">
                     <div>
                         <span class="font-bold text-xl text-slate-900 block">PT Signal Panca Utama</span>
                         <span class="text-xs text-slate-500 font-medium">Tender &bull; Jasa &bull; Perdagangan</span>
