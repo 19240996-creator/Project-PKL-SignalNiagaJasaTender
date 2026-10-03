@@ -3,626 +3,1148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignalNiagaJasaTender — PT Signal Panca Utama</title>
+    <title>PT Signal Panca Utama — Tender, Jasa & Perdagangan</title>
+    <meta name="description" content="PT Signal Panca Utama — Perusahaan perdagangan, jasa, dan pengadaan tender terpercaya di Karawang, Jawa Barat. Mitra bisnis BUMN dan instansi pemerintah.">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
-    <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            DEFAULT: '#2563EB',
-                            hover: '#1D4ED8',
-                            soft: '#EFF6FF',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- AOS CDN CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     @vite('resources/js/app.js')
     <style>
-        :root {
-            --color-primary: #2563EB;
-            --color-primary-deep: #1D4ED8;
-            --color-primary-soft: #EFF6FF;
-            --color-canvas: #FFFFFF;
-            --color-canvas-soft: #F8FAFC;
-            --color-surface: #FFFFFF;
-            --color-hairline: #E2E8F0;
-            --color-ink: #0F172A;
-            --color-body: #334155;
-            --color-mute: #64748B;
-            --color-subtle: #94A3B8;
-            --color-success: #16A34A;
-            --color-warning: #D97706;
-            --navy: var(--color-ink);
-            --blue: var(--color-primary);
-            --blue-soft: var(--color-primary-soft);
-            --teal: var(--color-success);
-            --amber: var(--color-warning);
-            --ink: var(--color-ink);
-            --muted: var(--color-mute);
-            --surface: var(--color-canvas-soft);
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
         }
 
-        body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--ink); }
-        .bg-white { background-color: #FFFFFF !important; }
-        .bg-slate-50 { background-color: var(--surface) !important; }
-        .bg-blue-600 { background-color: var(--blue) !important; }
-        .hover\:bg-blue-700:hover { background-color: var(--color-primary-deep) !important; }
-        .bg-blue-100, .bg-blue-50 { background-color: var(--blue-soft) !important; }
-        .text-slate-900, .text-slate-800 { color: var(--ink) !important; }
-        .text-slate-700, .text-slate-600, .text-slate-500 { color: var(--muted) !important; }
-        .text-blue-600, .text-blue-700, .text-blue-800 { color: var(--blue) !important; }
-        .text-emerald-600 { color: var(--teal) !important; }
-        .text-purple-600 { color: var(--teal) !important; }
-        .text-amber-600 { color: var(--amber) !important; }
-        .border-blue-200 { border-color: #DBEAFE !important; }
-        .border-slate-200 { border-color: var(--color-hairline) !important; }
-        .shadow-blue-600\/20, .shadow-blue-600\/25 { --tw-shadow-color: rgba(23, 105, 224, 0.22) !important; }
-        .bg-slate-900 { background-color: var(--navy) !important; }
-        .landing-action,
-        .landing-menu-button {
-            transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, filter 150ms ease;
+        :root {
+            --navy: #0c1d36;
+            --navy-light: #162d50;
+            --blue: #1a6de3;
+            --blue-dark: #1457b8;
+            --blue-muted: #3b82c4;
+            --teal: #0f9b6e;
+            --amber: #d4880f;
+            --ink: #111827;
+            --body: #4b5563;
+            --mute: #6b7280;
+            --subtle: #9ca3af;
+            --hairline: #e5e7eb;
+            --surface: #f9fafb;
+            --canvas: #ffffff;
+            --radius: 12px;
+            --radius-lg: 20px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,.07);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,.1);
         }
-        .landing-action:hover {
-            transform: translateY(-2px);
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--canvas);
+            color: var(--ink);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .landing-action:active,
-        .landing-menu-button:active {
-            transform: translateY(0) scale(0.97);
-            filter: brightness(0.9);
+
+        ::selection { background: var(--blue); color: #fff; }
+
+        img { display: block; max-width: 100%; }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
-        .landing-action:focus-visible,
-        .landing-menu-button:focus-visible {
-            outline: 3px solid rgba(23, 105, 224, 0.35);
-            outline-offset: 3px;
+
+        /* ─── HEADER ─────────────────────────────────────── */
+        .site-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(255,255,255,.92);
+            backdrop-filter: blur(16px) saturate(1.6);
+            -webkit-backdrop-filter: blur(16px) saturate(1.6);
+            border-bottom: 1px solid var(--hairline);
+            transition: box-shadow .3s ease;
         }
-        .landing-menu-button { display: none; }
-        .hero-modern {
-            background: #f8fafc !important;
-        }
-        .hero-layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+        .site-header.scrolled { box-shadow: 0 1px 8px rgba(0,0,0,.08); }
+        .header-inner {
+            display: flex;
             align-items: center;
-            gap: clamp(2rem, 6vw, 6rem);
-            min-height: 650px;
-            text-align: left;
+            justify-content: space-between;
+            height: 72px;
         }
-        .hero-copy { max-width: 650px; }
-        .hero-copy h1 { max-width: 620px; margin-left: 0; margin-right: 0; font-size: clamp(2.8rem, 5.3vw, 5.25rem); line-height: .98; letter-spacing: -0.04em; }
-        .hero-copy h1 span { display: block; margin-top: .8rem; color: var(--blue); }
-        .hero-copy > p { max-width: 560px; margin-left: 0; margin-right: 0; color: #526579; font-size: 1.08rem; }
-        .hero-actions { justify-content: flex-start; }
-        .hero-visual {
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { height: 38px; width: auto; }
+        .brand-text { line-height: 1.15; }
+        .brand-name { font-weight: 800; font-size: 18px; color: var(--ink); letter-spacing: -.02em; }
+        .brand-sub { font-size: 10px; font-weight: 700; color: var(--blue); letter-spacing: .06em; text-transform: uppercase; }
+        .nav-links { display: flex; align-items: center; gap: 32px; }
+        .nav-links a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--mute);
+            transition: color .2s;
             position: relative;
-            min-height: 420px;
-            padding: 1.25rem;
-            border: 1px solid #dbe5ef;
-            border-radius: 1.75rem;
-            background: #eaf2ff;
-            box-shadow: 0 28px 70px rgba(16, 42, 67, .12);
         }
-        .hero-visual::before { position: absolute; inset: 2rem -1.5rem -1.5rem 2rem; z-index: 0; content: ''; border-radius: 1.75rem; background: #dcefe9; }
-        .workflow-window { position: relative; z-index: 1; overflow: hidden; border: 1px solid #d9e3ed; border-radius: 1.1rem; background: #fff; box-shadow: 0 18px 40px rgba(16, 42, 67, .1); }
-        .workflow-topbar { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1rem; border-bottom: 1px solid #e7edf3; }
-        .workflow-dots { display: flex; gap: .35rem; }
-        .workflow-dots i { width: .5rem; height: .5rem; border-radius: 50%; background: #cbd6e1; }
-        .workflow-dots i:first-child { background: var(--blue); }
-        .workflow-topbar small { color: #728399; font-size: .68rem; font-weight: 700; }
-        .workflow-content { display: grid; grid-template-columns: 1fr 1.25fr; min-height: 330px; }
-        .workflow-sidebar { padding: 1.2rem .9rem; background: #f5f8fb; border-right: 1px solid #e7edf3; }
-        .workflow-sidebar strong { display: block; margin-bottom: 1rem; color: var(--ink); font-size: .76rem; }
-        .workflow-nav { display: grid; gap: .35rem; }
-        .workflow-nav span { padding: .6rem .65rem; color: #718197; border-radius: .55rem; font-size: .65rem; font-weight: 600; }
-        .workflow-nav span:first-child { color: var(--blue); background: #e4efff; }
-        .workflow-main { padding: 1.25rem; }
-        .workflow-main h3 { margin: 0; color: var(--ink); font-size: 1.1rem; font-weight: 800; }
-        .workflow-main > p { margin: .3rem 0 1.1rem; color: #8290a0; font-size: .68rem; }
-        .workflow-card { display: grid; grid-template-columns: auto 1fr auto; gap: .7rem; align-items: center; padding: .8rem; margin-bottom: .6rem; border: 1px solid #e6edf4; border-radius: .75rem; }
-        .workflow-icon { display: grid; width: 2rem; height: 2rem; place-items: center; color: var(--blue); border-radius: .55rem; background: #e9f1ff; font-size: .75rem; }
-        .workflow-card strong, .workflow-card small { display: block; }
-        .workflow-card strong { color: var(--ink); font-size: .68rem; }
-        .workflow-card small { margin-top: .2rem; color: #8794a4; font-size: .58rem; }
-        .workflow-badge { padding: .3rem .45rem; color: var(--teal); border-radius: 999px; background: #e4f5ef; font-size: .55rem; font-weight: 800; }
-        .hero-note { display: flex; align-items: center; gap: .6rem; margin-top: 1.2rem; color: #738297; font-size: .72rem; font-weight: 600; }
-        .hero-note i { color: var(--teal); }
-        #beranda .grid.max-w-4xl {
-            position: relative;
-            overflow: hidden;
-            border-color: var(--color-hairline);
-            box-shadow: 0 18px 45px rgba(15, 23, 42, .08);
-        }
-        #beranda .grid.max-w-4xl::before {
-            position: absolute;
-            inset: 0 0 auto;
-            height: 3px;
+        .nav-links a:hover { color: var(--ink); }
+        .nav-links a::after {
             content: '';
-            background: linear-gradient(90deg, var(--color-primary), #38BDF8, var(--color-success), var(--color-warning));
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--blue);
+            transition: width .2s ease;
         }
-        #beranda .grid.max-w-4xl > div { position: relative; min-height: 5.5rem; display: grid; align-content: center; }
-        #beranda .grid.max-w-4xl > div + div { border-left: 1px solid var(--color-hairline); }
-        #klien-slider { background: var(--color-canvas) !important; }
-        #klien-slider .animate-marquee > div > div {
-            border-color: var(--color-hairline);
-            box-shadow: 0 8px 22px rgba(15, 23, 42, .045);
-            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        .nav-links a:hover::after { width: 100%; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            padding: 10px 22px;
+            transition: all .2s ease;
+            text-decoration: none;
         }
-        #klien-slider .animate-marquee > div > div:hover { border-color: #BFDBFE; box-shadow: 0 14px 30px rgba(37, 99, 235, .1); transform: translateY(-3px); }
-        #kbli, #alur { background: var(--color-canvas-soft) !important; }
-        #kbli .grid > div {
+        .btn-ghost {
+            background: transparent;
+            color: var(--mute);
+            border: 1px solid var(--hairline);
+        }
+        .btn-ghost:hover { background: var(--surface); color: var(--ink); border-color: #d1d5db; }
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(26,109,227,.25);
+        }
+        .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,109,227,.3); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
+        .btn-white {
+            background: #fff;
+            color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-white:hover { background: var(--surface); transform: translateY(-1px); }
+
+        .mobile-toggle {
+            display: none;
+            background: none; border: none; cursor: pointer;
+            font-size: 22px; color: var(--ink); padding: 8px;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 72px; left: 0; right: 0;
+            background: #fff;
+            border-bottom: 1px solid var(--hairline);
+            padding: 16px 24px;
+            box-shadow: var(--shadow-md);
+        }
+        .mobile-menu.active { display: block; }
+        .mobile-menu a {
+            display: block;
+            padding: 12px 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--body);
+            border-bottom: 1px solid var(--hairline);
+        }
+        .mobile-menu a:last-child { border: none; }
+        .mobile-menu .btn { width: 100%; margin-top: 12px; }
+
+        @media (max-width: 900px) {
+            .nav-links, .header-actions { display: none; }
+            .mobile-toggle { display: block; }
+        }
+
+        /* ─── HERO ─────────────────────────────────────── */
+        .hero {
             position: relative;
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
             overflow: hidden;
-            border-color: var(--color-hairline);
-            border-radius: 14px;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, .035);
-            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+            padding-top: 72px;
         }
-        #kbli .grid > div::after { position: absolute; inset: auto 0 0; height: 3px; content: ''; background: var(--color-primary); transform: scaleX(0); transform-origin: left; transition: transform 180ms ease; }
-        #kbli .grid > div:hover { border-color: #BFDBFE; box-shadow: 0 16px 30px rgba(15, 23, 42, .08); transform: translateY(-4px); }
-        #kbli .grid > div:hover::after { transform: scaleX(1); }
-        #domain { background: var(--color-canvas) !important; }
-        #domain .grid > div {
-            border-color: var(--color-hairline);
-            border-radius: 14px;
-            box-shadow: 0 8px 22px rgba(15, 23, 42, .045);
-            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        .hero-bg {
+            position: absolute;
+            inset: 0;
         }
-        #domain .grid > div:hover { border-color: #BFDBFE; box-shadow: 0 18px 35px rgba(15, 23, 42, .09); transform: translateY(-5px); }
-        #domain .grid > div:nth-child(2):hover { border-color: #93C5FD; }
-        #domain .grid > div:nth-child(3):hover { border-color: #86EFAC; }
-        #domain .grid > div:nth-child(4):hover { border-color: #C4B5FD; }
-        #alur .grid > div {
-            border-color: var(--color-hairline);
-            border-radius: 14px;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, .035);
-            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        .hero-bg img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center 30%;
         }
-        #alur .grid > div:hover { border-color: #BFDBFE; box-shadow: 0 14px 28px rgba(15, 23, 42, .08); transform: translateY(-3px); }
-        @media (max-width: 640px) { #beranda .grid.max-w-4xl > div + div { border-left: 0; border-top: 1px solid var(--color-hairline); } }
-        @media (max-width: 900px) { .hero-layout { grid-template-columns: 1fr; min-height: auto; padding-top: 2rem; } .hero-copy { max-width: 700px; } .hero-visual { max-width: 650px; width: 100%; margin: 0 auto; } }
-        @media (max-width: 640px) { .landing-menu-button { display: block; } .hero-copy h1 { font-size: clamp(2.6rem, 13vw, 4rem); } .hero-copy > p { font-size: .98rem; } .hero-visual { min-height: 350px; padding: .7rem; border-radius: 1.2rem; } .hero-visual::before { inset: 1rem -.5rem -.5rem 1rem; border-radius: 1.2rem; } .workflow-content { grid-template-columns: 1fr; } .workflow-sidebar { display: none; } .workflow-main { padding: 1rem; } }
-        
-        @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(12,29,54,.88) 0%, rgba(22,45,80,.75) 40%, rgba(26,109,227,.45) 100%);
         }
-        .animate-marquee {
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 680px;
+            padding: 80px 0;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.18);
+            backdrop-filter: blur(8px);
+            color: rgba(255,255,255,.9);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .03em;
+            margin-bottom: 28px;
+        }
+        .hero-badge i { color: #5cb5f5; font-size: 10px; }
+        .hero h1 {
+            font-size: clamp(2.6rem, 5vw, 4rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.08;
+            letter-spacing: -.035em;
+            margin-bottom: 20px;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: #5cb5f5;
+        }
+        .hero-desc {
+            font-size: 17px;
+            line-height: 1.7;
+            color: rgba(255,255,255,.75);
+            max-width: 540px;
+            margin-bottom: 36px;
+        }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 40px; }
+        .hero-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 36px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,.12);
+        }
+        .hero-stat { text-align: left; }
+        .hero-stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.02em;
+        }
+        .hero-stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,.5);
+            margin-top: 2px;
+        }
+
+        @media (max-width: 640px) {
+            .hero { min-height: 85vh; }
+            .hero-content { padding: 48px 0; }
+            .hero-stats { gap: 24px; }
+        }
+
+        /* ─── SECTION SHARED ─────────────────────────────── */
+        .section { padding: 100px 0; }
+        .section-alt { background: var(--surface); }
+        .section-dark { background: var(--navy); color: #fff; }
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 12px;
+        }
+        .section-dark .section-label { color: #5cb5f5; }
+        .section-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -.03em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            font-size: 16px;
+            color: var(--mute);
+            max-width: 560px;
+            line-height: 1.6;
+        }
+        .section-dark .section-subtitle { color: rgba(255,255,255,.55); }
+        .section-header { margin-bottom: 56px; }
+        .section-header-center { text-align: center; }
+        .section-header-center .section-subtitle { margin: 0 auto; }
+
+        /* ─── CLIENT MARQUEE ─────────────────────────────── */
+        .clients-section {
+            padding: 56px 0;
+            border-bottom: 1px solid var(--hairline);
+            overflow: hidden;
+        }
+        .clients-label {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--subtle);
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+        .marquee-track {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        .marquee-track::before,
+        .marquee-track::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 80px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .marquee-track::before { left: 0; background: linear-gradient(90deg, #fff, transparent); }
+        .marquee-track::after { right: 0; background: linear-gradient(270deg, #fff, transparent); }
+        .marquee-strip {
             display: flex;
             width: max-content;
-            animation: marquee 30s linear infinite;
+            animation: scroll 35s linear infinite;
+            gap: 20px;
+            padding: 4px 0;
         }
-        .animate-marquee:hover {
-            animation-play-state: paused;
+        .marquee-strip:hover { animation-play-state: paused; }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .client-card {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 24px;
+            background: #fff;
+            border: 1px solid var(--hairline);
+            border-radius: var(--radius);
+            min-width: 230px;
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+        }
+        .client-card:hover {
+            border-color: #bfdbfe;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .client-badge {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 13px;
+            letter-spacing: .04em;
+            color: #fff;
+        }
+        .client-card img.client-logo {
+            height: 36px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+        .client-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.3;
+        }
+
+        /* ─── ZIGZAG FEATURE BLOCKS ─────────────────────── */
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+            padding: 80px 0;
+        }
+        .feature-block + .feature-block {
+            border-top: 1px solid var(--hairline);
+        }
+        .feature-block:nth-child(even) .feature-image { order: -1; }
+        .feature-image {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+        .feature-image img {
+            width: 100%;
+            height: 360px;
+            object-fit: cover;
+            display: block;
+        }
+        .feature-image-badge {
+            position: absolute;
+            top: 16px; left: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .03em;
+            backdrop-filter: blur(8px);
+        }
+        .feature-text .section-label { margin-bottom: 8px; }
+        .feature-text h3 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -.025em;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+        .feature-text p {
+            font-size: 15px;
+            color: var(--body);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 14px;
+            color: var(--body);
+            font-weight: 500;
+        }
+        .feature-list li i {
+            flex-shrink: 0;
+            margin-top: 3px;
+            font-size: 14px;
+        }
+        .check-blue { color: var(--blue); }
+        .check-teal { color: var(--teal); }
+        .check-amber { color: var(--amber); }
+
+        @media (max-width: 800px) {
+            .feature-block {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                padding: 48px 0;
+            }
+            .feature-block:nth-child(even) .feature-image { order: 0; }
+            .feature-image img { height: 240px; }
+        }
+
+        /* ─── KBLI CARDS ─────────────────────────────────── */
+        .kbli-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+        .kbli-card {
+            padding: 24px 20px;
+            background: var(--canvas);
+            border: 1px solid var(--hairline);
+            border-radius: var(--radius);
+            transition: all .25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .kbli-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--blue);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .25s ease;
+        }
+        .kbli-card:hover { border-color: #93c5fd; box-shadow: var(--shadow-md); transform: translateY(-3px); }
+        .kbli-card:hover::after { transform: scaleX(1); }
+        .kbli-code {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 800;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: .04em;
+            margin-bottom: 12px;
+        }
+        .kbli-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .kbli-card p {
+            font-size: 12px;
+            color: var(--mute);
+            line-height: 1.5;
+        }
+        @media (max-width: 1000px) { .kbli-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 640px) { .kbli-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ─── PROCESS FLOW ────────────────────────────────── */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            position: relative;
+        }
+        .process-grid::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 14%;
+            right: 14%;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 8px, transparent 8px 16px);
+            z-index: 1;
+        }
+        .process-step {
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+        .process-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; height: 56px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .process-step:nth-child(1) .process-num { background: rgba(26,109,227,.2); color: #5cb5f5; }
+        .process-step:nth-child(2) .process-num { background: rgba(99,102,241,.2); color: #a5b4fc; }
+        .process-step:nth-child(3) .process-num { background: rgba(139,92,246,.2); color: #c4b5fd; }
+        .process-step:nth-child(4) .process-num { background: rgba(15,155,110,.2); color: #6ee7b7; }
+        .process-step h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .process-step p {
+            font-size: 13px;
+            color: rgba(255,255,255,.5);
+            line-height: 1.6;
+        }
+        @media (max-width: 800px) {
+            .process-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+            .process-grid::before { display: none; }
+        }
+        @media (max-width: 500px) {
+            .process-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ─── CTA SECTION ─────────────────────────────────── */
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+        }
+        .cta-inner {
+            text-align: center;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+        .cta-inner h2 {
+            font-size: clamp(1.8rem, 3vw, 2.4rem);
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -.03em;
+            margin-bottom: 16px;
+        }
+        .cta-inner p {
+            font-size: 16px;
+            color: rgba(255,255,255,.55);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .cta-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+        /* ─── FOOTER ──────────────────────────────────────── */
+        .site-footer {
+            background: var(--navy);
+            color: rgba(255,255,255,.5);
+            padding: 64px 0 0;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 48px;
+        }
+        .footer-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .footer-brand img { height: 36px; width: auto; border-radius: 8px; background: #fff; padding: 3px; }
+        .footer-brand span { font-weight: 800; font-size: 18px; color: #fff; }
+        .footer-desc { font-size: 13px; line-height: 1.7; margin-bottom: 20px; max-width: 380px; }
+        .footer-contact { font-size: 12px; line-height: 1.8; }
+        .footer-contact i { color: var(--blue-muted); margin-right: 6px; width: 14px; text-align: center; }
+        .footer-heading {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .footer-links { list-style: none; padding: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,.45);
+            transition: color .2s;
+        }
+        .footer-links a:hover { color: #5cb5f5; }
+        .footer-bottom {
+            margin-top: 48px;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255,255,255,.08);
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,.3);
+        }
+
+        @media (max-width: 800px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+        }
+
+        /* ─── PAGE LOAD ENTRANCE ANIMATIONS ───────────────── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(36px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(1.08); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header entrance */
+        .anim-header {
+            animation: fadeDown .8s cubic-bezier(.22, 1, .36, 1) .1s both;
+        }
+
+        /* Hero background Ken Burns */
+        .anim-hero-bg {
+            animation: scaleIn 1.6s cubic-bezier(.22, 1, .36, 1) 0s both;
+        }
+
+        /* Hero staggered content */
+        .anim-hero-1 { animation: fadeUp 1s cubic-bezier(.22, 1, .36, 1) .3s both; }
+        .anim-hero-2 { animation: fadeUp 1s cubic-bezier(.22, 1, .36, 1) .5s both; }
+        .anim-hero-3 { animation: fadeUp 1s cubic-bezier(.22, 1, .36, 1) .7s both; }
+        .anim-hero-4 { animation: fadeUp 1s cubic-bezier(.22, 1, .36, 1) .9s both; }
+
+        /* Client section entrance */
+        .anim-clients {
+            animation: slideUp .9s cubic-bezier(.22, 1, .36, 1) 1.1s both;
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .anim-header, .anim-hero-bg, .anim-hero-1, .anim-hero-2,
+            .anim-hero-3, .anim-hero-4, .anim-clients {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .reveal {
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* ─── SCROLL REVEAL ANIMATION ─────────────────────── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity .9s cubic-bezier(.22, 1, .36, 1), transform .9s cubic-bezier(.22, 1, .36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: .12s; }
+        .reveal-delay-2 { transition-delay: .24s; }
+        .reveal-delay-3 { transition-delay: .36s; }
+        .reveal-delay-4 { transition-delay: .48s; }
+
+        /* Smooth transitions for interactive elements */
+        .kbli-card, .client-card, .feature-image, .process-step {
+            will-change: transform;
+        }
+
+        /* Parallax-like subtle float on images */
+        .feature-image img {
+            transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+        }
+        .feature-block:hover .feature-image img {
+            transform: scale(1.03);
         }
     </style>
 </head>
-<body class="bg-white antialiased selection:bg-blue-600 selection:text-white" x-data="{ mobileMenu: false }" data-landing-page>
+<body>
 
-    <!-- Header Navigation -->
-    <header class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 transition-all shadow-sm" data-landing-header>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-20 py-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-            
-            <!-- Brand Logo -->
-            <a href="#" class="flex items-center space-x-3 group">
-                <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-10 w-auto object-contain group-hover:scale-105 transition-transform">
-                <div>
-                    <span class="font-bold text-xl tracking-tight text-slate-900 block leading-none">SignalNiaga</span>
-                    <span class="text-[10px] text-blue-600 font-bold tracking-wider uppercase">PT Signal Panca Utama</span>
+    <!-- ═══ HEADER ═══ -->
+    <header class="site-header anim-header" id="siteHeader">
+        <div class="container header-inner">
+            <a href="#" class="brand">
+                <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama">
+                <div class="brand-text">
+                    <div class="brand-name">Signal Panca Utama</div>
+                    <div class="brand-sub">Tender · Jasa · Perdagangan</div>
                 </div>
             </a>
 
-            <!-- Desktop Nav Links -->
-            <nav class="order-last basis-full md:order-none md:basis-auto flex items-center gap-6 overflow-x-auto whitespace-nowrap text-sm font-semibold text-slate-600 pb-1 md:pb-0">
-                <a href="#beranda" class="hover:text-blue-600 transition-colors">Beranda</a>
-                <a href="#klien-slider" class="hover:text-blue-600 transition-colors">Klien Terpercaya</a>
-                <a href="#kbli" class="hover:text-blue-600 transition-colors">Ruang Lingkup KBLI</a>
-                <a href="#domain" class="hover:text-blue-600 transition-colors">Domain Bisnis</a>
-                <a href="#alur" class="hover:text-blue-600 transition-colors">Alur Integrasi</a>
-                <a href="#kontak" class="hover:text-blue-600 transition-colors">Kontak</a>
+            <nav class="nav-links">
+                <a href="#beranda">Beranda</a>
+                <a href="#layanan">Layanan</a>
+                <a href="#kbli">Kualifikasi</a>
+                <a href="#alur">Alur Bisnis</a>
+                <a href="#kontak">Kontak</a>
             </nav>
 
-            <!-- Action Buttons -->
-            <div class="hidden md:flex items-center space-x-3">
-                <a href="{{ route('login') }}" class="landing-action px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-sm transition-all">
-                    Masuk
-                </a>
-                <a href="{{ route('login') }}" class="landing-action px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-all shadow-md shadow-blue-600/20 flex items-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Portal Login
+            <div class="header-actions">
+                <a href="{{ route('login') }}" class="btn btn-ghost">Masuk</a>
+                <a href="{{ route('login') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Portal Sistem
                 </a>
             </div>
 
-            <!-- Mobile Hamburger Button -->
-            <button @click="mobileMenu = !mobileMenu" class="landing-menu-button text-slate-700 hover:text-blue-600 p-2">
-                <i class="fa-solid text-xl" :class="mobileMenu ? 'fa-xmark' : 'fa-bars'"></i>
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                <i class="fa-solid fa-bars"></i>
             </button>
         </div>
 
-        <!-- Mobile Menu Dropdown -->
-        <div x-show="mobileMenu" class="md:hidden bg-white border-b border-slate-200 px-6 py-4 space-y-3" x-cloak>
-            <a href="#beranda" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Beranda</a>
-            <a href="#klien-slider" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Klien Terpercaya</a>
-            <a href="#kbli" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Ruang Lingkup KBLI</a>
-            <a href="#domain" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Domain Bisnis</a>
-            <a href="#alur" @click="mobileMenu = false" class="block text-sm font-semibold text-slate-700 hover:text-blue-600">Alur Integrasi</a>
-            <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <a href="{{ route('login') }}" class="landing-action w-full py-2.5 text-center bg-blue-600 text-white font-semibold rounded-xl block text-sm shadow">Masuk</a>
-            </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#beranda" class="mobile-link">Beranda</a>
+            <a href="#layanan" class="mobile-link">Layanan</a>
+            <a href="#kbli" class="mobile-link">Kualifikasi</a>
+            <a href="#alur" class="mobile-link">Alur Bisnis</a>
+            <a href="#kontak" class="mobile-link">Kontak</a>
+            <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Masuk ke Portal</a>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="beranda" class="hero-modern relative pt-32 pb-20 md:pt-40 md:pb-24 overflow-hidden">
-        <div class="hero-layout max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="hero-copy" data-aos="fade-up" data-aos-duration="800">
-                <h1 class="font-extrabold tracking-tight text-slate-900">
-                    Satu ruang kerja untuk bisnis yang terus bergerak
-                    <span>Tender, jasa, dan perdagangan.</span>
-                </h1>
-
-            <!-- Subtitle -->
-            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal" data-aos="fade-up" data-aos-delay="100">
-                Platform manajemen internal perusahaan untuk menghubungkan alur pengadaan tender instansi, pelaksanaan pekerjaan jasa, stok persediaan barang, hingga invoice dan laporan bisnis.
-            </p>
-
-            <!-- Action Buttons -->
-            <div class="hero-actions flex flex-col sm:flex-row items-center justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
-                <a href="{{ route('login') }}" class="landing-action w-full sm:w-auto px-8 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i> Masuk 
-                </a>
-                <a href="#domain" class="landing-action w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i> Jelajahi Modul Sistem
-                </a>
-            </div>
-
-                <div class="hero-note" data-aos="fade-up" data-aos-delay="250"><i class="fa-solid fa-circle-check"></i><span>Data lebih rapi. Keputusan lebih cepat. Tim lebih selaras.</span></div>
-            </div>
-
-            <div class="hero-visual" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150" aria-label="Preview alur kerja SignalNiaga">
-                <div class="workflow-window">
-                    <div class="workflow-topbar"><div class="workflow-dots"><i></i><i></i><i></i></div><small>SignalNiaga Workspace</small></div>
-                    <div class="workflow-content">
-                        <aside class="workflow-sidebar"><strong>Workspace</strong><div class="workflow-nav"><span>Ringkasan</span><span>Pipeline Tender</span><span>Kontrak & Jasa</span><span>Persediaan</span><span>Keuangan</span></div></aside>
-                        <div class="workflow-main">
-                            <h3>Ringkasan operasional</h3>
-                            <p>Senin, 26 September 2026</p>
-                            <div class="workflow-card"><div class="workflow-icon"><i class="fa-solid fa-file-signature"></i></div><div><strong>Pipeline tender</strong><small>12 tender membutuhkan perhatian</small></div><span class="workflow-badge">Aktif</span></div>
-                            <div class="workflow-card"><div class="workflow-icon"><i class="fa-solid fa-briefcase"></i></div><div><strong>Pekerjaan jasa</strong><small>8 kontrak sedang berjalan</small></div><span class="workflow-badge">On track</span></div>
-                            <div class="workflow-card"><div class="workflow-icon"><i class="fa-solid fa-chart-line"></i></div><div><strong>Arus keuangan</strong><small>Invoice dan pembayaran terpantau</small></div><span class="workflow-badge">Terpantau</span></div>
-                        </div>
+    <!-- ═══ HERO ═══ -->
+    <section class="hero" id="beranda">
+        <div class="hero-bg anim-hero-bg">
+            <img src="{{ asset('images/hero-corporate.jpg') }}" alt="PT Signal Panca Utama Office">
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="anim-hero-1">Mitra Terpercaya untuk <em>Tender, Jasa,</em> dan <em>Perdagangan</em></h1>
+                <p class="hero-desc anim-hero-2">
+                    Mengelola pengadaan tender instansi, pelaksanaan pekerjaan jasa, serta perdagangan barang sejak 2015. Sistem terintegrasi untuk transparansi dan efisiensi bisnis.
+                </p>
+                <div class="hero-actions anim-hero-3">
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk Portal
+                    </a>
+                    <a href="#layanan" class="btn btn-white btn-lg">
+                        Pelajari Layanan Kami
+                    </a>
+                </div>
+                <div class="hero-stats anim-hero-4">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">50+</div>
+                        <div class="hero-stat-label">Tender Dimenangkan</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">100+</div>
+                        <div class="hero-stat-label">Mitra Kerjasama</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">Rp 25M+</div>
+                        <div class="hero-stat-label">Nilai Kontrak Terkelola</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">99.8%</div>
+                        <div class="hero-stat-label">Ketepatan Waktu</div>
                     </div>
                 </div>
             </div>
-
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 p-6 rounded-2xl bg-white border border-slate-200 shadow-xl shadow-slate-200/50 col-span-full">
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="0">
-                    <div class="text-3xl font-extrabold text-blue-600">50+</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-1">Tender Dimenangkan</div>
-                </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="100">
-                    <div class="text-3xl font-extrabold text-emerald-600">100+</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-1">Mitra Kerjasama</div>
-                </div>
-                <div class="p-3 border-r border-slate-100 last:border-r-0" data-aos="fade-up" data-aos-delay="200">
-                    <div class="text-3xl font-extrabold text-purple-600">Rp 25M+</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-1">Nilai Kontrak Terkelola</div>
-                </div>
-                <div class="p-3" data-aos="fade-up" data-aos-delay="300">
-                    <div class="text-3xl font-extrabold text-amber-600">99.8%</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-1">Ketepatan Waktu</div>
-                </div>
-            </div>
-
         </div>
     </section>
 
-    <!-- Client Logo Marquee Slider Section (Persis Gaya pengadaan.com) -->
-    <section id="klien-slider" class="py-16 bg-white border-y border-slate-200 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10" data-aos="fade-up">
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                PT Signal Panca Utama telah dipercaya oleh berbagai klien dari
-            </h2>
-        </div>
-
-        <!-- Infinite Auto-Sliding Marquee Track -->
-        <div class="relative w-full overflow-hidden flex" data-aos="fade-up" data-aos-delay="150">
-            <!-- Left & Right Fade Shadows -->
-            <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-            <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-
-            <div class="flex space-x-6 animate-marquee whitespace-nowrap py-4">
+    <!-- ═══ CLIENT MARQUEE ═══ -->
+    <section class="clients-section anim-clients" id="klien">
+        <div class="clients-label">Dipercaya oleh berbagai instansi & perusahaan</div>
+        <div class="marquee-track">
+            <div class="marquee-strip">
                 @if(isset($partnerLogos) && count($partnerLogos) > 0)
-                    <!-- Set 1 of Client Logos -->
-                    <div class="flex items-center space-x-6 shrink-0">
-                        @foreach($partnerLogos as $logo)
-                            <div class="px-7 py-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-lg transition-all flex items-center gap-4 min-w-[240px] md:min-w-[270px] h-20 justify-center">
-                                @if($logo->logo_path)
-                                    <img src="{{ asset('storage/' . $logo->logo_path) }}" alt="{{ $logo->name }}" class="h-11 md:h-12 max-h-12 w-auto max-w-[160px] object-contain shrink-0">
-                                @else
-                                    @if(str_starts_with($logo->badge_color ?? '', '#'))
-                                        <div class="px-3.5 py-1.5 rounded-xl text-white font-black text-sm md:text-base tracking-wider shadow-xs shrink-0" style="background-color: {{ $logo->badge_color }}">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @elseif(str_starts_with($logo->badge_color ?? '', 'text-'))
-                                        <div class="px-3.5 py-1.5 rounded-xl bg-slate-100 font-black text-sm md:text-base tracking-wider shadow-xs shrink-0 {{ $logo->badge_color }}">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @else
-                                        <div class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black text-sm md:text-base tracking-wider shadow-xs shrink-0">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @endif
-                                @endif
-                                <span class="text-sm font-bold text-slate-800 tracking-tight leading-snug">{{ $logo->name }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <!-- Set 2 of Client Logos (Duplicate for Seamless Infinite Marquee Loop) -->
-                    <div class="flex items-center space-x-6 shrink-0">
-                        @foreach($partnerLogos as $logo)
-                            <div class="px-7 py-5 bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-lg transition-all flex items-center gap-4 min-w-[240px] md:min-w-[270px] h-20 justify-center">
-                                @if($logo->logo_path)
-                                    <img src="{{ asset('storage/' . $logo->logo_path) }}" alt="{{ $logo->name }}" class="h-11 md:h-12 max-h-12 w-auto max-w-[160px] object-contain shrink-0">
-                                @else
-                                    @if(str_starts_with($logo->badge_color ?? '', '#'))
-                                        <div class="px-3.5 py-1.5 rounded-xl text-white font-black text-sm md:text-base tracking-wider shadow-xs shrink-0" style="background-color: {{ $logo->badge_color }}">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @elseif(str_starts_with($logo->badge_color ?? '', 'text-'))
-                                        <div class="px-3.5 py-1.5 rounded-xl bg-slate-100 font-black text-sm md:text-base tracking-wider shadow-xs shrink-0 {{ $logo->badge_color }}">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @else
-                                        <div class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black text-sm md:text-base tracking-wider shadow-xs shrink-0">
-                                            {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 4)) }}
-                                        </div>
-                                    @endif
-                                @endif
-                                <span class="text-sm font-bold text-slate-800 tracking-tight leading-snug">{{ $logo->name }}</span>
-                            </div>
-                        @endforeach
-                    </div>
+                    {{-- Set 1 --}}
+                    @foreach($partnerLogos as $logo)
+                        <div class="client-card">
+                            @if($logo->logo_path)
+                                <img src="{{ asset('storage/' . $logo->logo_path) }}" alt="{{ $logo->name }}" class="client-logo">
+                            @else
+                                <div class="client-badge" style="background-color: {{ $logo->badge_color && str_starts_with($logo->badge_color, '#') ? $logo->badge_color : '#1a6de3' }}">
+                                    {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 3)) }}
+                                </div>
+                            @endif
+                            <span class="client-name">{{ $logo->name }}</span>
+                        </div>
+                    @endforeach
+                    {{-- Set 2 (duplicate for infinite loop) --}}
+                    @foreach($partnerLogos as $logo)
+                        <div class="client-card">
+                            @if($logo->logo_path)
+                                <img src="{{ asset('storage/' . $logo->logo_path) }}" alt="{{ $logo->name }}" class="client-logo">
+                            @else
+                                <div class="client-badge" style="background-color: {{ $logo->badge_color && str_starts_with($logo->badge_color, '#') ? $logo->badge_color : '#1a6de3' }}">
+                                    {{ $logo->badge_text ?? strtoupper(substr($logo->name, 0, 3)) }}
+                                </div>
+                            @endif
+                            <span class="client-name">{{ $logo->name }}</span>
+                        </div>
+                    @endforeach
                 @else
-                    <!-- Fallback Set 1 -->
-                    <div class="flex items-center space-x-6 shrink-0">
-                        <div class="px-7 py-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 min-w-[240px] h-20 justify-center">
-                            <span class="font-black text-red-600 text-3xl tracking-tighter">HK</span>
-                            <span class="text-sm font-bold text-slate-800">Hutama Karya</span>
-                        </div>
-                        <div class="px-7 py-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 min-w-[240px] h-20 justify-center">
-                            <div class="w-9 h-9 rounded-full bg-amber-500 text-white font-black text-sm flex items-center justify-center">A</div>
-                            <span class="text-sm font-bold text-slate-800">Brantas Abipraya</span>
-                        </div>
-                    </div>
+                    <div class="client-card"><div class="client-badge" style="background:#dc2626">HK</div><span class="client-name">Hutama Karya</span></div>
+                    <div class="client-card"><div class="client-badge" style="background:#f59e0b">BA</div><span class="client-name">Brantas Abipraya</span></div>
+                    <div class="client-card"><div class="client-badge" style="background:#dc2626">HK</div><span class="client-name">Hutama Karya</span></div>
+                    <div class="client-card"><div class="client-badge" style="background:#f59e0b">BA</div><span class="client-name">Brantas Abipraya</span></div>
                 @endif
             </div>
         </div>
     </section>
 
-    <!-- Ruang Lingkup KBLI Section -->
-    <section id="kbli" class="py-20 bg-slate-50 border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14" data-aos="fade-up">
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Kualifikasi Resmi</span>
-                <h2 class="text-3xl font-bold text-slate-900">Ruang Lingkup KBLI PT Signal Panca Utama</h2>
-                <p class="text-sm text-slate-600 mt-2">Disesuaikan dengan Klasifikasi Baku Lapangan Usaha Indonesia resmi perusahaan.</p>
+    <!-- ═══ LAYANAN / DOMAIN BISNIS (Zigzag with Photos) ═══ -->
+    <section class="section" id="layanan">
+        <div class="container">
+            <div class="section-header section-header-center reveal">
+                <div class="section-label">Tiga Pilar Bisnis</div>
+                <h2 class="section-title">Layanan yang Kami Kelola</h2>
+                <p class="section-subtitle">Menghubungkan seluruh proses dari pencarian tender instansi, pelaksanaan pekerjaan jasa, hingga pengadaan dan penjualan barang.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="0">
-                    <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46100</span>
-                    <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perdagangan Balas Jasa (Fee)</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar atas dasar balas jasa atau kontrak kerja.</p>
+            <!-- Tender -->
+            <div class="feature-block reveal">
+                <div class="feature-text">
+                    <div class="section-label">Domain 01</div>
+                    <h3>Manajemen Tender</h3>
+                    <p>Pencarian tender instansi LPSE/BUMN, penyiapan dokumen penawaran, tracking pipeline dari tahap ditemukan hingga evaluasi dan pengumuman pemenang. Tender yang dimenangkan langsung terkonversi menjadi kontrak kerja.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-circle-check check-blue"></i> Monitoring pipeline tender aktif secara real-time</li>
+                        <li><i class="fa-solid fa-circle-check check-blue"></i> Peringatan otomatis menjelang deadline</li>
+                        <li><i class="fa-solid fa-circle-check check-blue"></i> Konversi tender menang menjadi kontrak jasa</li>
+                        <li><i class="fa-solid fa-circle-check check-blue"></i> Arsip dokumen kualifikasi terpusat</li>
+                    </ul>
                 </div>
-
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="100">
-                    <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46422</span>
-                    <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Percetakan & Penerbitan</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar barang percetakan berbagai bentuk.</p>
+                <div class="feature-image">
+                    <img src="{{ asset('images/section-tender.jpg') }}" alt="Manajemen Tender PT Signal Panca Utama">
+                    <div class="feature-image-badge" style="background:rgba(26,109,227,.85);color:#fff;">
+                        <i class="fa-solid fa-trophy"></i> Tender
+                    </div>
                 </div>
+            </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="200">
-                    <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46499</span>
-                    <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perlengkapan Rumah Tangga</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar perlengkapan & perabotan kantor/rumah.</p>
+            <!-- Jasa -->
+            <div class="feature-block reveal">
+                <div class="feature-text">
+                    <div class="section-label">Domain 02</div>
+                    <h3>Manajemen Jasa</h3>
+                    <p>Database klien dan mitra kerja, pembuatan quotation & penawaran harga, kontrak kerja dengan pencatatan fee komisi, serta tracking progres pelaksanaan pekerjaan hingga penerbitan tagihan termin.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-circle-check check-teal"></i> Pengelolaan kontrak dan fee komisi (%)</li>
+                        <li><i class="fa-solid fa-circle-check check-teal"></i> Tracking progres pelaksanaan pekerjaan</li>
+                        <li><i class="fa-solid fa-circle-check check-teal"></i> Penerbitan invoice dan tagihan jasa</li>
+                        <li><i class="fa-solid fa-circle-check check-teal"></i> Riwayat pembayaran per kontrak</li>
+                    </ul>
                 </div>
-
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="300">
-                    <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46511</span>
-                    <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Komputer & IT Equipment</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar komputer, laptop, server, & perangkat IT.</p>
+                <div class="feature-image">
+                    <img src="{{ asset('images/section-finance.jpg') }}" alt="Manajemen Jasa dan Keuangan">
+                    <div class="feature-image-badge" style="background:rgba(15,155,110,.85);color:#fff;">
+                        <i class="fa-solid fa-briefcase"></i> Jasa
+                    </div>
                 </div>
+            </div>
 
-                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-blue-500 transition group" data-aos="fade-up" data-aos-delay="400">
-                    <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs">KBLI 46900</span>
-                    <h3 class="font-bold text-slate-900 text-sm mt-3 mb-1 group-hover:text-blue-600 transition">Perdagangan Macam Barang</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">Perdagangan besar berbagai macam barang pengadaan umum.</p>
+            <!-- Perdagangan -->
+            <div class="feature-block reveal">
+                <div class="feature-text">
+                    <div class="section-label">Domain 03</div>
+                    <h3>Perdagangan & Pengadaan</h3>
+                    <p>Katalog produk lengkap dengan SKU, pengelolaan supplier mitra, pengadaan stok barang dengan tracking penerimaan, transaksi penjualan dengan validasi kecukupan stok, dan penerbitan invoice otomatis.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-circle-check check-amber"></i> Pengadaan barang otomatis ke stok gudang</li>
+                        <li><i class="fa-solid fa-circle-check check-amber"></i> Validasi kecukupan stok saat penjualan</li>
+                        <li><i class="fa-solid fa-circle-check check-amber"></i> Indikator peringatan stok minimum</li>
+                        <li><i class="fa-solid fa-circle-check check-amber"></i> Rekap mutasi stok masuk & keluar</li>
+                    </ul>
+                </div>
+                <div class="feature-image">
+                    <img src="{{ asset('images/section-warehouse.jpg') }}" alt="Gudang dan Pengadaan Barang">
+                    <div class="feature-image-badge" style="background:rgba(212,136,15,.85);color:#fff;">
+                        <i class="fa-solid fa-cart-shopping"></i> Perdagangan
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Tiga Domain Utama Section -->
-    <section id="domain" class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Tiga Pillar Bisnis</span>
-                <h2 class="text-3xl font-bold text-slate-900">Pengelolaan Bisnis Terpusat</h2>
-                <p class="text-sm text-slate-600 mt-2">Menghubungkan seluruh proses dari pencarian tender hingga pelunasan pembayaran.</p>
+    <!-- ═══ RUANG LINGKUP KBLI ═══ -->
+    <section class="section section-alt" id="kbli">
+        <div class="container">
+            <div class="section-header section-header-center reveal">
+                <div class="section-label">Kualifikasi Resmi</div>
+                <h2 class="section-title">Ruang Lingkup KBLI</h2>
+                <p class="section-subtitle">Klasifikasi Baku Lapangan Usaha Indonesia resmi yang dimiliki PT Signal Panca Utama.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
-                <!-- Domain 1: Tender -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="0">
-                    <div>
-                        <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-2xl mb-6">
-                            <i class="fa-solid fa-trophy"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">1. Manajemen Tender</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                            Pencarian tender instansi LPSE/BUMN, penyiapan dokumen penawaran, tracking pipeline (Ditemukan &rarr; Evaluasi &rarr; Menang/Kalah), dan pemicu kontrak.
-                        </p>
-                        <ul class="space-y-2.5 text-xs text-slate-700 font-medium">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-blue-600"></i> Monitoring pipeline tender aktif</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-blue-600"></i> Peringatan reminder deadline</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-blue-600"></i> Konversi otomatis tender menang ke kontrak</li>
-                        </ul>
-                    </div>
+            <div class="kbli-grid">
+                <div class="kbli-card reveal">
+                    <span class="kbli-code">46100</span>
+                    <h4>Perdagangan Balas Jasa</h4>
+                    <p>Perdagangan besar atas dasar balas jasa (fee) atau kontrak.</p>
                 </div>
-
-                <!-- Domain 2: Jasa -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="150">
-                    <div>
-                        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-2xl mb-6">
-                            <i class="fa-solid fa-briefcase"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">2. Manajemen Jasa</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                            Database Klien, pembuatan penawaran, kontrak kerja jasa, pencatatan persentase komisi fee %, tracking progress pekerjaan (%), dan penerbitan tagihan termin.
-                        </p>
-                        <ul class="space-y-2.5 text-xs text-slate-700 font-medium">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> Pengelolaan kontrak & fee komisi</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> Tracking progress (%) pelaksanaan job</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> Penerbitan invoice tagihan jasa</li>
-                        </ul>
-                    </div>
+                <div class="kbli-card reveal reveal-delay-1">
+                    <span class="kbli-code">46422</span>
+                    <h4>Percetakan & Penerbitan</h4>
+                    <p>Perdagangan besar barang percetakan dalam berbagai bentuk.</p>
                 </div>
-
-                <!-- Domain 3: Perdagangan -->
-                <div class="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-purple-500 transition-all flex flex-col justify-between shadow-sm hover:shadow-md" data-aos="fade-up" data-aos-delay="300">
-                    <div>
-                        <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-2xl mb-6">
-                            <i class="fa-solid fa-cart-shopping"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">3. Perdagangan & Pengadaan</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed mb-6">
-                            Katalog produk & SKU, supplier mitra, pengadaan stok barang (`StockMovement IN`), transaksi penjualan (`StockMovement OUT`), dan otomatisasi invoice.
-                        </p>
-                        <ul class="space-y-2.5 text-xs text-slate-700 font-medium">
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-600"></i> Pengadaan barang otomatis +Stok</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-600"></i> Validasi kecukupan stok saat penjualan</li>
-                            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-purple-600"></i> Indikator stok minimum warning</li>
-                        </ul>
-                    </div>
+                <div class="kbli-card reveal reveal-delay-2">
+                    <span class="kbli-code">46499</span>
+                    <h4>Perlengkapan Rumah Tangga</h4>
+                    <p>Perdagangan besar perlengkapan kantor dan rumah tangga.</p>
                 </div>
-
+                <div class="kbli-card reveal reveal-delay-3">
+                    <span class="kbli-code">46511</span>
+                    <h4>Komputer & IT Equipment</h4>
+                    <p>Perdagangan besar komputer, server, dan perangkat IT.</p>
+                </div>
+                <div class="kbli-card reveal reveal-delay-4">
+                    <span class="kbli-code">46900</span>
+                    <h4>Berbagai Macam Barang</h4>
+                    <p>Perdagangan besar berbagai macam barang pengadaan umum.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Alur Integrasi Flowchart Section -->
-    <section id="alur" class="py-20 bg-slate-50 border-t border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-14" data-aos="fade-up">
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Proses Bisnis</span>
-                <h2 class="text-3xl font-bold text-slate-900">Alur Bisnis Terintegrasi End-to-End</h2>
-                <p class="text-sm text-slate-600 mt-2">Seluruh transaksi terhubung untuk transparansi & auditabilitas data.</p>
+    <!-- ═══ ALUR BISNIS ═══ -->
+    <section class="section section-dark" id="alur">
+        <div class="container">
+            <div class="section-header section-header-center reveal">
+                <div class="section-label">Proses Terintegrasi</div>
+                <h2 class="section-title">Alur Bisnis End-to-End</h2>
+                <p class="section-subtitle">Seluruh transaksi terhubung untuk transparansi data dan auditabilitas penuh.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-                
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="0">
-                    <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-600/30">1</div>
-                    <h4 class="font-bold text-slate-900 text-base mb-1">Tender Menang</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Tender dimenangkan dan dikonversi otomatis menjadi Kontrak Jasa.</p>
+            <div class="process-grid">
+                <div class="process-step reveal">
+                    <div class="process-num">1</div>
+                    <h4>Tender Menang</h4>
+                    <p>Tender dimenangkan dan dikonversi otomatis menjadi kontrak kerja jasa.</p>
                 </div>
-
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-indigo-600/30">2</div>
-                    <h4 class="font-bold text-slate-900 text-base mb-1">Pengadaan Barang</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Barang diterima dari supplier langsung menambah stok persediaan.</p>
+                <div class="process-step reveal reveal-delay-1">
+                    <div class="process-num">2</div>
+                    <h4>Pengadaan Barang</h4>
+                    <p>Barang diterima dari supplier langsung menambah stok persediaan gudang.</p>
                 </div>
-
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-9 h-9 rounded-full bg-purple-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-purple-600/30">3</div>
-                    <h4 class="font-bold text-slate-900 text-base mb-1">Penjualan & Stok</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Transaksi penjualan memvalidasi & mengurangi stok secara akurat.</p>
+                <div class="process-step reveal reveal-delay-2">
+                    <div class="process-num">3</div>
+                    <h4>Penjualan & Stok</h4>
+                    <p>Transaksi penjualan memvalidasi dan mengurangi stok secara akurat.</p>
                 </div>
-
-                <div class="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm relative" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mx-auto mb-4 shadow-md shadow-emerald-600/30">4</div>
-                    <h4 class="font-bold text-slate-900 text-base mb-1">Invoice & Pelunasan</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Tagihan diterbitkan & pembayaran terupdate otomatis dalam laporan.</p>
+                <div class="process-step reveal reveal-delay-3">
+                    <div class="process-num">4</div>
+                    <h4>Invoice & Pelunasan</h4>
+                    <p>Tagihan diterbitkan dan pembayaran terupdate otomatis dalam laporan.</p>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- Footer Section -->
-    <footer id="kontak" class="bg-slate-900 text-slate-400 text-xs py-14 border-t border-slate-800" data-aos="fade-up">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="md:col-span-2 space-y-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm">
-                        <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
-                    </div>
-                    <span class="font-bold text-xl text-white">PT Signal Panca Utama</span>
+    <!-- ═══ CTA ═══ -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-inner reveal">
+                <h2>Siap mengelola bisnis lebih efisien?</h2>
+                <p>Masuk ke portal manajemen internal untuk memantau tender, kontrak, persediaan, dan keuangan dalam satu platform.</p>
+                <div class="cta-actions">
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk ke Portal
+                    </a>
+                    <a href="#layanan" class="btn btn-ghost btn-lg" style="border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.7);">
+                        <i class="fa-solid fa-layer-group"></i> Lihat Layanan
+                    </a>
                 </div>
-                <p class="max-w-md leading-relaxed text-slate-400">
-                    Sistem Manajemen Bisnis Internal terintegrasi untuk Tender, Jasa, dan Perdagangan Barang. Memusatkan data perusahaan untuk transparansi & performa bisnis.
-                </p>
-                <div class="text-slate-400 space-y-1 font-medium">
-                    <div><i class="fa-solid fa-location-dot text-blue-500"></i> Jl Rubaya Buher SPU Mansion Kavling CahayaKarangpawitan, Kec. Karawang Bar., Karawang, Jawa Barat 41315</div>
-                    <div><i class="fa-solid fa-phone text-blue-500"></i> (021) 7890-1234 | Email: info@signalpanca.co.id</div>
-                </div>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-white text-sm mb-3">Navigasi Portal</h4>
-                <ul class="space-y-2 text-slate-400 font-medium">
-                    <li><a href="#beranda" class="hover:text-blue-400">Beranda</a></li>
-                    <li><a href="#klien-slider" class="hover:text-blue-400">Klien Terpercaya</a></li>
-                    <li><a href="#kbli" class="hover:text-blue-400">Ruang Lingkup KBLI</a></li>
-                    <li><a href="#domain" class="hover:text-blue-400">Domain Bisnis</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-white text-sm mb-3">Akses Sistem</h4>
-                <p class="mb-3 text-slate-400">Masuk ke dalam portal manajemen internal perusahaan.</p>
-                <a href="{{ route('login') }}" class="landing-action px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl inline-block shadow-md">
-                    Masuk &rarr;
-                </a>
             </div>
         </div>
+    </section>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800 mt-10 pt-6 text-center text-slate-500">
-            &copy; {{ date('Y') }} PT Signal Panca Utama. All Rights Reserved. Enterprise SaaS Web Application.
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="site-footer" id="kontak">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">
+                        <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama">
+                        <span>PT Signal Panca Utama</span>
+                    </div>
+                    <p class="footer-desc">
+                        Sistem Manajemen Bisnis Internal terintegrasi untuk Tender, Jasa, dan Perdagangan Barang. Memusatkan data perusahaan untuk transparansi dan performa bisnis.
+                    </p>
+                    <div class="footer-contact">
+                        <div><i class="fa-solid fa-location-dot"></i> Jl Rubaya Buher SPU Mansion Kavling Cahaya, Karangpawitan, Kec. Karawang Bar., Karawang, Jawa Barat 41315</div>
+                        <div><i class="fa-solid fa-phone"></i> (021) 7890-1234</div>
+                        <div><i class="fa-solid fa-envelope"></i> info@signalpanca.co.id</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="footer-heading">Navigasi</div>
+                    <ul class="footer-links">
+                        <li><a href="#beranda">Beranda</a></li>
+                        <li><a href="#layanan">Layanan</a></li>
+                        <li><a href="#kbli">Kualifikasi KBLI</a></li>
+                        <li><a href="#alur">Alur Bisnis</a></li>
+                        <li><a href="#kontak">Kontak</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="footer-heading">Akses Sistem</div>
+                    <p style="font-size:13px;margin-bottom:16px;">Portal manajemen internal perusahaan untuk staf dan management.</p>
+                    <a href="{{ route('login') }}" class="btn btn-primary" style="width:100%;">
+                        Masuk Portal <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                &copy; {{ date('Y') }} PT Signal Panca Utama. Seluruh hak cipta dilindungi.
+            </div>
         </div>
     </footer>
 
-    <!-- AOS JS CDN Fallback & Init -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof AOS !== 'undefined') {
-                AOS.init({
-                    duration: 750,
-                    easing: 'ease-out-cubic',
-                    once: true,
-                    offset: 80
+        // Smooth scroll for anchor links with custom easing
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const target = document.querySelector(targetId);
+                if (!target) return;
+
+                const headerHeight = document.getElementById('siteHeader').offsetHeight;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+                const startPosition = window.pageYOffset;
+                const distance = targetPosition - startPosition;
+                const duration = Math.min(1200, Math.max(600, Math.abs(distance) * 0.5));
+                let startTime = null;
+
+                // Cubic bezier easing (ease-out-quart)
+                function easeOutQuart(t) {
+                    return 1 - Math.pow(1 - t, 4);
+                }
+
+                function animate(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = easeOutQuart(progress);
+                    window.scrollTo(0, startPosition + distance * eased);
+                    if (progress < 1) requestAnimationFrame(animate);
+                }
+                requestAnimationFrame(animate);
+            });
+        });
+
+        // Header scroll shadow
+        const header = document.getElementById('siteHeader');
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    header.classList.toggle('scrolled', window.scrollY > 10);
+                    ticking = false;
                 });
+                ticking = true;
             }
         });
+
+        // Mobile menu toggle
+        const toggle = document.getElementById('mobileToggle');
+        const menu = document.getElementById('mobileMenu');
+        toggle.addEventListener('click', () => {
+            menu.classList.toggle('active');
+            const icon = toggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.remove('active');
+                const icon = toggle.querySelector('i');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-xmark');
+            });
+        });
+
+        // Scroll reveal with staggered children
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+        reveals.forEach(el => observer.observe(el));
     </script>
+
 </body>
 </html>
