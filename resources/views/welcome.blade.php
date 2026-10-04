@@ -697,6 +697,136 @@
         @media (max-width: 1000px) { .kbli-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 640px) { .kbli-grid { grid-template-columns: repeat(2, 1fr); } }
 
+        /* KBLI qualification panel */
+        #kbli {
+            padding: 78px 0 84px;
+            background: #f4f7f8;
+        }
+        #kbli .section-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, .7fr);
+            align-items: end;
+            gap: 64px;
+            margin-bottom: 34px;
+            text-align: left;
+        }
+        #kbli .section-header-center .section-subtitle {
+            margin: 0;
+        }
+        #kbli .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 10px;
+            color: var(--blue);
+        }
+        #kbli .section-label::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: currentColor;
+        }
+        #kbli .section-title {
+            max-width: 520px;
+            margin-bottom: 0;
+            color: var(--ink);
+            font-size: clamp(2rem, 3.3vw, 3rem);
+            letter-spacing: -.045em;
+        }
+        #kbli .section-subtitle {
+            max-width: 390px;
+            color: var(--body);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        #kbli .kbli-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 0;
+            border-top: 1px solid var(--hairline);
+            border-bottom: 1px solid var(--hairline);
+        }
+        #kbli .kbli-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 182px;
+            padding: 21px 18px 19px;
+            border: 0;
+            border-right: 1px solid var(--hairline);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            transition: background-color .2s ease, padding-top .2s ease;
+        }
+        #kbli .kbli-card:first-child {
+            border-left: 1px solid var(--hairline);
+        }
+        #kbli .kbli-card:hover {
+            padding-top: 18px;
+            border-color: var(--hairline);
+            background: #fff;
+            box-shadow: none;
+            transform: none;
+        }
+        #kbli .kbli-card::after {
+            top: 0;
+            right: auto;
+            bottom: auto;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--blue);
+            transform: scaleX(0);
+        }
+        #kbli .kbli-card:hover::after {
+            transform: scaleX(1);
+        }
+        #kbli .kbli-code {
+            align-self: flex-start;
+            margin-bottom: 18px;
+            padding: 0;
+            border-bottom: 1px solid #a7c6d0;
+            border-radius: 0;
+            background: transparent;
+            color: var(--blue);
+            font-size: 11px;
+            letter-spacing: .08em;
+        }
+        #kbli .kbli-card h4 {
+            margin-bottom: 8px;
+            color: var(--ink);
+            font-size: 14px;
+            line-height: 1.25;
+        }
+        #kbli .kbli-card p {
+            margin-top: auto;
+            color: var(--mute);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        @media (max-width: 1000px) {
+            #kbli .kbli-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            #kbli .kbli-card:nth-child(3) { border-right: 0; }
+            #kbli .kbli-card:nth-child(n+4) { border-top: 1px solid var(--hairline); }
+            #kbli .kbli-card:nth-child(4) { border-left: 1px solid var(--hairline); }
+        }
+        @media (max-width: 640px) {
+            #kbli { padding: 62px 0 68px; }
+            #kbli .section-header { display: block; margin-bottom: 28px; }
+            #kbli .section-subtitle { margin-top: 16px; }
+            #kbli .kbli-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #kbli .kbli-card,
+            #kbli .kbli-card:nth-child(n) {
+                min-height: 168px;
+                border-top: 1px solid var(--hairline);
+                border-left: 1px solid var(--hairline);
+                border-right: 0;
+            }
+            #kbli .kbli-card:nth-child(-n+2) { border-top: 0; }
+            #kbli .kbli-card:nth-child(odd) { border-left: 1px solid var(--hairline); }
+            #kbli .kbli-card:nth-child(even) { border-left: 1px solid var(--hairline); }
+            #kbli .kbli-card:last-child { grid-column: span 2; }
+        }
+
         /* ─── PROCESS FLOW ────────────────────────────────── */
         .process-grid {
             display: grid;
@@ -751,6 +881,142 @@
         }
         @media (max-width: 500px) {
             .process-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Integrated business flow */
+        #alur {
+            padding: 78px 0 82px;
+            background: #09172b;
+        }
+        #alur .section-header {
+            max-width: 580px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        #alur .section-title {
+            margin-bottom: 14px;
+            color: #f8fafc;
+            font-size: clamp(2rem, 3.4vw, 3rem);
+            letter-spacing: -.045em;
+        }
+        #alur .section-subtitle {
+            max-width: 500px;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        #alur .process-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            padding: 0;
+        }
+        #alur .process-grid::before {
+            top: 50px;
+            left: 12.5%;
+            right: 12.5%;
+            height: 1px;
+            background: rgba(96, 165, 250, .45);
+        }
+        #alur .process-step {
+            min-height: 220px;
+            padding: 24px 22px 22px;
+            text-align: left;
+            border: 1px solid rgba(148, 163, 184, .2);
+            border-radius: 10px;
+            background: rgba(16, 36, 66, .72);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
+            transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+        }
+        #alur .process-step:first-child {
+            border-left: 1px solid rgba(148, 163, 184, .2);
+        }
+        #alur .process-step:last-child {
+            padding-right: 28px;
+        }
+        #alur .process-step:hover {
+            border-color: rgba(96, 165, 250, .65);
+            background: #132b4e;
+            transform: translateY(-3px);
+        }
+        #alur .process-num {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            margin: 0 0 28px;
+            border: 1px solid rgba(147, 197, 253, .65);
+            border-radius: 50%;
+            background: #102442;
+            color: #bfdbfe;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            z-index: 2;
+        }
+        #alur .process-step:nth-child(2) .process-num,
+        #alur .process-step:nth-child(3) .process-num,
+        #alur .process-step:nth-child(4) .process-num {
+            background: #102442;
+            color: #bfdbfe;
+        }
+        #alur .process-step h4 {
+            margin-bottom: 10px;
+            color: #f8fafc;
+            font-size: 15px;
+            line-height: 1.35;
+        }
+        #alur .process-step p {
+            max-width: 220px;
+            color: rgba(226, 232, 240, .58);
+            font-size: 12px;
+            line-height: 1.65;
+        }
+        @media (max-width: 800px) {
+            #alur { padding: 72px 0 78px; }
+            #alur .process-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+            #alur .process-grid::before { display: none; }
+            #alur .process-step,
+            #alur .process-step:first-child,
+            #alur .process-step:last-child {
+                min-height: 210px;
+                padding: 22px 20px 20px;
+                border: 1px solid rgba(148, 163, 184, .2);
+            }
+            #alur .process-step:nth-child(n+3) { padding-top: 22px; border-top: 1px solid rgba(148, 163, 184, .2); }
+        }
+        @media (max-width: 500px) {
+            #alur .process-grid { grid-template-columns: 1fr; }
+            #alur .process-step,
+            #alur .process-step:first-child,
+            #alur .process-step:last-child,
+            #alur .process-step:nth-child(odd) {
+                min-height: 0;
+                padding: 22px 20px 22px;
+                border: 1px solid rgba(148, 163, 184, .2);
+            }
+            #alur .process-step:first-child {
+                padding-top: 22px;
+            }
+            #alur .process-num { margin: 0 0 18px; }
+        }
+
+        #alur .process-grid,
+        #alur .process-step,
+        #alur .process-step:nth-child(n+3) {
+            border: 1px solid rgba(148, 163, 184, .2);
+        }
+        #alur .process-grid::before {
+            display: none;
+        }
+
+        .cta-actions .btn-ghost:hover,
+        .cta-actions .btn-ghost:focus,
+        .cta-actions .btn-ghost:focus-visible,
+        .cta-actions .btn-ghost:active {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(147, 197, 253, .55) !important;
+            color: #f8fafc !important;
+            box-shadow: none;
         }
 
         /* ─── CTA SECTION ─────────────────────────────────── */
@@ -1109,9 +1375,11 @@
     <!-- ═══ RUANG LINGKUP KBLI ═══ -->
     <section class="section section-alt" id="kbli">
         <div class="container">
-            <div class="section-header section-header-center reveal">
-                <div class="section-label">Kualifikasi Resmi</div>
-                <h2 class="section-title">Ruang Lingkup KBLI</h2>
+            <div class="section-header section-header-center kbli-header reveal">
+                <div class="kbli-heading">
+                    <div class="section-label">Kualifikasi Resmi</div>
+                    <h2 class="section-title">Ruang Lingkup KBLI</h2>
+                </div>
                 <p class="section-subtitle">Klasifikasi Baku Lapangan Usaha Indonesia resmi yang dimiliki PT Signal Panca Utama.</p>
             </div>
 
@@ -1155,22 +1423,22 @@
             </div>
 
             <div class="process-grid">
-                <div class="process-step reveal">
+                <div class="process-step">
                     <div class="process-num">1</div>
                     <h4>Tender Menang</h4>
                     <p>Tender dimenangkan dan dikonversi otomatis menjadi kontrak kerja jasa.</p>
                 </div>
-                <div class="process-step reveal reveal-delay-1">
+                <div class="process-step">
                     <div class="process-num">2</div>
                     <h4>Pengadaan Barang</h4>
                     <p>Barang diterima dari supplier langsung menambah stok persediaan gudang.</p>
                 </div>
-                <div class="process-step reveal reveal-delay-2">
+                <div class="process-step">
                     <div class="process-num">3</div>
                     <h4>Penjualan & Stok</h4>
                     <p>Transaksi penjualan memvalidasi dan mengurangi stok secara akurat.</p>
                 </div>
-                <div class="process-step reveal reveal-delay-3">
+                <div class="process-step">
                     <div class="process-num">4</div>
                     <h4>Invoice & Pelunasan</h4>
                     <p>Tagihan diterbitkan dan pembayaran terupdate otomatis dalam laporan.</p>
