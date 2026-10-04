@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 use Throwable;
@@ -77,6 +78,94 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
     }
 
+    public function redirectToProvider(string $provider): RedirectResponse
+    {
+        $this->ensureSupportedProvider($provider);
+
+        if (!config("services.{$provider}.client_id") || !config("services.{$provider}.client_secret")) {
+            return to_route('login')->withErrors([
+                'social' => 'Login sosial belum dikonfigurasi oleh administrator.',
+            ]);
+        }
+
+        return Socialite::driver($provider)->redirect();
+    }
+
+    public function handleProviderCallback(string $provider): RedirectResponse
+    {
+        $this->ensureSupportedProvider($provider);
+
+        try {
+            $socialUser = Socialite::driver($provider)->user();
+        } catch (InvalidStateException|Throwable $exception) {
+            report($exception);
+
+            return to_route('login')->withErrors([
+                'social' => 'Login dengan ' . ucfirst($provider) . ' gagal. Silakan coba lagi.',
+            ]);
+        }
+
+        $email = $socialUser->getEmail();
+
+        if (!$email) {
+            return to_route('login')->withErrors([
+                'social' => 'Akun ' . ucfirst($provider) . ' tidak memberikan alamat email.',
+            ]);
+        }
+
+        $user = User::where('oauth_provider', $provider)
+            ->where('oauth_id', $socialUser->getId())
+            ->first();
+
+        if (!$user) {
+            $user = User::where('email', $email)->first();
+        }
+
+        if (!$user) {
+            $managementRole = Role::where('name', 'management')->first();
+
+            if (!$managementRole) {
+                return to_route('login')->withErrors([
+                    'social' => 'Pendaftaran belum dapat diproses karena role default belum tersedia.',
+                ]);
+            }
+
+            User::create([
+                'role_id' => $managementRole->id,
+                'name' => $socialUser->getName() ?: $email,
+                'email' => $email,
+                'password' => null,
+                'oauth_provider' => $provider,
+                'oauth_id' => $socialUser->getId(),
+                'is_active' => false,
+            ]);
+
+            return to_route('login')->with('status', 'Pendaftaran berhasil. Tunggu persetujuan Super Admin sebelum masuk ke sistem.');
+        }
+
+        if ($user->oauth_provider && ($user->oauth_provider !== $provider || $user->oauth_id !== $socialUser->getId())) {
+            return to_route('login')->withErrors([
+                'social' => 'Email tersebut sudah terhubung dengan metode login lain.',
+            ]);
+        }
+
+        $user->forceFill([
+            'oauth_provider' => $provider,
+            'oauth_id' => $socialUser->getId(),
+        ])->save();
+
+        if (!$user->is_active) {
+            return to_route('login')->withErrors([
+                'social' => 'Akun belum aktif. Tunggu persetujuan Super Admin.',
+            ]);
+        }
+
+        Auth::login($user);
+        request()->session()->regenerate();
+
+        return redirect()->intended('/dashboard')->with('success', 'Selamat datang kembali, ' . $user->name . '.');
+    }
+
     public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
@@ -128,6 +217,11 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => __($status)])->withInput($credentials);
+    }
+
+    private function ensureSupportedProvider(string $provider): void
+    {
+        abort_unless(in_array($provider, ['google', 'linkedin'], true), 404);
     }
 
     public function showResetPasswordForm(string $token): View

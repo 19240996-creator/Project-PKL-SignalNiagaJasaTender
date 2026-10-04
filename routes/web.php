@@ -36,6 +36,8 @@ Route::get('/', function () {
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirectToProvider'])->name('oauth.redirect');
+Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])->name('oauth.callback');
 Route::post('/register', [AuthController::class, 'register'])->middleware('guest')->name('register');
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->middleware('guest')->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware(['guest', 'throttle:6,1'])->name('password.email');
