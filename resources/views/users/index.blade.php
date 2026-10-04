@@ -42,8 +42,8 @@
                                 </span>
                             </td>
                             <td class="p-4 text-center whitespace-nowrap">
-                                <span class="inline-flex items-center justify-center gap-1.5 w-24 py-1 rounded-full text-xs font-semibold border {{ $user->is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $user->is_active ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                <span class="inline-flex items-center justify-center gap-1.5 w-24 py-1 rounded-full text-xs font-semibold border {{ $user->is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $user->is_active ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
                                     {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                                 </span>
                             </td>

@@ -109,6 +109,39 @@ class BusinessFlowTest extends TestCase
         $this->assertTrue(Hash::check('new-password-123', $user->fresh()->password));
     }
 
+    public function test_registration_requires_super_admin_approval_before_login(): void
+    {
+        $managementRole = Role::create(['name' => 'management']);
+
+        $response = $this->post(route('register'), [
+            'name' => 'New Employee',
+            'email' => 'new.employee@example.com',
+            'password' => 'password-123',
+            'password_confirmation' => 'password-123',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('status');
+        $this->assertDatabaseHas('users', [
+            'email' => 'new.employee@example.com',
+            'role_id' => $managementRole->id,
+            'is_active' => false,
+        ]);
+
+        $this->post(route('login'), [
+            'email' => 'new.employee@example.com',
+            'password' => 'password-123',
+        ])->assertSessionHasErrors('email');
+
+        $user = User::where('email', 'new.employee@example.com')->firstOrFail();
+        $user->update(['is_active' => true]);
+
+        $this->post(route('login'), [
+            'email' => 'new.employee@example.com',
+            'password' => 'password-123',
+        ])->assertRedirect(route('dashboard'));
+    }
+
     public function test_user_delete_requires_matching_email_confirmation(): void
     {
         [$admin] = $this->foundation();

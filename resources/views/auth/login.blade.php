@@ -64,8 +64,8 @@
                 <div class="mb-9">
                     <div class="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-blue-500"><span class="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i class="fa-solid fa-shield-halved"></i></span>Secure internal access</div>
                     <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#155eef]">Selamat datang kembali</p>
-                    <h2 class="text-3xl font-extrabold tracking-[-0.03em] text-[#0d2b5c]">Masuk ke ruang kerja</h2>
-                    <p class="mt-3 text-sm leading-6 text-slate-500">Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.</p>
+                    <h2 class="text-3xl font-extrabold tracking-[-0.03em] text-[#0d2b5c]" x-text="mode === 'login' ? 'Masuk ke ruang kerja' : 'Buat akun baru'">Masuk ke ruang kerja</h2>
+                    <p class="mt-3 text-sm leading-6 text-slate-500" x-text="mode === 'login' ? 'Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.' : 'Daftarkan diri Anda. Akun akan aktif setelah disetujui Super Admin.'">Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.</p>
                 </div>
 
                 @if(session('status'))
@@ -75,7 +75,7 @@
                     <div class="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Login belum berhasil.</p><p class="mt-1 text-xs">{{ $errors->first() }}</p></div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" class="space-y-5" @submit="submitForm">
+                <form x-show="mode === 'login'" x-cloak action="{{ route('login') }}" method="POST" class="space-y-5" @submit="submitForm">
                     @csrf
                     <div>
                         <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">Alamat email</label>
@@ -87,7 +87,33 @@
                     <button type="submit" :disabled="loading" class="login-submit flex h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-600/20 disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk ke dashboard'"></span></button>
                 </form>
 
-                <div class="mt-10 border-t border-blue-100 pt-5 text-center text-xs leading-5 text-slate-400">Akses sistem dikelola oleh administrator perusahaan.<br><a href="{{ route('home') }}" class="font-semibold text-[#155eef] hover:text-[#0d2b5c]">Kembali ke halaman utama</a></div>
+                <form x-show="mode === 'register'" x-cloak action="{{ route('register') }}" method="POST" class="space-y-5" @submit="submitRegister">
+                    @csrf
+                    <div>
+                        <label for="register-name" class="mb-2 block text-sm font-semibold text-slate-700">Nama lengkap</label>
+                        <div class="relative"><i class="fa-regular fa-user pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required placeholder="Nama lengkap Anda" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"></div>
+                    </div>
+                    <div>
+                        <label for="register-email" class="mb-2 block text-sm font-semibold text-slate-700">Alamat email</label>
+                        <div class="relative"><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="nama@perusahaan.co.id" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"></div>
+                    </div>
+                    <div>
+                        <label for="register-password" class="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+                        <div class="relative"><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password" :type="registerPasswordVisible ? 'text' : 'password'" name="password" autocomplete="new-password" required minlength="8" placeholder="Minimal 8 karakter" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"><button type="button" @click="registerPasswordVisible = !registerPasswordVisible" class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" :aria-label="registerPasswordVisible ? 'Sembunyikan password' : 'Tampilkan password'"><i class="fa-solid" :class="registerPasswordVisible ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
+                    </div>
+                    <div>
+                        <label for="register-password-confirmation" class="mb-2 block text-sm font-semibold text-slate-700">Konfirmasi password</label>
+                        <input id="register-password-confirmation" type="password" name="password_confirmation" autocomplete="new-password" required minlength="8" placeholder="Ulangi password Anda" class="login-input h-12 w-full rounded-lg border bg-white px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10">
+                    </div>
+                    <div class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-800"><i class="fa-solid fa-circle-info mr-1"></i> Akun baru berstatus <strong>Nonaktif</strong> sampai disetujui Super Admin.</div>
+                    <button type="submit" :disabled="registerLoading" class="login-submit flex h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-600/20 disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="registerLoading ? 'fa-spinner fa-spin' : 'fa-user-plus'"></i><span x-text="registerLoading ? 'Mendaftarkan...' : 'Daftar sekarang'"></span></button>
+                </form>
+
+                <div class="mt-8 rounded-xl bg-blue-50 px-4 py-3 text-center text-sm text-slate-600">
+                    <span x-text="mode === 'login' ? 'Belum punya akun?' : 'Sudah punya akun?'">Belum punya akun?</span>
+                    <button type="button" @click="toggleMode" class="ml-1 font-bold text-blue-600 hover:text-blue-800" x-text="mode === 'login' ? 'Daftar sekarang' : 'Masuk di sini'">Daftar sekarang</button>
+                </div>
+                <div class="mt-5 border-t border-blue-100 pt-5 text-center text-xs leading-5 text-slate-400">Akses sistem dikelola oleh administrator perusahaan.<br><a href="{{ route('home') }}" class="font-semibold text-[#155eef] hover:text-[#0d2b5c]">Kembali ke halaman utama</a></div>
             </div>
         </section>
     </main>
@@ -102,6 +128,9 @@
             emailError: false,
             passwordTouched: false,
             loading: false,
+            mode: 'login',
+            registerLoading: false,
+            registerPasswordVisible: false,
             get passwordFilled() { return document.getElementById('password')?.value.length > 0; },
             validateEmail(event) {
                 const value = event.target.value.trim();
@@ -119,6 +148,14 @@
                     return;
                 }
                 this.loading = true;
+            },
+            toggleMode() {
+                this.mode = this.mode === 'login' ? 'register' : 'login';
+                this.loading = false;
+                this.registerLoading = false;
+            },
+            submitRegister() {
+                this.registerLoading = true;
             }
         };
     }

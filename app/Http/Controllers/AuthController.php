@@ -31,6 +31,31 @@ class AuthController extends Controller
         return view('auth.login', compact('accounts'));
     }
 
+    public function register(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:150'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $managementRole = Role::where('name', 'management')->first();
+
+        if (!$managementRole) {
+            return back()->withErrors(['email' => 'Pendaftaran belum dapat diproses karena role default belum tersedia.'])->withInput();
+        }
+
+        User::create([
+            'role_id' => $managementRole->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'is_active' => false,
+        ]);
+
+        return to_route('login')->with('status', 'Pendaftaran berhasil. Tunggu persetujuan Super Admin sebelum masuk ke sistem.');
+    }
+
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
