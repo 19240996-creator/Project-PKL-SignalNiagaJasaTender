@@ -18,6 +18,8 @@
         .blue-panel { background: linear-gradient(145deg, #81bdf8 0%, #6eaff2 100%); }
         .login-panel { border-radius: 0 43% 43% 0 / 0 28% 28% 0; }
         .register-panel { border-radius: 43% 0 0 43% / 28% 0 0 28%; }
+        .auth-pane { transition: transform .55s cubic-bezier(.22, 1, .36, 1), border-radius .55s cubic-bezier(.22, 1, .36, 1); }
+        .auth-form-pane { transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
         .field { background: #f1f6fb; border: 1px solid transparent; }
         .field:focus { border-color: #9bc8f8; box-shadow: 0 0 0 4px rgba(119, 182, 247, .16); outline: 0; }
         .primary-button { background: var(--blue); transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease; }
@@ -29,29 +31,29 @@
     </style>
 </head>
 <body class="min-h-screen px-4 py-6 text-slate-900 sm:px-8 sm:py-10 lg:flex lg:items-center lg:justify-center" x-data="loginForm('{{ old('_form', 'login') }}')">
-    <main class="auth-card mx-auto grid min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-[28px] bg-white lg:grid-cols-2">
-        <section class="relative hidden min-h-[650px] overflow-hidden text-white lg:flex lg:items-center lg:justify-center" :class="mode === 'login' ? 'blue-panel login-panel lg:order-2' : 'blue-panel register-panel lg:order-1'">
-            <div class="relative z-10 max-w-md px-12 text-center xl:px-16">
-                <div class="mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-blue-700/20">
+    <main class="auth-card relative mx-auto min-h-[580px] w-full max-w-[980px] overflow-hidden rounded-[24px] bg-white lg:min-h-[580px]">
+        <section class="auth-pane absolute inset-y-0 left-1/2 z-10 hidden w-1/2 overflow-hidden text-white lg:flex lg:items-center lg:justify-center" :class="mode === 'login' ? 'blue-panel login-panel translate-x-0' : 'blue-panel register-panel -translate-x-full'">
+            <div class="relative z-10 max-w-md px-10 text-center xl:px-14">
+                <div class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-white p-2 shadow-lg shadow-blue-700/20">
                     <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
                 </div>
-                <h1 class="text-4xl font-extrabold tracking-[-0.04em] xl:text-5xl" x-text="mode === 'login' ? 'Halo, Teman!' : 'Selamat Datang!'">Halo, Teman!</h1>
-                <p class="mx-auto mt-5 max-w-sm text-base leading-7 text-white/90" x-text="mode === 'login' ? 'Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!' : 'Daftar sekarang dan nikmati semua fitur yang kami sediakan.'">Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!</p>
-                <button type="button" @click="toggleMode" class="outline-button mt-9 min-w-[235px] rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10" x-text="mode === 'login' ? 'Daftar Sekarang' : 'Masuk'">Daftar Sekarang</button>
+                <h1 class="text-3xl font-extrabold tracking-[-0.04em] xl:text-4xl" x-text="mode === 'login' ? 'Halo, Teman!' : 'Selamat Datang!'">Halo, Teman!</h1>
+                <p class="mx-auto mt-4 max-w-sm text-sm leading-6 text-white/90" x-text="mode === 'login' ? 'Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!' : 'Daftar sekarang dan nikmati semua fitur yang kami sediakan.'">Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!</p>
+                <button type="button" @click="toggleMode" class="outline-button mt-7 min-w-[200px] rounded-xl px-6 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 active:scale-[.98]" x-text="mode === 'login' ? 'Daftar Sekarang' : 'Masuk'">Daftar Sekarang</button>
             </div>
         </section>
 
-        <section class="flex min-h-[650px] items-center justify-center px-6 py-10 sm:px-12 lg:px-16 xl:px-20" :class="mode === 'login' ? 'lg:order-1' : 'lg:order-2'">
-            <div class="w-full max-w-[455px]">
-                <div class="mb-7 flex items-center gap-3">
+        <section class="auth-form-pane flex min-h-[580px] items-center justify-center px-6 py-10 sm:px-12 lg:absolute lg:inset-y-0 lg:left-0 lg:z-20 lg:w-1/2 lg:px-12 xl:px-14" :class="mode === 'login' ? 'translate-x-0' : 'lg:translate-x-full'">
+            <div class="w-full max-w-[400px]">
+                <div class="mb-6 flex items-center gap-3">
                     <a href="{{ route('home') }}" class="flex items-center gap-2.5" title="Kembali ke beranda">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-white p-1 shadow-sm"><img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain"></span>
+                        <span class="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-100 bg-white p-1 shadow-sm"><img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain"></span>
                         <span class="text-sm font-extrabold tracking-tight text-[var(--ink)]">SignalNiaga</span>
                     </a>
                 </div>
 
-                <div class="mb-7">
-                    <h2 class="text-4xl font-extrabold tracking-[-0.05em] text-[var(--ink)]" x-text="mode === 'login' ? 'Masuk' : 'Buat Akun'">Masuk</h2>
+                <div class="mb-6">
+                    <h2 class="text-3xl font-extrabold tracking-[-0.05em] text-[var(--ink)]" x-text="mode === 'login' ? 'Masuk' : 'Buat Akun'">Masuk</h2>
                     <p class="mt-2 text-sm text-slate-400" x-text="mode === 'login' ? 'Masuk dengan email dan kata sandi' : 'Daftar dengan email dan kata sandi'">Masuk dengan email dan kata sandi</p>
                 </div>
 
@@ -62,11 +64,11 @@
                     <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Belum berhasil.</p><p class="mt-1 text-xs">{{ $errors->first() }}</p></div>
                 @endif
 
-                <div class="mb-6 flex gap-3" x-show="mode === 'login' || mode === 'register'">
+                <div class="mb-5 flex gap-3" x-show="mode === 'login' || mode === 'register'">
                     <button type="button" disabled class="social-button flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-xs font-bold text-slate-700"><span class="text-base font-extrabold text-[#4285f4]">G</span><span x-text="mode === 'login' ? 'Masuk dengan Google' : 'Google'">Masuk dengan Google</span></button>
                     <button type="button" disabled class="social-button flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-xs font-bold text-slate-700"><span class="flex h-5 w-5 items-center justify-center rounded bg-[#0a66c2] text-xs font-extrabold text-white">in</span><span x-text="mode === 'login' ? 'Masuk dengan LinkedIn' : 'LinkedIn'">Masuk dengan LinkedIn</span></button>
                 </div>
-                <div class="mb-6 flex items-center gap-4 text-xs font-semibold text-slate-400"><span class="h-px flex-1 bg-slate-200"></span><span>atau</span><span class="h-px flex-1 bg-slate-200"></span></div>
+                <div class="mb-5 flex items-center gap-4 text-xs font-semibold text-slate-400"><span class="h-px flex-1 bg-slate-200"></span><span>atau</span><span class="h-px flex-1 bg-slate-200"></span></div>
 
                 <form x-show="mode === 'login'" x-cloak action="{{ route('login') }}" method="POST" class="space-y-4" @submit="submitForm">
                     @csrf
