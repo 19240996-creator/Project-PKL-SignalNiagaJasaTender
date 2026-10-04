@@ -451,6 +451,164 @@
         .check-teal { color: var(--teal); }
         .check-amber { color: var(--amber); }
 
+        /* ─── BUSINESS PILLARS ─────────────────────────── */
+        .pillar-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+            gap: 48px;
+            align-items: end;
+            margin-bottom: 44px;
+        }
+        .pillar-intro .section-header { margin-bottom: 0; }
+        .pillar-note {
+            padding: 18px 0 2px 24px;
+            border-left: 2px solid var(--blue);
+            color: var(--body);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+            gap: 20px;
+            align-items: stretch;
+        }
+        .pillar-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            overflow: hidden;
+            background: var(--canvas);
+            border: 1px solid var(--hairline);
+            border-radius: var(--radius-lg);
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+        }
+        .pillar-card:hover {
+            border-color: #b8d5f7;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+        .pillar-card-primary { grid-row: span 2; }
+        .pillar-card-image {
+            position: relative;
+            overflow: hidden;
+            background: #dbeafe;
+        }
+        .pillar-card-primary .pillar-card-image { min-height: 286px; }
+        .pillar-card-secondary .pillar-card-image { height: 148px; }
+        .pillar-card-secondary:nth-child(2) .pillar-card-image {
+            height: 180px;
+        }
+        .pillar-card-secondary:nth-child(2) .pillar-card-image img {
+            object-position: 68% 38%;
+        }
+        .pillar-card-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 52%, rgba(12,29,54,.42));
+            pointer-events: none;
+        }
+        .pillar-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+        }
+        .pillar-card:hover .pillar-card-image img { transform: scale(1.04); }
+        .pillar-card-index {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 28px;
+            border: 1px solid rgba(255,255,255,.55);
+            border-radius: 7px;
+            background: rgba(12,29,54,.58);
+            color: #fff;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            backdrop-filter: blur(8px);
+        }
+        .pillar-card-body { padding: 26px 28px 28px; }
+        .pillar-card-secondary .pillar-card-body { padding: 20px 22px 22px; }
+        .pillar-card-kicker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+        }
+        .pillar-card-kicker::before {
+            content: '';
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+        }
+        .pillar-card-secondary:nth-child(3) .pillar-card-kicker { color: var(--teal); }
+        .pillar-card h3 {
+            margin-bottom: 10px;
+            color: var(--ink);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+            line-height: 1.2;
+        }
+        .pillar-card-secondary h3 { font-size: 20px; }
+        .pillar-card p {
+            color: var(--body);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .pillar-features {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 18px;
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid var(--hairline);
+            list-style: none;
+        }
+        .pillar-features li {
+            display: flex;
+            gap: 8px;
+            color: var(--body);
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+        .pillar-features li i { margin-top: 3px; color: var(--blue); font-size: 10px; }
+        .pillar-card-secondary .pillar-features {
+            display: block;
+            margin-top: 16px;
+            padding-top: 14px;
+        }
+        .pillar-card-secondary .pillar-features li + li { margin-top: 8px; }
+        .pillar-card-secondary .pillar-features li i { color: var(--teal); }
+
+        @media (max-width: 800px) {
+            .pillar-intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
+            .pillar-note { padding: 0 0 0 16px; }
+            .pillar-grid { grid-template-columns: 1fr; }
+            .pillar-card-primary { grid-row: auto; }
+            .pillar-card-primary .pillar-card-image { min-height: 230px; }
+        }
+        @media (max-width: 500px) {
+            .pillar-card-body, .pillar-card-secondary .pillar-card-body { padding: 20px; }
+            .pillar-features { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 800px) {
             .feature-block {
                 grid-template-columns: 1fr;
@@ -811,7 +969,7 @@
                         <div class="hero-stat-value">99.8%</div>
                         <div class="hero-stat-label">Ketepatan Waktu</div>
                     </div>
-                </div>
+                </article>
             </div>
         </div>
     </section>
@@ -861,73 +1019,65 @@
     <!-- ═══ LAYANAN / DOMAIN BISNIS (Zigzag with Photos) ═══ -->
     <section class="section" id="layanan">
         <div class="container">
-            <div class="section-header section-header-center reveal">
-                <div class="section-label">Tiga Pilar Bisnis</div>
-                <h2 class="section-title">Layanan yang Kami Kelola</h2>
-                <p class="section-subtitle">Menghubungkan seluruh proses dari pencarian tender instansi, pelaksanaan pekerjaan jasa, hingga pengadaan dan penjualan barang.</p>
+            <div class="pillar-intro reveal">
+                <div class="section-header">
+                    <div class="section-label">Tiga Pilar Bisnis</div>
+                    <h2 class="section-title">Satu alur kerja untuk tiga area utama</h2>
+                    <p class="section-subtitle">Dari peluang tender hingga barang diterima pelanggan, setiap domain dikelola dengan data yang saling terhubung.</p>
+                </div>
+                <p class="pillar-note">Struktur ini membantu tim menjaga keputusan, dokumen, dan transaksi tetap berada dalam satu sumber data yang dapat ditelusuri.</p>
             </div>
 
-            <!-- Tender -->
-            <div class="feature-block reveal">
-                <div class="feature-text">
-                    <div class="section-label">Domain 01</div>
-                    <h3>Manajemen Tender</h3>
-                    <p>Pencarian tender instansi LPSE/BUMN, penyiapan dokumen penawaran, tracking pipeline dari tahap ditemukan hingga evaluasi dan pengumuman pemenang. Tender yang dimenangkan langsung terkonversi menjadi kontrak kerja.</p>
-                    <ul class="feature-list">
-                        <li><i class="fa-solid fa-circle-check check-blue"></i> Monitoring pipeline tender aktif secara real-time</li>
-                        <li><i class="fa-solid fa-circle-check check-blue"></i> Peringatan otomatis menjelang deadline</li>
-                        <li><i class="fa-solid fa-circle-check check-blue"></i> Konversi tender menang menjadi kontrak jasa</li>
-                        <li><i class="fa-solid fa-circle-check check-blue"></i> Arsip dokumen kualifikasi terpusat</li>
-                    </ul>
-                </div>
-                <div class="feature-image">
-                    <img src="{{ asset('images/section-tender.jpg') }}" alt="Manajemen Tender PT Signal Panca Utama">
-                    <div class="feature-image-badge" style="background:rgba(26,109,227,.85);color:#fff;">
-                        <i class="fa-solid fa-trophy"></i> Tender
+            <div class="pillar-grid">
+                <article class="pillar-card pillar-card-primary reveal">
+                    <div class="pillar-card-image">
+                        <span class="pillar-card-index">01</span>
+                        <img src="{{ asset('images/hero-corporate.jpg') }}" alt="Manajemen Tender PT Signal Panca Utama">
                     </div>
-                </div>
-            </div>
+                    <div class="pillar-card-body">
+                        <div class="pillar-card-kicker">Domain utama</div>
+                        <h3>Manajemen Tender</h3>
+                        <p>Pantau peluang LPSE dan BUMN, siapkan dokumen penawaran, lalu kelola pipeline sampai tender beralih menjadi kontrak kerja.</p>
+                        <ul class="pillar-features">
+                            <li><i class="fa-solid fa-check"></i><span>Pipeline tender aktif</span></li>
+                            <li><i class="fa-solid fa-check"></i><span>Peringatan deadline</span></li>
+                            <li><i class="fa-solid fa-check"></i><span>Konversi ke kontrak</span></li>
+                            <li><i class="fa-solid fa-check"></i><span>Arsip dokumen terpusat</span></li>
+                        </ul>
+                    </div>
+                </article>
 
-            <!-- Jasa -->
-            <div class="feature-block reveal">
-                <div class="feature-text">
-                    <div class="section-label">Domain 02</div>
-                    <h3>Manajemen Jasa</h3>
-                    <p>Database klien dan mitra kerja, pembuatan quotation & penawaran harga, kontrak kerja dengan pencatatan fee komisi, serta tracking progres pelaksanaan pekerjaan hingga penerbitan tagihan termin.</p>
-                    <ul class="feature-list">
-                        <li><i class="fa-solid fa-circle-check check-teal"></i> Pengelolaan kontrak dan fee komisi (%)</li>
-                        <li><i class="fa-solid fa-circle-check check-teal"></i> Tracking progres pelaksanaan pekerjaan</li>
-                        <li><i class="fa-solid fa-circle-check check-teal"></i> Penerbitan invoice dan tagihan jasa</li>
-                        <li><i class="fa-solid fa-circle-check check-teal"></i> Riwayat pembayaran per kontrak</li>
-                    </ul>
-                </div>
-                <div class="feature-image">
-                    <img src="{{ asset('images/section-finance.jpg') }}" alt="Manajemen Jasa dan Keuangan">
-                    <div class="feature-image-badge" style="background:rgba(15,155,110,.85);color:#fff;">
-                        <i class="fa-solid fa-briefcase"></i> Jasa
+                <article class="pillar-card pillar-card-secondary reveal reveal-delay-1">
+                    <div class="pillar-card-image">
+                        <span class="pillar-card-index">02</span>
+                        <img src="{{ asset('images/section-finance.jpg') }}" alt="Manajemen Jasa dan Keuangan">
                     </div>
-                </div>
-            </div>
+                    <div class="pillar-card-body">
+                        <div class="pillar-card-kicker">Domain pendukung</div>
+                        <h3>Manajemen Jasa</h3>
+                        <p>Kelola klien, kontrak, progres pekerjaan, fee komisi, dan tagihan termin dalam satu alur.</p>
+                        <ul class="pillar-features">
+                            <li><i class="fa-solid fa-check"></i><span>Kontrak dan fee komisi</span></li>
+                            <li><i class="fa-solid fa-check"></i><span>Invoice dan riwayat pembayaran</span></li>
+                        </ul>
+                    </div>
+                </article>
 
-            <!-- Perdagangan -->
-            <div class="feature-block reveal">
-                <div class="feature-text">
-                    <div class="section-label">Domain 03</div>
-                    <h3>Perdagangan & Pengadaan</h3>
-                    <p>Katalog produk lengkap dengan SKU, pengelolaan supplier mitra, pengadaan stok barang dengan tracking penerimaan, transaksi penjualan dengan validasi kecukupan stok, dan penerbitan invoice otomatis.</p>
-                    <ul class="feature-list">
-                        <li><i class="fa-solid fa-circle-check check-amber"></i> Pengadaan barang otomatis ke stok gudang</li>
-                        <li><i class="fa-solid fa-circle-check check-amber"></i> Validasi kecukupan stok saat penjualan</li>
-                        <li><i class="fa-solid fa-circle-check check-amber"></i> Indikator peringatan stok minimum</li>
-                        <li><i class="fa-solid fa-circle-check check-amber"></i> Rekap mutasi stok masuk & keluar</li>
-                    </ul>
-                </div>
-                <div class="feature-image">
-                    <img src="{{ asset('images/section-warehouse.jpg') }}" alt="Gudang dan Pengadaan Barang">
-                    <div class="feature-image-badge" style="background:rgba(212,136,15,.85);color:#fff;">
-                        <i class="fa-solid fa-cart-shopping"></i> Perdagangan
+                <article class="pillar-card pillar-card-secondary reveal reveal-delay-2">
+                    <div class="pillar-card-image">
+                        <span class="pillar-card-index">03</span>
+                        <img src="{{ asset('images/section-warehouse.jpg') }}" alt="Gudang dan Pengadaan Barang">
                     </div>
-                </div>
+                    <div class="pillar-card-body">
+                        <div class="pillar-card-kicker">Domain pendukung</div>
+                        <h3>Perdagangan & Pengadaan</h3>
+                        <p>Hubungkan supplier, stok gudang, transaksi penjualan, dan invoice dengan kontrol yang jelas.</p>
+                        <ul class="pillar-features">
+                            <li><i class="fa-solid fa-check"></i><span>Validasi stok saat penjualan</span></li>
+                            <li><i class="fa-solid fa-check"></i><span>Rekap mutasi barang</span></li>
+                        </ul>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
