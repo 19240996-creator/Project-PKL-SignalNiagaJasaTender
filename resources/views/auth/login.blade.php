@@ -12,152 +12,106 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        :root { --primary: #2563EB; --primary-deep: #1D4ED8; --ink: #0F172A; --body: #334155; --mute: #64748B; --canvas-soft: #F8FAFC; --hairline: #E2E8F0; }
-        body { font-family: 'Manrope', sans-serif; background: var(--canvas-soft); }
-        .login-grid { background-color: var(--ink); background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 34px 34px; }
-        .login-grid::after { position: absolute; right: -8rem; bottom: -10rem; width: 28rem; height: 28rem; content: ''; border: 1px solid rgba(147,197,253,.2); border-radius: 50%; box-shadow: 0 0 0 2rem rgba(147,197,253,.04), 0 0 0 5rem rgba(147,197,253,.025); }
-        .form-shell { box-shadow: 0 24px 80px rgba(15, 23, 42, .08); }
-        .login-feature { display: flex; align-items: center; gap: .7rem; padding: .75rem .85rem; border: 1px solid rgba(255,255,255,.12); border-radius: .7rem; background: rgba(255,255,255,.06); color: rgba(219,234,254,.78); font-size: .7rem; font-weight: 600; }
-        .login-feature i { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; color: #bfdbfe; border-radius: .5rem; background: rgba(37,99,235,.3); }
-        .login-form-card { border: 1px solid var(--hairline); background: rgba(255,255,255,.92); box-shadow: 0 24px 70px rgba(15,23,42,.09); }
-        .login-submit { background: var(--primary); transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease; }
-        .login-submit:hover { background: var(--primary-deep); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(37,99,235,.2); }
-        .login-submit:active { transform: scale(.98); }
-        .login-submit:focus-visible { outline: 3px solid rgba(37,99,235,.25); outline-offset: 3px; }
-        .login-input { border-color: var(--hairline); transition: border-color 150ms ease, box-shadow 150ms ease; }
-        .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.1); }
+        :root { --blue: #77b6f7; --blue-deep: #5ea6ef; --ink: #142642; --muted: #91a1b8; --line: #dce5ef; }
+        body { font-family: 'Manrope', sans-serif; background: #edf6ff; }
+        .auth-card { box-shadow: 0 22px 55px rgba(76, 127, 177, .18); }
+        .blue-panel { background: linear-gradient(145deg, #81bdf8 0%, #6eaff2 100%); }
+        .login-panel { border-radius: 0 43% 43% 0 / 0 28% 28% 0; }
+        .register-panel { border-radius: 43% 0 0 43% / 28% 0 0 28%; }
+        .field { background: #f1f6fb; border: 1px solid transparent; }
+        .field:focus { border-color: #9bc8f8; box-shadow: 0 0 0 4px rgba(119, 182, 247, .16); outline: 0; }
+        .primary-button { background: var(--blue); transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease; }
+        .primary-button:hover { background: var(--blue-deep); box-shadow: 0 10px 20px rgba(94, 166, 239, .24); transform: translateY(-1px); }
+        .outline-button { border: 1px solid rgba(255,255,255,.9); }
+        .social-button { border: 1px solid var(--line); box-shadow: 0 2px 5px rgba(44, 73, 107, .08); }
+        .social-button:disabled { cursor: not-allowed; opacity: .72; }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen bg-[#f4f8ff] text-slate-900" x-data="loginForm()">
-    <main class="min-h-screen lg:grid lg:grid-cols-[minmax(420px,0.9fr)_minmax(500px,1.1fr)]">
-        <section class="login-grid relative hidden overflow-hidden px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
-            <a href="{{ route('home') }}" class="relative z-10 inline-flex w-fit items-center gap-3" title="Kembali ke beranda">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white p-1 shadow-lg shadow-blue-950/30">
+<body class="min-h-screen px-4 py-6 text-slate-900 sm:px-8 sm:py-10 lg:flex lg:items-center lg:justify-center" x-data="loginForm('{{ old('_form', 'login') }}')">
+    <main class="auth-card mx-auto grid min-h-[650px] w-full max-w-[1120px] overflow-hidden rounded-[28px] bg-white lg:grid-cols-2">
+        <section class="relative hidden min-h-[650px] overflow-hidden text-white lg:flex lg:items-center lg:justify-center" :class="mode === 'login' ? 'blue-panel login-panel lg:order-2' : 'blue-panel register-panel lg:order-1'">
+            <div class="relative z-10 max-w-md px-12 text-center xl:px-16">
+                <div class="mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-blue-700/20">
                     <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain">
-                </span>
-                <span><span class="block text-lg font-extrabold tracking-tight">SignalNiaga</span><span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200">PT Signal Panca Utama</span></span>
-            </a>
-
-            <div class="relative z-10 max-w-md py-12">
-                <p class="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-blue-200">Business management system</p>
-                <h1 class="text-4xl font-extrabold leading-tight tracking-[-0.03em] xl:text-5xl">Satu ruang kerja untuk bisnis yang terus bergerak.</h1>
-                <p class="mt-6 max-w-sm text-sm leading-7 text-blue-100/75">Kelola tender, pekerjaan jasa, perdagangan, dan arus transaksi perusahaan dalam satu tempat yang terhubung.</p>
-                <div class="mt-8 grid max-w-sm gap-2">
-                    <div class="login-feature"><i class="fa-solid fa-layer-group"></i><span>Semua alur kerja terhubung dalam satu workspace</span></div>
-                    <div class="login-feature"><i class="fa-solid fa-chart-simple"></i><span>Informasi operasional lebih mudah dipantau</span></div>
-                    <div class="login-feature"><i class="fa-solid fa-shield-halved"></i><span>Akses internal dengan kontrol berbasis peran</span></div>
                 </div>
-                <div class="mt-9 flex items-center gap-3 text-xs font-semibold text-blue-100/80"><span class="h-2 w-2 rounded-full bg-[#8fc1ff] shadow-[0_0_0_4px_rgba(143,193,255,.15)]"></span>Ruang kerja internal PT Signal Panca Utama</div>
+                <h1 class="text-4xl font-extrabold tracking-[-0.04em] xl:text-5xl" x-text="mode === 'login' ? 'Halo, Teman!' : 'Selamat Datang!'">Halo, Teman!</h1>
+                <p class="mx-auto mt-5 max-w-sm text-base leading-7 text-white/90" x-text="mode === 'login' ? 'Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!' : 'Daftar sekarang dan nikmati semua fitur yang kami sediakan.'">Senang sekali bisa melihat kamu di sini. Yuk, mulai langkah baru bersama kami!</p>
+                <button type="button" @click="toggleMode" class="outline-button mt-9 min-w-[235px] rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10" x-text="mode === 'login' ? 'Daftar Sekarang' : 'Masuk'">Daftar Sekarang</button>
             </div>
-
-            <div class="relative z-10 flex items-center justify-between border-t border-white/15 pt-5 text-[11px] text-blue-100/60"><span>© {{ date('Y') }} PT Signal Panca Utama</span><span>Internal workspace</span></div>
         </section>
 
-        <section class="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-12 xl:px-20">
-            <div class="form-shell login-form-card w-full max-w-[460px] rounded-2xl bg-white p-6 sm:p-9 lg:p-10">
-                <div class="mb-10 flex items-center justify-between lg:hidden">
-                    <a href="{{ route('home') }}" class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white p-1 shadow-md shadow-blue-600/20 border border-slate-100"><img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain"></span><span class="text-base font-extrabold tracking-tight text-[#0d2b5c]">SignalNiaga</span></a>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-400">Internal</span>
+        <section class="flex min-h-[650px] items-center justify-center px-6 py-10 sm:px-12 lg:px-16 xl:px-20" :class="mode === 'login' ? 'lg:order-1' : 'lg:order-2'">
+            <div class="w-full max-w-[455px]">
+                <div class="mb-7 flex items-center gap-3">
+                    <a href="{{ route('home') }}" class="flex items-center gap-2.5" title="Kembali ke beranda">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-white p-1 shadow-sm"><img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" class="h-full w-full object-contain"></span>
+                        <span class="text-sm font-extrabold tracking-tight text-[var(--ink)]">SignalNiaga</span>
+                    </a>
                 </div>
 
-                <div class="mb-9">
-                    <div class="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-blue-500"><span class="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600"><i class="fa-solid fa-shield-halved"></i></span>Secure internal access</div>
-                    <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#155eef]">Selamat datang kembali</p>
-                    <h2 class="text-3xl font-extrabold tracking-[-0.03em] text-[#0d2b5c]" x-text="mode === 'login' ? 'Masuk ke ruang kerja' : 'Buat akun baru'">Masuk ke ruang kerja</h2>
-                    <p class="mt-3 text-sm leading-6 text-slate-500" x-text="mode === 'login' ? 'Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.' : 'Daftarkan diri Anda. Akun akan aktif setelah disetujui Super Admin.'">Gunakan akun perusahaan Anda untuk melanjutkan ke dashboard.</p>
+                <div class="mb-7">
+                    <h2 class="text-4xl font-extrabold tracking-[-0.05em] text-[var(--ink)]" x-text="mode === 'login' ? 'Masuk' : 'Buat Akun'">Masuk</h2>
+                    <p class="mt-2 text-sm text-slate-400" x-text="mode === 'login' ? 'Masuk dengan email dan kata sandi' : 'Daftar dengan email dan kata sandi'">Masuk dengan email dan kata sandi</p>
                 </div>
 
                 @if(session('status'))
-                    <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('status') }}</div>
+                    <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('status') }}</div>
                 @endif
                 @if($errors->any())
-                    <div class="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Login belum berhasil.</p><p class="mt-1 text-xs">{{ $errors->first() }}</p></div>
+                    <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><p class="font-semibold">Belum berhasil.</p><p class="mt-1 text-xs">{{ $errors->first() }}</p></div>
                 @endif
 
-                <form x-show="mode === 'login'" x-cloak action="{{ route('login') }}" method="POST" class="space-y-5" @submit="submitForm">
-                    @csrf
-                    <div>
-                        <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">Alamat email</label>
-                        <div class="relative"><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transition" :class="emailFocused ? 'text-blue-600' : 'text-slate-400'"></i><input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus placeholder="nama@perusahaan.co.id" @focus="emailFocused = true" @blur="emailFocused = false" @input="validateEmail" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-11 text-sm outline-none transition placeholder:text-slate-400" :class="emailError ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10' : 'border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10'"><span x-show="emailValid" x-cloak class="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500"><i class="fa-solid fa-circle-check"></i></span></div>
-                        <p x-show="emailError" x-cloak class="mt-1.5 text-xs text-rose-600">Masukkan alamat email yang valid.</p>
-                    </div>
-                    <div><div class="mb-2 flex items-center justify-between"><label for="password" class="block text-sm font-semibold text-slate-700">Password</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Lupa password?</a></div><div class="relative"><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 transition" :class="passwordFocused ? 'text-blue-600' : 'text-slate-400'"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required placeholder="Masukkan password" @focus="passwordFocused = true" @blur="passwordFocused = false" @input="passwordTouched = true" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div><p x-show="passwordTouched && !passwordFilled" x-cloak class="mt-1.5 text-xs text-rose-600">Password wajib diisi.</p></div>
-                    <label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-blue-200 text-blue-600 focus:ring-blue-600">Ingat saya di perangkat ini</label>
-                    <button type="submit" :disabled="loading" class="login-submit flex h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-600/20 disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk ke dashboard'"></span></button>
-                </form>
-
-                <form x-show="mode === 'register'" x-cloak action="{{ route('register') }}" method="POST" class="space-y-5" @submit="submitRegister">
-                    @csrf
-                    <div>
-                        <label for="register-name" class="mb-2 block text-sm font-semibold text-slate-700">Nama lengkap</label>
-                        <div class="relative"><i class="fa-regular fa-user pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required placeholder="Nama lengkap Anda" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"></div>
-                    </div>
-                    <div>
-                        <label for="register-email" class="mb-2 block text-sm font-semibold text-slate-700">Alamat email</label>
-                        <div class="relative"><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="nama@perusahaan.co.id" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"></div>
-                    </div>
-                    <div>
-                        <label for="register-password" class="mb-2 block text-sm font-semibold text-slate-700">Password</label>
-                        <div class="relative"><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password" :type="registerPasswordVisible ? 'text' : 'password'" name="password" autocomplete="new-password" required minlength="8" placeholder="Minimal 8 karakter" class="login-input h-12 w-full rounded-lg border bg-white pl-11 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"><button type="button" @click="registerPasswordVisible = !registerPasswordVisible" class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" :aria-label="registerPasswordVisible ? 'Sembunyikan password' : 'Tampilkan password'"><i class="fa-solid" :class="registerPasswordVisible ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
-                    </div>
-                    <div>
-                        <label for="register-password-confirmation" class="mb-2 block text-sm font-semibold text-slate-700">Konfirmasi password</label>
-                        <input id="register-password-confirmation" type="password" name="password_confirmation" autocomplete="new-password" required minlength="8" placeholder="Ulangi password Anda" class="login-input h-12 w-full rounded-lg border bg-white px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10">
-                    </div>
-                    <div class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-800"><i class="fa-solid fa-circle-info mr-1"></i> Akun baru berstatus <strong>Nonaktif</strong> sampai disetujui Super Admin.</div>
-                    <button type="submit" :disabled="registerLoading" class="login-submit flex h-12 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-600/20 disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="registerLoading ? 'fa-spinner fa-spin' : 'fa-user-plus'"></i><span x-text="registerLoading ? 'Mendaftarkan...' : 'Daftar sekarang'"></span></button>
-                </form>
-
-                <div class="mt-8 rounded-xl bg-blue-50 px-4 py-3 text-center text-sm text-slate-600">
-                    <span x-text="mode === 'login' ? 'Belum punya akun?' : 'Sudah punya akun?'">Belum punya akun?</span>
-                    <button type="button" @click="toggleMode" class="ml-1 font-bold text-blue-600 hover:text-blue-800" x-text="mode === 'login' ? 'Daftar sekarang' : 'Masuk di sini'">Daftar sekarang</button>
+                <div class="mb-6 flex gap-3" x-show="mode === 'login' || mode === 'register'">
+                    <button type="button" disabled class="social-button flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-xs font-bold text-slate-700"><span class="text-base font-extrabold text-[#4285f4]">G</span><span x-text="mode === 'login' ? 'Masuk dengan Google' : 'Google'">Masuk dengan Google</span></button>
+                    <button type="button" disabled class="social-button flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-white text-xs font-bold text-slate-700"><span class="flex h-5 w-5 items-center justify-center rounded bg-[#0a66c2] text-xs font-extrabold text-white">in</span><span x-text="mode === 'login' ? 'Masuk dengan LinkedIn' : 'LinkedIn'">Masuk dengan LinkedIn</span></button>
                 </div>
-                <div class="mt-5 border-t border-blue-100 pt-5 text-center text-xs leading-5 text-slate-400">Akses sistem dikelola oleh administrator perusahaan.<br><a href="{{ route('home') }}" class="font-semibold text-[#155eef] hover:text-[#0d2b5c]">Kembali ke halaman utama</a></div>
+                <div class="mb-6 flex items-center gap-4 text-xs font-semibold text-slate-400"><span class="h-px flex-1 bg-slate-200"></span><span>atau</span><span class="h-px flex-1 bg-slate-200"></span></div>
+
+                <form x-show="mode === 'login'" x-cloak action="{{ route('login') }}" method="POST" class="space-y-4" @submit="submitForm">
+                    @csrf
+                    <input type="hidden" name="_form" value="login">
+                    <div class="relative"><label class="sr-only" for="email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus placeholder="Email" class="field h-14 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
+                    <div class="relative"><label class="sr-only" for="password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required placeholder="Kata sandi" class="field h-14 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
+                    <div class="flex items-center justify-between pt-1"><label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-400"> Ingat saya</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lupa kata sandi?</a></div>
+                    <button type="submit" :disabled="loading" class="primary-button flex h-14 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk'">Masuk</span></button>
+                </form>
+
+                <form x-show="mode === 'register'" x-cloak action="{{ route('register') }}" method="POST" class="space-y-4" @submit="registerLoading = true">
+                    @csrf
+                    <input type="hidden" name="_form" value="register">
+                    <div class="relative"><label class="sr-only" for="register-name">Nama lengkap</label><i class="fa-regular fa-user pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required placeholder="Nama lengkap" class="field h-14 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
+                    <div class="relative"><label class="sr-only" for="register-email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="Email" class="field h-14 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
+                    <div class="relative"><label class="sr-only" for="register-password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password" :type="registerPasswordVisible ? 'text' : 'password'" name="password" autocomplete="new-password" required minlength="8" placeholder="Kata sandi" class="field h-14 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="registerPasswordVisible = !registerPasswordVisible" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="registerPasswordVisible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="registerPasswordVisible ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
+                    <div class="relative"><label class="sr-only" for="register-password-confirmation">Konfirmasi kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password-confirmation" type="password" name="password_confirmation" autocomplete="new-password" required minlength="8" placeholder="Konfirmasi kata sandi" class="field h-14 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
+                    <p class="rounded-xl bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-700"><i class="fa-solid fa-circle-info mr-1"></i> Akun akan berstatus <strong>Nonaktif</strong> sampai disetujui Super Admin.</p>
+                    <button type="submit" :disabled="registerLoading" class="primary-button flex h-14 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="registerLoading ? 'fa-spinner fa-spin' : 'fa-user-plus'"></i><span x-text="registerLoading ? 'Mendaftarkan...' : 'Daftar'">Daftar</span></button>
+                </form>
+
+                <div class="mt-7 text-center text-xs text-slate-400 lg:hidden"><button type="button" @click="toggleMode" class="font-bold text-blue-500" x-text="mode === 'login' ? 'Daftar sekarang' : 'Masuk di sini'">Daftar sekarang</button></div>
+                <p class="mt-7 text-center text-[11px] text-slate-400"><a href="{{ route('home') }}" class="font-semibold text-blue-500 hover:text-blue-700">Kembali ke halaman utama</a></p>
             </div>
         </section>
     </main>
-</body>
-<script>
-    function loginForm() {
-        return {
-            showPassword: false,
-            emailFocused: false,
-            passwordFocused: false,
-            emailValid: false,
-            emailError: false,
-            passwordTouched: false,
-            loading: false,
-            mode: 'login',
-            registerLoading: false,
-            registerPasswordVisible: false,
-            get passwordFilled() { return document.getElementById('password')?.value.length > 0; },
-            validateEmail(event) {
-                const value = event.target.value.trim();
-                this.emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-                this.emailError = value.length > 0 && !this.emailValid;
-            },
-            submitForm(event) {
-                const email = document.getElementById('email')?.value.trim();
-                const password = document.getElementById('password')?.value;
-                this.emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-                this.emailError = !this.emailValid;
-                this.passwordTouched = true;
-                if (!this.emailValid || !password) {
-                    event.preventDefault();
-                    return;
+
+    <script>
+        function loginForm(initialMode) {
+            return {
+                mode: initialMode === 'register' ? 'register' : 'login',
+                showPassword: false,
+                registerPasswordVisible: false,
+                loading: false,
+                registerLoading: false,
+                toggleMode() {
+                    this.mode = this.mode === 'login' ? 'register' : 'login';
+                    this.showPassword = false;
+                    this.registerPasswordVisible = false;
+                },
+                submitForm() {
+                    this.loading = true;
                 }
-                this.loading = true;
-            },
-            toggleMode() {
-                this.mode = this.mode === 'login' ? 'register' : 'login';
-                this.loading = false;
-                this.registerLoading = false;
-            },
-            submitRegister() {
-                this.registerLoading = true;
-            }
-        };
-    }
-</script>
+            };
+        }
+    </script>
+</body>
 </html>
