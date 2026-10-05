@@ -4,6 +4,10 @@
 @section('header-title', 'Dashboard Performa Perusahaan')
 
 @section('content')
+@php
+    $dashboardRole = Auth::user()->role->name ?? '';
+@endphp
+
 <div class="space-y-6">
 
     @if($notifications->isNotEmpty())
@@ -267,10 +271,12 @@
                         <p class="text-xs text-slate-500">Berdasarkan volume penjualan barang</p>
                     </div>
                 </div>
-                <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-semibold text-xs border border-slate-200 hover:border-emerald-200 transition shadow-sm group">
-                    <span>Lihat Penjualan</span>
-                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5"></i>
-                </a>
+                @if($dashboardRole === 'super_admin' || $dashboardRole === 'sales')
+                    <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-semibold text-xs border border-slate-200 hover:border-emerald-200 transition shadow-sm group">
+                        <span>Lihat Penjualan</span>
+                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5"></i>
+                    </a>
+                @endif
             </div>
 
             <div class="space-y-3">
@@ -306,10 +312,12 @@
                         <p class="text-xs text-slate-500">Barang paling sering digunakan dalam tender</p>
                     </div>
                 </div>
-                <a href="{{ route('tender.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
-                    <span>Lihat Tender</span>
-                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
-                </a>
+                @if($dashboardRole === 'super_admin' || $dashboardRole === 'tender_officer')
+                    <a href="{{ route('tender.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
+                        <span>Lihat Tender</span>
+                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
+                    </a>
+                @endif
             </div>
 
             <div class="space-y-3">

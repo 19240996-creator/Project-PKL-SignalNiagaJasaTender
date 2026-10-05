@@ -90,7 +90,7 @@ class DashboardController extends Controller
         }
         $totalProcurementCost = (clone $procurementBase)->sum('total_amount');
 
-        $totalOutstandingPiutang = Invoice::whereIn('status', ['Issued', 'Partial', 'Overdue'])
+        $totalOutstandingPiutang = (clone $invoiceBase)->whereIn('status', ['Issued', 'Partial', 'Overdue'])
             ->selectRaw('SUM(total_amount - paid_amount) as remaining')
             ->value('remaining') ?? 0;
 
