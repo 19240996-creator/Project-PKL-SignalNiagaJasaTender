@@ -7,13 +7,24 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root { --blue: #1a6de3; --blue-deep: #1457b8; --blue-light: #5cb5f5; --blue-muted: #3b82c4; --ink: #142642; --muted: #91a1b8; --line: #dce5ef; }
-        body { font-family: 'Manrope', sans-serif; background: #edf6ff; }
+        body { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #edf6ff; }
         .auth-card { box-shadow: 0 22px 55px rgba(76, 127, 177, .18); }
         .blue-panel { background: linear-gradient(145deg, var(--blue-light) 0%, var(--blue-muted) 100%); }
         .login-panel { border-radius: 0 43% 43% 0 / 0 28% 28% 0; }
@@ -85,23 +96,6 @@
                     <div class="relative"><label class="sr-only" for="password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" x-model="loginPassword" autocomplete="current-password" required placeholder="Kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
                     <div class="flex items-center justify-between pt-1"><label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-400"> Ingat saya</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lupa kata sandi?</a></div>
                     <button type="submit" :disabled="loading" class="primary-button flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk'">Masuk</span></button>
-
-                    <!-- Quick Login 3 Akun Utama -->
-                    @if(!empty($accounts))
-                        <div class="mt-4 pt-3 border-t border-slate-100">
-                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">Masuk Cepat (3 Peran Sistem)</p>
-                            <div class="grid grid-cols-3 gap-2">
-                                @foreach($accounts as $acc)
-                                    <button type="button" @click="fillAccount('{{ $acc['email'] }}', '{{ $acc['password'] }}')" class="p-2 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/60 text-center transition group bg-white shadow-xs">
-                                        <div class="text-xs font-bold text-slate-800 group-hover:text-blue-600">
-                                            {{ $acc['label'] }}
-                                        </div>
-                                        <div class="text-[10px] text-slate-400 truncate mt-0.5">{{ explode('@', $acc['email'])[0] }}</div>
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </form>
 
                 <form x-show="mode === 'register'" x-cloak action="{{ route('register') }}" method="POST" class="register-form space-y-3" @submit="registerLoading = true">
@@ -129,16 +123,12 @@
                 registerPasswordVisible: false,
                 loading: false,
                 registerLoading: false,
-                loginEmail: '{{ old('email', 'owner@signalpanca.co.id') }}',
-                loginPassword: 'password',
+                loginEmail: '{{ old('email') }}',
+                loginPassword: '',
                 toggleMode() {
                     this.mode = this.mode === 'login' ? 'register' : 'login';
                     this.showPassword = false;
                     this.registerPasswordVisible = false;
-                },
-                fillAccount(email, pass) {
-                    this.loginEmail = email;
-                    this.loginPassword = pass;
                 },
                 submitForm() {
                     this.loading = true;

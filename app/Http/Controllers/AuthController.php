@@ -18,13 +18,7 @@ class AuthController extends Controller
 {
     public function showLoginForm(): View
     {
-        $accounts = [
-            ['role' => 'owner', 'label' => 'Owner', 'email' => 'owner@signalpanca.co.id', 'password' => 'password', 'desc' => 'Monitoring dan melihat laporan seluruh domain', 'badge' => 'bg-purple-100 text-purple-800'],
-            ['role' => 'manager', 'label' => 'Manager', 'email' => 'manager@signalpanca.co.id', 'password' => 'password', 'desc' => 'Pemeriksaan, persetujuan & pengendalian eksekusi', 'badge' => 'bg-emerald-100 text-emerald-800'],
-            ['role' => 'admin', 'label' => 'Admin', 'email' => 'admin@signalpanca.co.id', 'password' => 'password', 'desc' => 'Menerima dan menginput seluruh data operasional', 'badge' => 'bg-blue-100 text-blue-800'],
-        ];
-
-        return view('auth.login', compact('accounts'));
+        return view('auth.login');
     }
 
     public function register(Request $request): RedirectResponse

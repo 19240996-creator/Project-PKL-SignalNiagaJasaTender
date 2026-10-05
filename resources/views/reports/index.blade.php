@@ -83,124 +83,130 @@
 
     <!-- 3. Kartu KPI Sesuai Domain Terpilih -->
     @if($domain === 'tender')
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Proyek Tender</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_tenders'] }} Proyek</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Lelang terdaftar</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Proyek Tender</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2">{{ $kpi['total_tenders'] }} Proyek</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Lelang terdaftar</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Nilai Penawaran</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Akumulasi bidding</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Nilai Penawaran</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2 truncate" title="Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Akumulasi bidding</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Tender Disetujui</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $tenders->where('approval_status', 'approved')->count() }}</div>
-                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Tender Disetujui</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-emerald-700 mt-2">{{ $tenders->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-1.5 block font-semibold">Disetujui Manager</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Tender Pending</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $tenders->where('approval_status', 'pending')->count() }}</div>
-                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Tender Pending</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-amber-700 mt-2">{{ $tenders->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-1.5 block font-semibold">Menunggu verifikasi</span>
             </div>
         </div>
 
     @elseif($domain === 'jasa')
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Pekerjaan Jasa</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_services'] }} Pekerjaan</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Servis & maintenance</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Pekerjaan Jasa</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2">{{ $kpi['total_services'] }} Pekerjaan</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Servis & maintenance</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Biaya Layanan</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Biaya pekerjaan teknis</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Biaya Layanan</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2 truncate" title="Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Biaya pekerjaan teknis</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Pekerjaan Disetujui</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $services->where('approval_status', 'approved')->count() }}</div>
-                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Pekerjaan Disetujui</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-emerald-700 mt-2">{{ $services->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-1.5 block font-semibold">Disetujui Manager</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Pekerjaan Pending</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $services->where('approval_status', 'pending')->count() }}</div>
-                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Pekerjaan Pending</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-amber-700 mt-2">{{ $services->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-1.5 block font-semibold">Menunggu verifikasi</span>
             </div>
         </div>
 
     @elseif($domain === 'barang')
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Transaksi Dagang</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_sales'] }} Penjualan</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Penjualan barang fisik</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Transaksi Dagang</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2">{{ $kpi['total_sales'] }} Penjualan</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Penjualan barang fisik</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Omzet Penjualan</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
-                <span class="text-xs text-slate-500 mt-0.5 block">Nilai transaksi barang</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Omzet Penjualan</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-2 truncate" title="Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-600 mt-1.5 block font-medium">Nilai transaksi barang</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Transaksi Disetujui</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $sales->where('approval_status', 'approved')->count() }}</div>
-                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Transaksi Disetujui</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-emerald-700 mt-2">{{ $sales->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-1.5 block font-semibold">Disetujui Manager</span>
             </div>
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Transaksi Pending</span>
-                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $sales->where('approval_status', 'pending')->count() }}</div>
-                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Transaksi Pending</span>
+                <div class="text-xl sm:text-2xl font-extrabold font-number text-amber-700 mt-2">{{ $sales->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-1.5 block font-semibold">Menunggu verifikasi</span>
             </div>
         </div>
 
     @else
         <!-- Ringkasan Perbandingan 3 Bisnis Mandiri -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             <!-- Bisnis 1: Tender -->
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 1: Tender</span>
-                        <i class="fa-solid fa-file-contract text-slate-400"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bisnis 1: Tender</span>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 text-xs">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_tenders'] }} Proyek</div>
-                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
-                    <p class="text-xs text-slate-500 mt-2">Lelang pengadaan resmi (Internal & Vendor Relasi).</p>
+                    <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-1">{{ $kpi['total_tenders'] }} Proyek</div>
+                    <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2 font-medium">Lelang pengadaan resmi (Internal & Vendor Relasi).</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
                     Rincian Laporan Tender →
                 </a>
             </div>
 
             <!-- Bisnis 2: Jasa -->
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 2: Jasa</span>
-                        <i class="fa-solid fa-wrench text-slate-400"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bisnis 2: Jasa</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 text-xs">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_services'] }} Pekerjaan</div>
-                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
-                    <p class="text-xs text-slate-500 mt-2">Layanan teknis, pemeliharaan, dan instalasi.</p>
+                    <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-1">{{ $kpi['total_services'] }} Pekerjaan</div>
+                    <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2 font-medium">Layanan teknis, pemeliharaan, dan instalasi.</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
                     Rincian Laporan Jasa →
                 </a>
             </div>
 
             <!-- Bisnis 3: Dagang -->
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+            <div class="bg-white p-5 rounded-2xl border-2 border-slate-200/90 shadow-sm hover:border-blue-400 hover:shadow transition duration-150 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 3: Dagang</span>
-                        <i class="fa-solid fa-boxes-stacked text-slate-400"></i>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bisnis 3: Dagang</span>
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 text-xs">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_sales'] }} Penjualan</div>
-                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
-                    <p class="text-xs text-slate-500 mt-2">Perdagangan produk fisik, percetakan, dan aksesoris.</p>
+                    <div class="text-xl sm:text-2xl font-extrabold font-number text-slate-900 mt-1">{{ $kpi['total_sales'] }} Penjualan</div>
+                    <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2 font-medium">Perdagangan produk fisik, percetakan, dan aksesoris.</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
                     Rincian Laporan Dagang →
                 </a>
             </div>

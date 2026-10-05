@@ -167,10 +167,58 @@ class DashboardController extends Controller
         $recentProcurements = Procurement::with('supplier')->latest()->take(5)->get();
         $notifications = $request->user()?->unreadNotifications()->latest()->take(5)->get() ?? collect();
 
+        // ==========================================
+        // DATA GRAFIK ANALITIK (6 BULAN TERAKHIR)
+        // ==========================================
+        $indonesianMonths = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+            7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+        ];
+
+        $chartMonths = [];
+        $chartTransactionValues = [];
+        $chartRevenueValues = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $cDate = now()->subMonths($i);
+            $mNum = (int) $cDate->format('n');
+            $mYear = $cDate->format('Y');
+            $label = ($indonesianMonths[$mNum] ?? $cDate->format('M')) . ' ' . $mYear;
+
+            $mStart = $cDate->copy()->startOfMonth()->toDateTimeString();
+            $mEnd = $cDate->copy()->endOfMonth()->toDateTimeString();
+
+            $mTenderVal = (float) Tender::whereBetween('created_at', [$mStart, $mEnd])->sum('bid_value');
+            $mServiceVal = (float) Contract::whereBetween('created_at', [$mStart, $mEnd])->sum('contract_value');
+            if ($mServiceVal == 0) {
+                $mServiceVal = (float) ServiceJob::whereBetween('created_at', [$mStart, $mEnd])->sum('biaya');
+            }
+            $mSalesVal = (float) Sale::whereBetween('created_at', [$mStart, $mEnd])->sum('total_amount');
+            $mProcVal = (float) Procurement::whereBetween('created_at', [$mStart, $mEnd])->sum('total_amount');
+
+            $mPaidService = (float) Invoice::whereNotNull('service_job_id')->whereBetween('created_at', [$mStart, $mEnd])->sum('paid_amount');
+            $mRevenue = $mPaidService + $mSalesVal;
+
+            $chartMonths[] = $label;
+            $chartTransactionValues[] = (float) ($mTenderVal + $mServiceVal + $mSalesVal + $mProcVal);
+            $chartRevenueValues[] = (float) $mRevenue;
+        }
+
+        // Komposisi 3 Pilar Bisnis
+        $pillarShare = [
+            'tender' => (float) $totalTenderValue,
+            'jasa' => (float) $totalServiceValue,
+            'barang' => (float) $tradeRevenue,
+        ];
+
         return view('dashboard', compact(
             'period',
             'startDate',
             'endDate',
+            'chartMonths',
+            'chartTransactionValues',
+            'chartRevenueValues',
+            'pillarShare',
             // 11.4 Ringkasan Perusahaan & PRD Approval
             'companyTotalActivities',
             'companyTotalTransactionValue',
