@@ -58,4 +58,19 @@ class User extends Authenticatable
     {
         return $this->role?->permissions()->where('name', $permission)->exists() ?? false;
     }
+
+    public function isOwner(): bool
+    {
+        return strtolower($this->role?->name ?? '') === 'owner';
+    }
+
+    public function isManager(): bool
+    {
+        return strtolower($this->role?->name ?? '') === 'manager';
+    }
+
+    public function isAdmin(): bool
+    {
+        return strtolower($this->role?->name ?? '') === 'admin';
+    }
 }

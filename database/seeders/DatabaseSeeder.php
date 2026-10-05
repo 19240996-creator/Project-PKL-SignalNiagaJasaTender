@@ -26,16 +26,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Seed Roles
+        // 1. Seed Roles (Hanya 3 role: Owner, Manager, Admin)
         $rolesData = [
-            'super_admin' => 'Akses penuh terhadap seluruh sistem.',
-            'management' => 'Dashboard, KPI, monitoring, dan laporan.',
-            'tender_officer' => 'Pengelolaan proses tender.',
-            'service_officer' => 'Pengelolaan klien, kontrak, dan pekerjaan jasa.',
-            'purchasing' => 'Pengelolaan supplier dan pengadaan.',
-            'warehouse' => 'Pengelolaan persediaan dan pergerakan stok.',
-            'sales' => 'Pengelolaan penjualan dan transaksi perdagangan.',
-            'finance' => 'Pengelolaan invoice, tagihan, dan pembayaran.',
+            'owner' => 'Owner - Monitoring dan melihat laporan seluruh domain.',
+            'manager' => 'Manager - Pemeriksaan, persetujuan, dan pengendalian eksekusi.',
+            'admin' => 'Admin - Menerima dan menginput data operasional.',
         ];
 
         $rolesMap = [];
@@ -44,45 +39,54 @@ class DatabaseSeeder extends Seeder
             $rolesMap[$name] = $role->id;
         }
 
-        // 2. Seed Users
+        // 2. Seed Users (3 akun sesuai 3 role)
         $adminUser = User::firstOrCreate(
-            ['email' => 'superadmin@signalpanca.co.id'],
+            ['email' => 'owner@signalpanca.co.id'],
             [
-                'name' => 'Super Administrator',
+                'name' => 'Owner SPU',
                 'password' => Hash::make('password'),
-                'role_id' => $rolesMap['super_admin'],
+                'role_id' => $rolesMap['owner'],
                 'is_active' => true,
             ]
         );
 
-        foreach ($rolesMap as $roleName => $roleId) {
-            if ($roleName === 'super_admin') continue;
-            User::firstOrCreate(
-                ['email' => $roleName . '@signalpanca.co.id'],
-                [
-                    'name' => ucwords(str_replace('_', ' ', $roleName)) . ' SPU',
-                    'password' => Hash::make('password'),
-                    'role_id' => $roleId,
-                    'is_active' => true,
-                ]
-            );
-        }
+        User::firstOrCreate(
+            ['email' => 'manager@signalpanca.co.id'],
+            [
+                'name' => 'Manager SPU',
+                'password' => Hash::make('password'),
+                'role_id' => $rolesMap['manager'],
+                'is_active' => true,
+            ]
+        );
 
+        User::firstOrCreate(
+            ['email' => 'admin@signalpanca.co.id'],
+            [
+                'name' => 'Admin SPU',
+                'password' => Hash::make('password'),
+                'role_id' => $rolesMap['admin'],
+                'is_active' => true,
+            ]
+        );
+
+        // 3. Seed Permissions
         $permissionNames = ['users.manage', 'reports.view', 'reports.export', 'tenders.manage', 'services.manage', 'sales.manage', 'finance.manage'];
         foreach ($permissionNames as $permissionName) {
             Permission::firstOrCreate(['name' => $permissionName]);
         }
+
+        // Owner: Akses penuh (monitoring, laporan, kelola user)
+        // Manager: Laporan + approve/reject semua domain operasional
+        // Admin: Input/edit data semua domain operasional
         $rolePermissions = [
-            'management' => ['reports.view', 'reports.export'],
-            'tender_officer' => ['tenders.manage'],
-            'service_officer' => ['services.manage'],
-            'sales' => ['sales.manage'],
-            'finance' => ['finance.manage'],
+            'owner' => ['users.manage', 'reports.view', 'reports.export', 'tenders.manage', 'services.manage', 'sales.manage', 'finance.manage'],
+            'manager' => ['reports.view', 'reports.export', 'tenders.manage', 'services.manage', 'sales.manage', 'finance.manage'],
+            'admin' => ['reports.view', 'reports.export', 'tenders.manage', 'services.manage', 'sales.manage', 'finance.manage'],
         ];
         foreach ($rolePermissions as $roleName => $permissions) {
             Role::find($rolesMap[$roleName])->permissions()->sync(Permission::whereIn('name', $permissions)->pluck('id'));
         }
-        Role::find($rolesMap['super_admin'])->permissions()->sync(Permission::pluck('id'));
 
         // 3. Seed Master Clients
         $clients = [

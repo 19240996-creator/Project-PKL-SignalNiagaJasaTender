@@ -81,10 +81,27 @@
                 <form x-show="mode === 'login'" x-cloak action="{{ route('login') }}" method="POST" class="space-y-3" @submit="submitForm">
                     @csrf
                     <input type="hidden" name="_form" value="login">
-                    <div class="relative"><label class="sr-only" for="email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus placeholder="Email" class="field h-12 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
-                    <div class="relative"><label class="sr-only" for="password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" autocomplete="current-password" required placeholder="Kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
+                    <div class="relative"><label class="sr-only" for="email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="email" type="email" name="email" x-model="loginEmail" autocomplete="email" required autofocus placeholder="Email" class="field h-12 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
+                    <div class="relative"><label class="sr-only" for="password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" x-model="loginPassword" autocomplete="current-password" required placeholder="Kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
                     <div class="flex items-center justify-between pt-1"><label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-400"> Ingat saya</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lupa kata sandi?</a></div>
                     <button type="submit" :disabled="loading" class="primary-button flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk'">Masuk</span></button>
+
+                    <!-- Quick Login 3 Akun Utama -->
+                    @if(!empty($accounts))
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">Masuk Cepat (3 Peran Sistem)</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach($accounts as $acc)
+                                    <button type="button" @click="fillAccount('{{ $acc['email'] }}', '{{ $acc['password'] }}')" class="p-2 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/60 text-center transition group bg-white shadow-xs">
+                                        <div class="text-xs font-bold text-slate-800 group-hover:text-blue-600">
+                                            {{ $acc['label'] }}
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 truncate mt-0.5">{{ explode('@', $acc['email'])[0] }}</div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </form>
 
                 <form x-show="mode === 'register'" x-cloak action="{{ route('register') }}" method="POST" class="register-form space-y-3" @submit="registerLoading = true">
@@ -94,7 +111,7 @@
                     <div class="relative"><label class="sr-only" for="register-email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required placeholder="Email" class="field h-12 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
                     <div class="relative"><label class="sr-only" for="register-password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password" :type="registerPasswordVisible ? 'text' : 'password'" name="password" autocomplete="new-password" required minlength="8" placeholder="Kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="registerPasswordVisible = !registerPasswordVisible" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="registerPasswordVisible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="registerPasswordVisible ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
                     <div class="relative"><label class="sr-only" for="register-password-confirmation">Konfirmasi kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="register-password-confirmation" type="password" name="password_confirmation" autocomplete="new-password" required minlength="8" placeholder="Konfirmasi kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
-                    <p class="rounded-xl bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-700"><i class="fa-solid fa-circle-info mr-1"></i> Akun akan berstatus <strong>Nonaktif</strong> sampai disetujui Super Admin.</p>
+                    <p class="rounded-xl bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-700"><i class="fa-solid fa-circle-info mr-1"></i> Akun akan berstatus <strong>Nonaktif</strong> sampai disetujui Owner.</p>
                     <button type="submit" :disabled="registerLoading" class="primary-button flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="registerLoading ? 'fa-spinner fa-spin' : 'fa-user-plus'"></i><span x-text="registerLoading ? 'Mendaftarkan...' : 'Daftar'">Daftar</span></button>
                 </form>
 
@@ -112,10 +129,16 @@
                 registerPasswordVisible: false,
                 loading: false,
                 registerLoading: false,
+                loginEmail: '{{ old('email', 'owner@signalpanca.co.id') }}',
+                loginPassword: 'password',
                 toggleMode() {
                     this.mode = this.mode === 'login' ? 'register' : 'login';
                     this.showPassword = false;
                     this.registerPasswordVisible = false;
+                },
+                fillAccount(email, pass) {
+                    this.loginEmail = email;
+                    this.loginPassword = pass;
                 },
                 submitForm() {
                     this.loading = true;

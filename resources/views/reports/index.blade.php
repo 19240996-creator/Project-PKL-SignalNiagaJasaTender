@@ -1,315 +1,435 @@
 @extends('layouts.app')
 
 @section('title', 'Laporan Bisnis')
-@section('header-title', 'Laporan Eksekutif & Operational SignalNiagaJasaTender')
+@section('header-title', 'Laporan Bisnis')
 
 @section('content')
-<div class="space-y-6">
+@php
+    $user = Auth::user();
+    $isOwner = $user->isOwner();
+    $isManager = $user->isManager();
+    $isAdmin = $user->isAdmin();
+@endphp
 
-    <!-- Filter Bar & Print Header -->
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Jenis Laporan</label>
-                <select name="type" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                    <option value="tender" {{ $type === 'tender' ? 'selected' : '' }}>Laporan Tender</option>
-                    <option value="contract" {{ $type === 'contract' ? 'selected' : '' }}>Laporan Kontrak Jasa</option>
-                    <option value="jasa" {{ $type === 'jasa' ? 'selected' : '' }}>Laporan Pekerjaan Jasa</option>
-                    <option value="procurement" {{ $type === 'procurement' ? 'selected' : '' }}>Laporan Pengadaan Barang</option>
-                    <option value="sales" {{ $type === 'sales' ? 'selected' : '' }}>Laporan Penjualan Perdagangan</option>
-                    <option value="stock" {{ $type === 'stock' ? 'selected' : '' }}>Laporan Persediaan Stok</option>
-                    <option value="invoice" {{ $type === 'invoice' ? 'selected' : '' }}>Laporan Invoice & Piutang</option>
-                    <option value="payment" {{ $type === 'payment' ? 'selected' : '' }}>Laporan Pembayaran Diterima</option>
-                </select>
-            </div>
+<div class="space-y-5">
 
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Dari Tanggal</label>
-                <input type="date" name="start_date" value="{{ $startDate }}" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
-            </div>
+    <!-- 1. Tab Seleksi Unit Bisnis (Corporate Blue & White Tabs) -->
+    <div class="border-b border-slate-200 flex flex-wrap gap-6 text-xs md:text-sm font-medium print:hidden">
+        <a href="{{ route('laporan.index', ['domain' => 'tender', 'periode' => $periode, 'status' => $status]) }}"
+           class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'tender' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
+            <i class="fa-solid fa-file-contract text-xs"></i>
+            <span>Bisnis Tender</span>
+        </a>
 
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Sampai Tanggal</label>
-                <input type="date" name="end_date" value="{{ $endDate }}" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
-            </div>
+        <a href="{{ route('laporan.index', ['domain' => 'jasa', 'periode' => $periode, 'status' => $status]) }}"
+           class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'jasa' ? 'border-emerald-600 text-emerald-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
+            <i class="fa-solid fa-wrench text-xs"></i>
+            <span>Bisnis Jasa</span>
+        </a>
 
-            <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cari</label>
-                <input type="search" name="search" value="{{ $search }}" placeholder="Nomor atau nama" class="px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
-            </div>
+        <a href="{{ route('laporan.index', ['domain' => 'barang', 'periode' => $periode, 'status' => $status]) }}"
+           class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'barang' ? 'border-purple-600 text-purple-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
+            <i class="fa-solid fa-boxes-stacked text-xs"></i>
+            <span>Bisnis Dagang (Barang)</span>
+        </a>
 
-            <div class="self-end">
-                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl">
-                    <i class="fa-solid fa-filter"></i> Tampilkan
-                </button>
-            </div>
-        </form>
-
-        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
-            <i class="fa-solid fa-print"></i> Cetak Laporan
-        </button>
-                <a href="{{ route('laporan.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv"></i> Export Excel/CSV
-                </a>
-                <a href="{{ route('laporan.export.pdf', request()->query()) }}" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-                <a href="{{ route('laporan.export.xlsx', request()->query()) }}" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> XLSX</a>
+        <a href="{{ route('laporan.index', ['domain' => 'semua', 'periode' => $periode, 'status' => $status]) }}"
+           class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'semua' ? 'border-slate-800 text-slate-900 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
+            <i class="fa-solid fa-chart-pie text-xs"></i>
+            <span>Ringkasan Tiga Bisnis</span>
+        </a>
     </div>
 
-    <!-- Report Document Printable Sheet -->
-    <div class="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+    <!-- 2. Filter Toolbar (1 Baris Ringkas) -->
+    <div class="bg-white rounded-lg p-3 border border-slate-200/90 shadow-xs print:hidden">
+        <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-center justify-between gap-3">
+            <input type="hidden" name="domain" value="{{ $domain }}">
 
-        <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
-            <div>
-                <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tight">LAPORAN {{ strtoupper($type) }}</h2>
-                <p class="text-xs text-slate-500">PT Signal Panca Utama &bull; Periode: {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Periode -->
+                <select name="periode" onchange="this.form.submit()" class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="bulan_ini" {{ $periode === 'bulan_ini' ? 'selected' : '' }}>Bulan Ini</option>
+                    <option value="tahun_ini" {{ $periode === 'tahun_ini' ? 'selected' : '' }}>Tahun Ini</option>
+                    <option value="hari_ini" {{ $periode === 'hari_ini' ? 'selected' : '' }}>Hari Ini</option>
+                    <option value="semua" {{ $periode === 'semua' ? 'selected' : '' }}>Semua Periode</option>
+                </select>
+
+                <!-- Status Approval -->
+                <select name="status" onchange="this.form.submit()" class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="semua" {{ $status === 'semua' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Disetujui</option>
+                    <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Pending</option>
+                </select>
+
+                <!-- Pencarian Cepat -->
+                <input type="text" name="search" value="{{ $search }}" placeholder="Cari nomor / nama..." class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs w-48 outline-none focus:ring-2 focus:ring-blue-500">
+
+                <button type="submit" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold rounded-md transition">
+                    Filter
+                </button>
             </div>
-            <div class="text-right text-xs text-slate-400">
-                Dicetak pada: {{ date('d M Y H:i') }}
+
+            <!-- Tombol Cetak & Ekspor CSV -->
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="window.print()" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-print text-xs text-slate-500"></i> Cetak Laporan
+                </button>
+                <a href="{{ route('laporan.export', request()->query()) }}" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-download text-xs"></i> Ekspor CSV
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. Kartu KPI Sesuai Domain Terpilih -->
+    @if($domain === 'tender')
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Proyek Tender</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_tenders'] }} Proyek</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Lelang terdaftar</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Nilai Penawaran</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Akumulasi bidding</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Tender Disetujui</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $tenders->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Tender Pending</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $tenders->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
             </div>
         </div>
 
-        <!-- Render Report Tables according to $type -->
+    @elseif($domain === 'jasa')
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Pekerjaan Jasa</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_services'] }} Pekerjaan</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Servis & maintenance</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Biaya Layanan</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Biaya pekerjaan teknis</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Pekerjaan Disetujui</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $services->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Pekerjaan Pending</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $services->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
+            </div>
+        </div>
+
+    @elseif($domain === 'barang')
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Transaksi Dagang</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $kpi['total_sales'] }} Penjualan</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Penjualan barang fisik</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Omzet Penjualan</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1 truncate">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
+                <span class="text-xs text-slate-500 mt-0.5 block">Nilai transaksi barang</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Transaksi Disetujui</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $sales->where('approval_status', 'approved')->count() }}</div>
+                <span class="text-xs text-emerald-700 mt-0.5 block">Disetujui Manager</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Transaksi Pending</span>
+                <div class="text-xl md:text-2xl font-bold font-mono text-slate-900 mt-1">{{ $sales->where('approval_status', 'pending')->count() }}</div>
+                <span class="text-xs text-amber-700 mt-0.5 block">Menunggu verifikasi</span>
+            </div>
+        </div>
+
+    @else
+        <!-- Ringkasan Perbandingan 3 Bisnis Mandiri -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Bisnis 1: Tender -->
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 1: Tender</span>
+                        <i class="fa-solid fa-file-contract text-slate-400"></i>
+                    </div>
+                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_tenders'] }} Proyek</div>
+                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2">Lelang pengadaan resmi (Internal & Vendor Relasi).</p>
+                </div>
+                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                    Rincian Laporan Tender →
+                </a>
+            </div>
+
+            <!-- Bisnis 2: Jasa -->
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 2: Jasa</span>
+                        <i class="fa-solid fa-wrench text-slate-400"></i>
+                    </div>
+                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_services'] }} Pekerjaan</div>
+                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2">Layanan teknis, pemeliharaan, dan instalasi.</p>
+                </div>
+                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                    Rincian Laporan Jasa →
+                </a>
+            </div>
+
+            <!-- Bisnis 3: Dagang -->
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bisnis 3: Dagang</span>
+                        <i class="fa-solid fa-boxes-stacked text-slate-400"></i>
+                    </div>
+                    <div class="text-xl font-bold font-mono text-slate-900">{{ $kpi['total_sales'] }} Penjualan</div>
+                    <div class="text-sm font-semibold font-mono text-slate-800 mt-1">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
+                    <p class="text-xs text-slate-500 mt-2">Perdagangan produk fisik, percetakan, dan aksesoris.</p>
+                </div>
+                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs rounded text-center transition">
+                    Rincian Laporan Dagang →
+                </a>
+            </div>
+        </div>
+    @endif
+
+    <!-- 4. Tabel Data Sesuai Domain Terpilih -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <h3 class="font-semibold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                @if($domain === 'tender')
+                    <i class="fa-solid fa-file-contract text-slate-500"></i> Data Laporan Bisnis 1: Tender
+                @elseif($domain === 'jasa')
+                    <i class="fa-solid fa-wrench text-slate-500"></i> Data Laporan Bisnis 2: Jasa
+                @elseif($domain === 'barang')
+                    <i class="fa-solid fa-boxes-stacked text-slate-500"></i> Data Laporan Bisnis 3: Dagang (Barang)
+                @else
+                    <i class="fa-solid fa-chart-pie text-slate-500"></i> Ringkasan Nilai Finansial 3 Bisnis
+                @endif
+            </h3>
+            <span class="text-xs text-slate-500">
+                @if($domain === 'tender') {{ $tenders->count() }} data proyek
+                @elseif($domain === 'jasa') {{ $services->count() }} data pekerjaan
+                @elseif($domain === 'barang') {{ $sales->count() }} data transaksi
+                @else 3 Bidang Usaha
+                @endif
+            </span>
+        </div>
+
         <div class="overflow-x-auto">
-            @if($type === 'tender')
+            @if($domain === 'tender')
+                <!-- TABEL TENDER -->
                 <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
+                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                        <tr>
                             <th class="p-3">No. Tender</th>
                             <th class="p-3">Nama Tender</th>
-                            <th class="p-3">Klien</th>
-                            <th class="p-3">Tanggal</th>
-                            <th class="p-3 text-right">Nilai Estimasi</th>
-                            <th class="p-3 text-right">Nilai Penawaran</th>
-                            <th class="p-3">Status</th>
+                            <th class="p-3">Klien / Instansi</th>
+                            <th class="p-3">Pengerjaan</th>
+                            <th class="p-3 text-right">Nilai Kontrak/Bid</th>
+                            <th class="p-3 text-center">Status Lelang</th>
+                            <th class="p-3 text-center">Approval</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $t)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $t->tender_number }}</td>
-                                <td class="p-3 font-medium">{{ $t->name }}</td>
-                                <td class="p-3">{{ $t->client->name ?? '-' }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($t->found_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-right">Rp {{ number_format($t->estimated_value, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right font-bold">Rp {{ number_format($t->bid_value, 0, ',', '.') }}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-slate-100 text-slate-700">{{ $t->status }}</span></td>
+                        @forelse($tenders as $t)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="p-3 font-mono font-medium text-slate-900">{{ $t->tender_number }}</td>
+                                <td class="p-3 font-medium text-slate-800">{{ $t->name }}</td>
+                                <td class="p-3 text-slate-600">{{ $t->client->name ?? '-' }}</td>
+                                <td class="p-3 text-slate-600">
+                                    @if($t->metode_penanganan === 'vendor_relasi')
+                                        <span>Vendor: {{ $t->nama_vendor_relasi ?: 'Mitra' }}</span>
+                                    @else
+                                        <span>Internal SPU</span>
+                                    @endif
+                                </td>
+                                <td class="p-3 text-right font-mono font-medium text-slate-900">Rp {{ number_format($t->bid_value ?? $t->estimated_value, 0, ',', '.') }}</td>
+                                <td class="p-3 text-center">
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">{{ $t->status }}</span>
+                                </td>
+                                <td class="p-3 text-center">
+                                    @if($t->approval_status === 'approved')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Disetujui
+                                        </span>
+                                    @elseif($t->approval_status === 'rejected')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Ditolak
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                        </span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data tender pada periode ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-            @elseif($type === 'contract')
+
+            @elseif($domain === 'jasa')
+                <!-- TABEL JASA -->
                 <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">No. Kontrak</th>
-                            <th class="p-3">Klien</th>
-                            <th class="p-3">Tanggal Mulai</th>
-                            <th class="p-3">Tanggal Berakhir</th>
-                            <th class="p-3 text-right">Nilai Kontrak</th>
-                            <th class="p-3 text-right">Fee (%)</th>
-                            <th class="p-3 text-right">Nilai Fee</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $c)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $c->contract_number }}</td>
-                                <td class="p-3 font-medium">{{ $c->client->name ?? '-' }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($c->start_date)->format('d/m/Y') }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($c->end_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-right font-bold">Rp {{ number_format($c->contract_value, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right">{{ number_format($c->fee_percentage, 1) }}%</td>
-                                <td class="p-3 text-right font-bold text-emerald-600">Rp {{ number_format($c->fee_amount, 0, ',', '.') }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data kontrak pada periode ini.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @elseif($type === 'jasa')
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
+                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                        <tr>
                             <th class="p-3">No. Job</th>
-                            <th class="p-3">Nama Pekerjaan</th>
-                            <th class="p-3">Klien</th>
-                            <th class="p-3">No. Kontrak</th>
-                            <th class="p-3 text-center">Progress</th>
-                            <th class="p-3">Status</th>
+                            <th class="p-3">Nama Layanan Jasa</th>
+                            <th class="p-3">Nama Klien</th>
+                            <th class="p-3 text-right">Biaya Layanan (Rp)</th>
+                            <th class="p-3 text-center">Pelaksanaan</th>
+                            <th class="p-3 text-center">Approval</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $j)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $j->job_number }}</td>
-                                <td class="p-3 font-medium">{{ $j->name }}</td>
-                                <td class="p-3">{{ $j->contract->client->name ?? '-' }}</td>
-                                <td class="p-3 font-mono text-slate-500">{{ $j->contract->contract_number ?? '-' }}</td>
+                        @forelse($services as $j)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="p-3 font-mono font-medium text-slate-900">{{ $j->job_number }}</td>
+                                <td class="p-3 font-medium text-slate-800">{{ $j->name }}</td>
+                                <td class="p-3 text-slate-600">{{ $j->klien ?: ($j->contract?->client?->name ?: '-') }}</td>
+                                <td class="p-3 text-right font-mono font-medium text-slate-900">Rp {{ number_format($j->biaya ?? ($j->contract?->contract_value ?? 0), 0, ',', '.') }}</td>
                                 <td class="p-3 text-center">
-                                    <div class="inline-flex items-center gap-2">
-                                        <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $j->progress }}%"></div>
-                                        </div>
-                                        <span class="font-bold text-slate-700">{{ $j->progress }}%</span>
-                                    </div>
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">{{ $j->status }}</span>
                                 </td>
-                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-slate-100 text-slate-700">{{ $j->status }}</span></td>
+                                <td class="p-3 text-center">
+                                    @if($j->approval_status === 'approved')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Disetujui
+                                        </span>
+                                    @elseif($j->approval_status === 'rejected')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Ditolak
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                        </span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="6" class="p-6 text-center text-slate-400">Tidak ada data pekerjaan jasa pada periode ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-            @elseif($type === 'procurement')
+
+            @elseif($domain === 'barang')
+                <!-- TABEL DAGANG -->
                 <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">No. Pengadaan</th>
-                            <th class="p-3">Supplier</th>
-                            <th class="p-3">Tanggal</th>
-                            <th class="p-3 text-right">Total Biaya</th>
-                            <th class="p-3">Status</th>
+                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3">No. Transaksi</th>
+                            <th class="p-3">Nama Pelanggan</th>
+                            <th class="p-3">Nama Barang</th>
+                            <th class="p-3 text-right">Qty</th>
+                            <th class="p-3 text-right">Harga Satuan</th>
+                            <th class="p-3 text-right">Total Transaksi (Rp)</th>
+                            <th class="p-3 text-center">Approval</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $prc)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $prc->procurement_number }}</td>
-                                <td class="p-3 font-medium">{{ $prc->supplier->name ?? '-' }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($prc->procurement_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-right font-bold">Rp {{ number_format($prc->total_amount, 0, ',', '.') }}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">{{ $prc->status }}</span></td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada data pengadaan pada periode ini.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @elseif($type === 'sales')
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">No. Penjualan</th>
-                            <th class="p-3">Pelanggan</th>
-                            <th class="p-3">Tanggal Penjualan</th>
-                            <th class="p-3 text-right">Total Penjualan</th>
-                            <th class="p-3">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $s)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $s->sale_number }}</td>
-                                <td class="p-3 font-medium">{{ $s->customer_name }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($s->sale_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-right font-bold text-emerald-600">Rp {{ number_format($s->total_amount, 0, ',', '.') }}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">{{ $s->status }}</span></td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada data penjualan pada periode ini.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @elseif($type === 'stock')
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">SKU</th>
-                            <th class="p-3">Nama Produk</th>
-                            <th class="p-3">Kategori</th>
-                            <th class="p-3 text-right">Harga Beli</th>
-                            <th class="p-3 text-right">Harga Jual</th>
-                            <th class="p-3 text-right">Stok Terkini</th>
-                            <th class="p-3">Status stok</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $p)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $p->sku }}</td>
-                                <td class="p-3 font-medium">{{ $p->name }}</td>
-                                <td class="p-3">{{ $p->category ?? 'Umum' }}</td>
-                                <td class="p-3 text-right">Rp {{ number_format($p->purchase_price, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right font-bold">Rp {{ number_format($p->selling_price, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right font-bold">{{ number_format($p->stock, 0) }} {{ $p->unit }}</td>
-                                <td class="p-3">
-                                    @if($p->isLowStock())
-                                        <span class="px-2 py-0.5 rounded font-bold bg-rose-100 text-rose-700">Stok Menipis</span>
+                        @forelse($sales as $s)
+                            <tr class="hover:bg-slate-50/70 transition">
+                                <td class="p-3 font-mono font-medium text-slate-900">{{ $s->sale_number }}</td>
+                                <td class="p-3 font-medium text-slate-800">{{ $s->customer_name }}</td>
+                                <td class="p-3 text-slate-700">{{ $s->nama_barang ?: ($s->items->first()?->product?->name ?? 'Barang Dagang') }}</td>
+                                <td class="p-3 text-right font-mono">{{ number_format($s->kuantitas ?? 1, 0, ',', '.') }} unit</td>
+                                <td class="p-3 text-right font-mono text-slate-600">Rp {{ number_format($s->harga_satuan ?? ($s->total_amount / max(1, $s->kuantitas ?? 1)), 0, ',', '.') }}</td>
+                                <td class="p-3 text-right font-mono font-medium text-slate-900">Rp {{ number_format($s->total_amount, 0, ',', '.') }}</td>
+                                <td class="p-3 text-center">
+                                    @if($s->approval_status === 'approved')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Disetujui
+                                        </span>
+                                    @elseif($s->approval_status === 'rejected')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Ditolak
+                                        </span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">Aman</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data produk.</td></tr>
+                            <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada transaksi penjualan dagang pada periode ini.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-            @elseif($type === 'invoice')
+
+            @else
+                <!-- TABEL PERBANDINGAN TIGA BISNIS -->
                 <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">No. Invoice</th>
-                            <th class="p-3">Tanggal Tagihan</th>
-                            <th class="p-3">Jatuh Tempo</th>
-                            <th class="p-3 text-right">Total Tagihan</th>
-                            <th class="p-3 text-right">Dibayar</th>
-                            <th class="p-3 text-right">Sisa Piutang</th>
-                            <th class="p-3">Status</th>
+                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                        <tr>
+                            <th class="p-3.5">Unit Bisnis</th>
+                            <th class="p-3.5">Fokus Operasional</th>
+                            <th class="p-3.5 text-center">Volume Aktivitas</th>
+                            <th class="p-3.5 text-right">Total Nilai Finansial (Rp)</th>
+                            <th class="p-3.5 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $inv)
-                            <tr>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $inv->invoice_number }}</td>
-                                <td class="p-3">{{ \Carbon\Carbon::parse($inv->invoice_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-rose-600 font-semibold">{{ \Carbon\Carbon::parse($inv->due_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 text-right font-bold">Rp {{ number_format($inv->total_amount, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right text-emerald-600 font-semibold">Rp {{ number_format($inv->paid_amount, 0, ',', '.') }}</td>
-                                <td class="p-3 text-right font-bold text-rose-600">Rp {{ number_format($inv->remaining_balance, 0, ',', '.') }}</td>
-                                <td class="p-3"><span class="px-2 py-0.5 rounded font-semibold bg-slate-100 text-slate-700">{{ $inv->status }}</span></td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="7" class="p-6 text-center text-slate-400">Tidak ada data invoice pada periode ini.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @elseif($type === 'payment')
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
-                            <th class="p-3">Tanggal Bayar</th>
-                            <th class="p-3">No. Invoice</th>
-                            <th class="p-3">Metode Bayar</th>
-                            <th class="p-3">No. Referensi</th>
-                            <th class="p-3 text-right">Jumlah Dibayar</th>
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="p-3.5 font-semibold text-slate-900">
+                                Bisnis 1: Tender
+                            </td>
+                            <td class="p-3.5 text-slate-600">Proyek pengadaan & lelang resmi (Internal & Vendor Relasi)</td>
+                            <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_tenders'] }} Proyek</td>
+                            <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</td>
+                            <td class="p-3.5 text-center">
+                                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                    Buka
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($data as $pm)
-                            <tr>
-                                <td class="p-3 font-medium">{{ \Carbon\Carbon::parse($pm->payment_date)->format('d/m/Y') }}</td>
-                                <td class="p-3 font-mono font-bold text-blue-600">{{ $pm->invoice->invoice_number ?? '-' }}</td>
-                                <td class="p-3 font-semibold">{{ $pm->payment_method }}</td>
-                                <td class="p-3 font-mono text-slate-500">{{ $pm->reference_number ?? '-' }}</td>
-                                <td class="p-3 text-right font-bold text-emerald-600">Rp {{ number_format($pm->amount, 0, ',', '.') }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada data pembayaran pada periode ini.</td></tr>
-                        @endforelse
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="p-3.5 font-semibold text-slate-900">
+                                Bisnis 2: Jasa
+                            </td>
+                            <td class="p-3.5 text-slate-600">Layanan jasa teknis, maintenance, dan instalasi perangkat</td>
+                            <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_services'] }} Pekerjaan</td>
+                            <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</td>
+                            <td class="p-3.5 text-center">
+                                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                    Buka
+                                </a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/70 transition">
+                            <td class="p-3.5 font-semibold text-slate-900">
+                                Bisnis 3: Dagang (Barang)
+                            </td>
+                            <td class="p-3.5 text-slate-600">Perdagangan produk fisik, percetakan, dan aksesoris</td>
+                            <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_sales'] }} Penjualan</td>
+                            <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</td>
+                            <td class="p-3.5 text-center">
+                                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                    Buka
+                                </a>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             @endif
         </div>
-
-        @if(method_exists($data, 'links'))
-            <div class="border-t border-slate-100 pt-4 print:hidden">
-                {{ $data->links() }}
-            </div>
-        @endif
-
     </div>
 
 </div>

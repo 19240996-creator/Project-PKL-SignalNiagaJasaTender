@@ -29,14 +29,26 @@ class SalesService
                 $totalAmount += ($item['quantity'] * $item['price']);
             }
 
+            $firstItem = $items[0] ?? null;
+            $namaBarang = $data['nama_barang'] ?? null;
+            if (!$namaBarang && $firstItem) {
+                $p = Product::find($firstItem['product_id']);
+                $namaBarang = $p ? $p->name : null;
+            }
+
             $sale = Sale::create([
                 'sale_number' => $data['sale_number'] ?? 'SLS-' . date('Ymd') . '-' . rand(100, 999),
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'] ?? null,
+                'nama_barang' => $namaBarang,
+                'kuantitas' => $data['kuantitas'] ?? ($firstItem['quantity'] ?? 1),
+                'harga_satuan' => $data['harga_satuan'] ?? ($firstItem['price'] ?? 0),
+                'catatan_pengiriman' => $data['catatan_pengiriman'] ?? null,
                 'tender_id' => $data['tender_id'] ?? null,
                 'sale_date' => $data['sale_date'] ?? now()->toDateString(),
                 'total_amount' => $totalAmount,
                 'status' => $data['status'] ?? 'Completed',
+                'approval_status' => $data['approval_status'] ?? 'approved',
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $userId,
             ]);

@@ -13,24 +13,49 @@ class ServiceJob extends Model
 
     protected $fillable = [
         'contract_id',
+        'client_id',
+        'klien',
         'job_number',
         'name',
+        'biaya',
         'start_date',
         'end_date',
         'status',
+        'approval_status',
+        'approval_notes',
         'progress',
         'notes',
+        'deskripsi_pekerjaan',
+        'created_by',
+        'approved_by',
+        'approved_at',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'biaya' => 'decimal:2',
         'progress' => 'integer',
     ];
 
     public function contract(): BelongsTo
     {
         return $this->belongsTo(Contract::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function invoices(): HasMany

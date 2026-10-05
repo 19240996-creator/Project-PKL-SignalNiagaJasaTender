@@ -66,9 +66,9 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        // Only super_admin can edit product data
-        if (Auth::user()->role?->name !== 'super_admin') {
-            abort(403, 'Hanya Super Admin yang dapat mengedit data produk.');
+        // Only owner, manager, admin can edit product data
+        if (!in_array(Auth::user()->role?->name, ['owner', 'manager', 'admin'], true)) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengedit data produk.');
         }
 
         $validated = $request->validate([

@@ -4,6 +4,9 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     server: {
         host: '127.0.0.1',
+        watch: {
+            ignored: ['**/*.md', '**/.git/**', '**/storage/**'],
+        },
         proxy: {
             '^/(?!@vite|resources|build|node_modules)': {
                 target: 'http://127.0.0.1:8000',

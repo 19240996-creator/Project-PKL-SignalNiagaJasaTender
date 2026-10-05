@@ -17,15 +17,33 @@ class ServiceJobController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = ServiceJob::with(['contract.client', 'invoices']);
+        $user = Auth::user();
+        $query = ServiceJob::with(['contract.client', 'client', 'creator', 'approver', 'invoices']);
+
+        // Admin hanya melihat data yang ia input sendiri sesuai PRD
+        if ($user && $user->role && $user->role->name === 'admin') {
+            $query->where('created_by', $user->id);
+        }
+
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->approval_status);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('job_number', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('job_number', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('klien', 'like', "%{$search}%");
+            });
         }
 
-        $serviceJobs = $query->orderBy('created_at', 'desc')->paginate(10);
+        $pendingCount = ServiceJob::where('approval_status', 'pending')->count();
+        $serviceJobs = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         // Pastikan setiap record pekerjaan jasa sinkron otomatis persentase progress-nya
         foreach ($serviceJobs as $job) {
@@ -36,21 +54,48 @@ class ServiceJobController extends Controller
         }
 
         $contracts = Contract::with('client')->where('status', 'Aktif')->get();
+        $clients = \App\Models\Client::where('status', 'active')->orderBy('name')->get();
 
-        return view('services.index', compact('serviceJobs', 'contracts'));
+        return view('services.index', compact('serviceJobs', 'contracts', 'clients', 'pendingCount'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $user = Auth::user();
         $validated = $request->validate([
-            'contract_id' => 'required|exists:contracts,id',
-            'job_number' => 'required|unique:service_jobs,job_number',
+            'contract_id' => 'nullable|exists:contracts,id',
+            'client_id' => 'nullable|exists:clients,id',
+            'klien' => 'nullable|string|max:200',
+            'job_number' => 'nullable|string|max:50|unique:service_jobs,job_number',
             'name' => 'required|string|max:200',
+            'biaya' => 'nullable|numeric|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'status' => 'required|string',
             'notes' => 'nullable|string',
+            'deskripsi_pekerjaan' => 'nullable|string',
         ]);
+
+        if (empty($validated['job_number'])) {
+            $validated['job_number'] = 'JOB-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+        }
+
+        // Ambil nama klien dari master klien jika client_id diisi
+        if (!empty($validated['client_id']) && empty($validated['klien'])) {
+            $cl = \App\Models\Client::find($validated['client_id']);
+            $validated['klien'] = $cl ? $cl->name : null;
+        }
+
+        $validated['created_by'] = $user->id ?? 1;
+
+        // Sesuai PRD: Data yang diinput Admin berstatus Pending secara default
+        if ($user && $user->role && $user->role->name === 'admin') {
+            $validated['approval_status'] = 'pending';
+        } else {
+            $validated['approval_status'] = 'approved';
+            $validated['approved_by'] = $user->id ?? null;
+            $validated['approved_at'] = now();
+        }
 
         // Progress awal otomatis 100% jika langsung berstatus Selesai, atau 0% untuk pekerjaan baru
         $validated['progress'] = ($validated['status'] === 'Selesai') ? 100 : 0;
@@ -58,17 +103,25 @@ class ServiceJobController extends Controller
         $job = ServiceJob::create($validated);
         $job->syncProgress();
 
-        return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil ditambahkan dengan progress otomatis.');
+        $msg = ($validated['approval_status'] === 'pending')
+            ? 'Pekerjaan Jasa berhasil dicatat dan berstatus PENDING menunggu persetujuan Manager.'
+            : 'Pekerjaan Jasa berhasil ditambahkan dengan progress otomatis.';
+
+        return redirect()->route('jasa.index')->with('success', $msg);
     }
 
     public function update(Request $request, ServiceJob $serviceJob): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:200',
+            'client_id' => 'nullable|exists:clients,id',
+            'klien' => 'nullable|string|max:200',
+            'biaya' => 'nullable|numeric|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'status' => 'required|string',
             'notes' => 'nullable|string',
+            'deskripsi_pekerjaan' => 'nullable|string',
         ]);
 
         if ($validated['status'] === 'Selesai') {
@@ -79,6 +132,46 @@ class ServiceJobController extends Controller
         $serviceJob->syncProgress();
 
         return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil diperbarui.');
+    }
+
+    public function approve(Request $request, ServiceJob $serviceJob): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || !$user->role || !in_array($user->role->name, ['manager', 'owner'], true)) {
+            return redirect()->route('jasa.index')->with('error', 'Hanya Manager atau Owner yang berhak menyetujui (Approve) pekerjaan jasa.');
+        }
+
+        $serviceJob->update([
+            'approval_status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'approval_notes' => $request->input('notes'),
+        ]);
+
+        return redirect()->route('jasa.index')->with('success', "Pekerjaan Jasa {$serviceJob->job_number} berhasil disetujui (Approved).");
+    }
+
+    public function reject(Request $request, ServiceJob $serviceJob): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || !$user->role || !in_array($user->role->name, ['manager', 'owner'], true)) {
+            return redirect()->route('jasa.index')->with('error', 'Hanya Manager atau Owner yang berhak menolak (Reject) pekerjaan jasa.');
+        }
+
+        $serviceJob->update([
+            'approval_status' => 'rejected',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'approval_notes' => $request->input('notes', 'Ditolak oleh ' . $user->name),
+        ]);
+
+        return redirect()->route('jasa.index')->with('success', "Pekerjaan Jasa {$serviceJob->job_number} telah ditolak (Rejected).");
+    }
+
+    public function destroy(ServiceJob $serviceJob): RedirectResponse
+    {
+        $serviceJob->delete();
+        return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil dihapus.');
     }
 
     public function generateBill(Request $request, ServiceJob $serviceJob): RedirectResponse

@@ -1,391 +1,328 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Executive')
-@section('header-title', 'Dashboard Performa Perusahaan')
+@section('title', 'Dashboard')
+@section('header-title', 'Dashboard')
 
 @section('content')
 @php
-    $dashboardRole = Auth::user()->role->name ?? '';
+    $roleName = Auth::user()->role->name ?? '';
+    $userDisplayName = Auth::user()->name ?? 'Pengguna';
+    $isOwner = Auth::user()->isOwner();
+    $isManager = Auth::user()->isManager();
+    $isAdmin = Auth::user()->isAdmin();
 @endphp
 
-<div class="space-y-6">
+<div class="space-y-5">
 
-    @if($notifications->isNotEmpty())
-        <div class="bg-white rounded-2xl p-5 border border-amber-200 shadow-sm">
-            <div class="flex items-center gap-2 mb-3">
-                <i class="fa-solid fa-bell text-amber-600"></i>
-                <h3 class="font-bold text-slate-800">Notifikasi Terbaru</h3>
+    <!-- 1. Page Header & Periode Filter -->
+    <div class="bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-chart-line"></i>
             </div>
-            <div class="space-y-2">
-                @foreach($notifications as $notification)
-                    <div class="rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700">
-                        <div class="font-semibold">{{ $notification->data['title'] ?? 'Notifikasi' }}</div>
-                        <div class="text-xs text-slate-600">{{ $notification->data['message'] ?? '' }}</div>
-                    </div>
-                @endforeach
+            <div>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">Ringkasan Operasional Perusahaan</h2>
+                <p class="text-xs text-slate-500">PT Signal Panca Utama • Pemantauan 3 Unit Bisnis Mandiri</p>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2 self-start sm:self-auto">
+            <span class="text-xs text-slate-500 font-medium">Periode:</span>
+            <select name="period" onchange="this.form.submit()" class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="all" {{ ($period ?? 'all') === 'all' ? 'selected' : '' }}>Semua Waktu</option>
+                <option value="month" {{ ($period ?? '') === 'month' ? 'selected' : '' }}>Bulan Ini</option>
+                <option value="year" {{ ($period ?? '') === 'year' ? 'selected' : '' }}>Tahun Ini</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- 2. Manager Alert (Hanya muncul jika ada pengajuan pending) -->
+    @if($isManager && ($totalPendingApprovals ?? 0) > 0)
+        <div class="border-l-4 border-amber-500 bg-white border border-slate-200/90 rounded-lg p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-slate-900">Persetujuan Transaksi Menunggu Verifikasi</div>
+                    <div class="text-xs text-slate-500">Terdapat <span class="font-semibold text-slate-800">{{ $totalPendingApprovals }} pengajuan</span> dari Admin yang memerlukan persetujuan Manager.</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                @if(($pendingTendersCount ?? 0) > 0)
+                    <a href="{{ route('tender.index', ['approval_status' => 'pending']) }}" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-md text-xs font-semibold transition">
+                        Tender ({{ $pendingTendersCount }})
+                    </a>
+                @endif
+                @if(($pendingServicesCount ?? 0) > 0)
+                    <a href="{{ route('jasa.index', ['approval_status' => 'pending']) }}" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-md text-xs font-semibold transition">
+                        Jasa ({{ $pendingServicesCount }})
+                    </a>
+                @endif
+                @if(($pendingSalesCount ?? 0) > 0)
+                    <a href="{{ route('sales.index', ['approval_status' => 'pending']) }}" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-md text-xs font-semibold transition">
+                        Dagang ({{ $pendingSalesCount }})
+                    </a>
+                @endif
             </div>
         </div>
     @endif
 
-    <!-- Filter Bar Periode (PRD FR-02) -->
-    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                <i class="fa-solid fa-calendar-days text-sm"></i>
-            </div>
+    <!-- 3. Owner Direct Report Navigation Bar -->
+    @if($isOwner)
+        <div class="border border-slate-200/90 bg-white rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
             <div>
-                <span class="text-xs font-bold text-slate-700 block">Periode Data Dashboard</span>
-                <span class="text-[11px] text-slate-500">
-                    @if($period === 'today') Hari Ini ({{ now()->format('d M Y') }})
-                    @elseif($period === 'week') Minggu Ini
-                    @elseif($period === 'month') Bulan Ini ({{ now()->format('F Y') }})
-                    @elseif($period === 'year') Tahun Ini ({{ now()->format('Y') }})
-                    @elseif($period === 'custom' && $startDate) {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
-                    @else Semua Waktu (Kumulatif)
-                    @endif
-                </span>
+                <span class="text-xs font-bold text-slate-900 block leading-tight">Akses Cepat Laporan Eksekutif</span>
+                <span class="text-xs text-slate-500">Buka rincian pembukuan per unit bisnis atau konsolidasi perusahaan:</span>
             </div>
-        </div>
-
-        <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-center gap-2 w-full md:w-auto" x-data="{ showCustom: '{{ $period }}' === 'custom' }">
-            <select name="period" @change="showCustom = ($event.target.value === 'custom'); if(!showCustom) $el.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Semua Waktu</option>
-                <option value="today" {{ $period === 'today' ? 'selected' : '' }}>Hari Ini</option>
-                <option value="week" {{ $period === 'week' ? 'selected' : '' }}>Minggu Ini</option>
-                <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Bulan Ini</option>
-                <option value="year" {{ $period === 'year' ? 'selected' : '' }}>Tahun Ini</option>
-                <option value="custom" {{ $period === 'custom' ? 'selected' : '' }}>Rentang Kustom</option>
-            </select>
-
-            <div x-show="showCustom" x-cloak class="flex items-center gap-1.5">
-                <input type="date" name="start_date" value="{{ request('start_date') }}" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs outline-none">
-                <span class="text-xs text-slate-400">-</span>
-                <input type="date" name="end_date" value="{{ request('end_date') }}" class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs outline-none">
-                <button type="submit" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">Terapkan</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- KPI Cards Overview Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-
-        <!-- Card 1: Tender Pipeline & Win Rate -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Tender Aktif / Win Rate</span>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1">{{ $tendersActive }} <span class="text-xs text-slate-500 font-normal">Aktif</span></h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-trophy text-lg"></i>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">Win Rate {{ $winRate }}%</span>
-                <span class="text-slate-500">{{ $tendersWon }} Menang dari {{ $tendersWon + $tendersLost }} Selesai</span>
-            </div>
-        </div>
-
-        <!-- Card 2: Potensi Nilai Tender -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Nilai Tender</span>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1">Rp {{ number_format($totalTenderValue, 0, ',', '.') }}</h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-file-contract text-lg"></i>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                <i class="fa-solid fa-clock text-amber-500"></i>
-                <span>{{ count($upcomingDeadlines) }} mendekati deadline</span>
-            </div>
-        </div>
-
-        <!-- Card 3: Jasa & Kontrak -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Kontrak Jasa & Revenue</span>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1">Rp {{ number_format($serviceRevenue, 0, ',', '.') }}</h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-briefcase text-lg"></i>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                <span class="font-semibold text-emerald-600">{{ $activeContracts }} Kontrak Aktif</span>
-                <span>(Rp {{ number_format($totalContractValue, 0, ',', '.') }})</span>
-            </div>
-        </div>
-
-        <!-- Card 4: Omzet Perdagangan & Piutang -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Omzet Perdagangan</span>
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1">Rp {{ number_format($tradeRevenue, 0, ',', '.') }}</h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-cart-shopping text-lg"></i>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                <span class="font-semibold text-rose-600">Piutang: Rp {{ number_format($totalOutstandingPiutang, 0, ',', '.') }}</span>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Alert Section: Low Stock Warning & Deadlines -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Low Stock Warning Widget -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm lg:col-span-2">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-base">Peringatan Stok Menipis</h4>
-                        <p class="text-xs text-slate-500">Produk yang berada di bawah stok minimum</p>
-                    </div>
-                </div>
-                <a href="{{ route('products.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
-                    <span>Kelola Stok</span>
-                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="px-3 py-1.5 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-contract"></i> Laporan Tender
+                </a>
+                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="px-3 py-1.5 text-xs font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wrench"></i> Laporan Jasa
+                </a>
+                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="px-3 py-1.5 text-xs font-medium bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-stacked"></i> Laporan Dagang
+                </a>
+                <a href="{{ route('laporan.index', ['domain' => 'semua']) }}" class="px-3.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-chart-pie"></i> Ringkasan 3 Bisnis
                 </a>
             </div>
+        </div>
+    @endif
 
-            @if(count($lowStockProducts) > 0)
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-                                <th class="p-2.5">SKU</th>
-                                <th class="p-2.5">Nama Produk</th>
-                                <th class="p-2.5">Stok Saat Ini</th>
-                                <th class="p-2.5">Stok Minimum</th>
-                                <th class="p-2.5">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @foreach($lowStockProducts as $p)
-                                <tr>
-                                    <td class="p-2.5 font-mono text-slate-600">{{ $p->sku }}</td>
-                                    <td class="p-2.5 font-medium text-slate-800">{{ $p->name }}</td>
-                                    <td class="p-2.5 font-bold text-rose-600">{{ number_format($p->stock, 0) }} {{ $p->unit }}</td>
-                                    <td class="p-2.5 text-slate-500">{{ number_format($p->minimum_stock, 0) }} {{ $p->unit }}</td>
-                                    <td class="p-2.5">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span> Perlu Restock
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+    <!-- 4. 4 Metric Cards (Identitas Warna: Netral, Biru, Hijau, Ungu) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Metric 1: Total Transaksi -->
+        <div class="bg-white border-l-4 border-slate-700 border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Nilai Transaksi</span>
+                <div class="w-8 h-8 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-wallet"></i>
                 </div>
-            @else
-                <div class="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <i class="fa-solid fa-circle-check text-emerald-500 text-xl mb-1 block"></i>
-                    Semua stok persediaan produk dalam tingkat aman.
+            </div>
+            <div class="mt-2">
+                <div class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight font-mono truncate" title="Rp {{ number_format($companyTotalTransactionValue, 0, ',', '.') }}">
+                    Rp {{ number_format($companyTotalTransactionValue, 0, ',', '.') }}
                 </div>
-            @endif
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="font-semibold text-slate-700">{{ $companyTotalActivities }}</span> total transaksi perusahaan
+                </div>
+            </div>
         </div>
 
-        <!-- Tender Deadline Reminder -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-clock"></i>
+        <!-- Metric 2: Tender (Biru) -->
+        <div class="bg-white border-l-4 border-blue-500 border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Nilai Portofolio Tender</span>
+                <div class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-file-contract"></i>
                 </div>
+            </div>
+            <div class="mt-2">
+                <div class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight font-mono truncate" title="Rp {{ number_format($totalTenderValue, 0, ',', '.') }}">
+                    Rp {{ number_format($totalTenderValue, 0, ',', '.') }}
+                </div>
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="font-semibold text-blue-600">{{ $totalTenders }}</span> proyek lelang terdaftar
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric 3: Jasa (Hijau) -->
+        <div class="bg-white border-l-4 border-emerald-500 border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Biaya Jasa</span>
+                <div class="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight font-mono truncate" title="Rp {{ number_format($totalServiceValue, 0, ',', '.') }}">
+                    Rp {{ number_format($totalServiceValue, 0, ',', '.') }}
+                </div>
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="font-semibold text-emerald-600">{{ $totalServices }}</span> pekerjaan jasa teknis
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric 4: Dagang (Ungu) -->
+        <div class="bg-white border-l-4 border-purple-500 border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Omzet Dagang</span>
+                <div class="w-8 h-8 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight font-mono truncate" title="Rp {{ number_format($tradeRevenue, 0, ',', '.') }}">
+                    Rp {{ number_format($tradeRevenue, 0, ',', '.') }}
+                </div>
+                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="font-semibold text-purple-600">{{ $totalSales }}</span> transaksi penjualan barang
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Tiga Bidang Usaha Mandiri (3-Column Clean Blue-White Panel) -->
+    <div>
+        <div class="mb-3 flex items-center gap-2">
+            <span class="w-1.5 h-3.5 bg-blue-600 rounded-xs"></span>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Performa 3 Unit Bisnis Mandiri</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Bisnis 1: Tender -->
+            <div class="bg-white border border-slate-200/90 rounded-lg p-5 shadow-xs flex flex-col justify-between hover:border-blue-400 transition-colors">
                 <div>
-                    <h4 class="font-bold text-slate-800 text-base">Deadline Terdekat</h4>
-                    <p class="text-xs text-slate-500">Tender mendekati batas waktu</p>
+                    <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-sm shrink-0">
+                                <i class="fa-solid fa-file-contract"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Bisnis 1</span>
+                                <h4 class="text-sm font-bold text-slate-900 leading-tight">Tender & Lelang</h4>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                            Win Rate: {{ $winRate }}%
+                        </span>
+                    </div>
+
+                    <div class="py-3.5 space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Tender Berjalan</span>
+                            <span class="font-semibold text-slate-800">{{ $tendersActive }} proyek</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Hasil (Menang / Kalah)</span>
+                            <span class="font-semibold text-slate-800">{{ $tendersWon }} menang / {{ $tendersLost }} kalah</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500">Nilai Bidding Portofolio</span>
+                            <span class="font-mono font-bold text-blue-700">Rp {{ number_format($totalTenderValue, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100">
+                    @if($isOwner)
+                        <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold text-xs rounded-md transition flex items-center justify-between border border-blue-200">
+                            <span>Buka Laporan Tender</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('tender.index') }}" class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md transition flex items-center justify-between shadow-xs">
+                            <span>Kelola Data Tender</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
 
-            <div class="space-y-3">
-                @forelse($upcomingDeadlines as $t)
-                    <div class="p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex justify-between items-center">
-                        <div>
-                            <span class="text-[10px] font-mono font-semibold text-amber-800 block">{{ $t->tender_number }}</span>
-                            <span class="text-xs font-bold text-slate-800 block truncate max-w-[180px]">{{ $t->name }}</span>
-                            <span class="text-[10px] text-slate-500">{{ $t->client->name ?? 'N/A' }}</span>
+            <!-- Bisnis 2: Jasa (Hijau) -->
+            <div class="bg-white border border-slate-200/90 rounded-lg p-5 shadow-xs flex flex-col justify-between hover:border-emerald-400 transition-colors">
+                <div>
+                    <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shrink-0">
+                                <i class="fa-solid fa-wrench"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Bisnis 2</span>
+                                <h4 class="text-sm font-bold text-slate-900 leading-tight">Layanan Jasa</h4>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900 block mb-1">
-                                {{ \Carbon\Carbon::parse($t->deadline)->format('d M Y') }}
-                            </span>
-                            <span class="text-[10px] text-amber-700 font-medium">
-                                {{ \Carbon\Carbon::parse($t->deadline)->diffForHumans() }}
-                            </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {{ $servicesActive }} aktif
+                        </span>
+                    </div>
+
+                    <div class="py-3.5 space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Pekerjaan Selesai</span>
+                            <span class="font-semibold text-slate-800">{{ $servicesCompleted }} pekerjaan</span>
                         </div>
-                    </div>
-                @empty
-                    <div class="p-6 text-center text-slate-400 text-xs">
-                        Tidak ada tender mendekati deadline.
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Charts & Activity Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- Chart 1: Revenue Comparison -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <h4 class="font-bold text-slate-800 text-base mb-4">Performa Pendapatan Perusahaan</h4>
-            <div class="h-64">
-                <canvas id="revenueChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Chart 2: Tender Pipeline Status -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <h4 class="font-bold text-slate-800 text-base mb-4">Distribusi Status Tender</h4>
-            <div class="h-64 flex items-center justify-center">
-                <canvas id="tenderStatusChart"></canvas>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Widgets: Top Selling Products & Top Tender Items (PRD Seksi 9 & 22) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- Widget 1: Top Selling Products -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-fire text-sm"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-base">Produk Terlaris</h4>
-                        <p class="text-xs text-slate-500">Berdasarkan volume penjualan barang</p>
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Total Ditagih / Invoice</span>
+                            <span class="font-mono font-semibold text-slate-800">Rp {{ number_format($totalServiceBilled, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500">Total Biaya Layanan</span>
+                            <span class="font-mono font-bold text-emerald-700">Rp {{ number_format($totalServiceValue, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
-                @if($dashboardRole === 'super_admin' || $dashboardRole === 'sales')
-                    <a href="{{ route('sales.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-semibold text-xs border border-slate-200 hover:border-emerald-200 transition shadow-sm group">
-                        <span>Lihat Penjualan</span>
-                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5"></i>
-                    </a>
-                @endif
+
+                <div class="pt-3 border-t border-slate-100">
+                    @if($isOwner)
+                        <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="w-full px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs rounded-md transition flex items-center justify-between border border-emerald-200">
+                            <span>Buka Laporan Jasa</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('jasa.index') }}" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-md transition flex items-center justify-between shadow-xs">
+                            <span>Kelola Data Jasa</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @endif
+                </div>
             </div>
 
-            <div class="space-y-3">
-                @forelse($topSellingProducts as $p)
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <div class="min-w-0">
-                            <span class="font-mono text-[10px] text-slate-400 block">{{ $p->sku }}</span>
-                            <span class="font-bold text-slate-800 block truncate">{{ $p->name }}</span>
+            <!-- Bisnis 3: Dagang (Ungu) -->
+            <div class="bg-white border border-slate-200/90 rounded-lg p-5 shadow-xs flex flex-col justify-between hover:border-purple-400 transition-colors">
+                <div>
+                    <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-9 h-9 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center text-sm shrink-0">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Bisnis 3</span>
+                                <h4 class="text-sm font-bold text-slate-900 leading-tight">Dagang (Barang)</h4>
+                            </div>
                         </div>
-                        <div class="text-right shrink-0">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                                {{ number_format($p->total_sold ?? 0, 0) }} {{ $p->unit }}
-                            </span>
-                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                            {{ $totalProductItems }} jenis item
+                        </span>
                     </div>
-                @empty
-                    <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl">
-                        Belum ada data penjualan tercatat.
-                    </div>
-                @endforelse
-            </div>
-        </div>
 
-        <!-- Widget 2: Top Tender Items (PRD Seksi 22 poin 9) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-boxes-packing text-sm"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-base">Kebutuhan Barang Tender Terbanyak</h4>
-                        <p class="text-xs text-slate-500">Barang paling sering digunakan dalam tender</p>
+                    <div class="py-3.5 space-y-2.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Total Transaksi Penjualan</span>
+                            <span class="font-semibold text-slate-800">{{ $totalSales }} transaksi</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-50">
+                            <span class="text-slate-500">Stok Barang Tersedia</span>
+                            <span class="font-mono font-semibold text-slate-800">{{ number_format($totalStockUnits, 0, ',', '.') }} unit</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500">Total Omzet Penjualan</span>
+                            <span class="font-mono font-bold text-purple-700">Rp {{ number_format($tradeRevenue, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
-                @if($dashboardRole === 'super_admin' || $dashboardRole === 'tender_officer')
-                    <a href="{{ route('tender.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-semibold text-xs border border-slate-200 hover:border-blue-200 transition shadow-sm group">
-                        <span>Lihat Tender</span>
-                        <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 group-hover:text-blue-600 transition-transform group-hover:translate-x-0.5"></i>
-                    </a>
-                @endif
-            </div>
 
-            <div class="space-y-3">
-                @forelse($topTenderItems as $p)
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <div class="min-w-0">
-                            <span class="font-mono text-[10px] text-slate-400 block">{{ $p->sku }}</span>
-                            <span class="font-bold text-slate-800 block truncate">{{ $p->name }}</span>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
-                                {{ number_format($p->total_tender_needed ?? 0, 0) }} {{ $p->unit }}
-                            </span>
-                        </div>
-                    </div>
-                @empty
-                    <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl">
-                        Belum ada data kebutuhan barang tender.
-                    </div>
-                @endforelse
+                <div class="pt-3 border-t border-slate-100">
+                    @if($isOwner)
+                        <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="w-full px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-semibold text-xs rounded-md transition flex items-center justify-between border border-purple-200">
+                            <span>Buka Laporan Dagang</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('sales.index') }}" class="w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs rounded-md transition flex items-center justify-between shadow-xs">
+                            <span>Kelola Data Dagang</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
-
     </div>
 
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Bar Chart Revenue
-        const ctxRev = document.getElementById('revenueChart').getContext('2d');
-        new Chart(ctxRev, {
-            type: 'bar',
-            data: {
-                labels: ['Pendapatan Jasa', 'Omzet Perdagangan', 'Total Biaya Pengadaan'],
-                datasets: [{
-                    label: 'Nilai (Rp)',
-                    data: [{{ $serviceRevenue }}, {{ $tradeRevenue }}, {{ $totalProcurementCost }}],
-                    backgroundColor: ['#10B981', '#2563EB', '#F59E0B'],
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-
-        // Donut Chart Tender
-        const ctxTdr = document.getElementById('tenderStatusChart').getContext('2d');
-        new Chart(ctxTdr, {
-            type: 'doughnut',
-            data: {
-                labels: ['Aktif', 'Menang', 'Kalah'],
-                datasets: [{
-                    data: [{{ $tendersActive }}, {{ $tendersWon }}, {{ $tendersLost }}],
-                    backgroundColor: ['#3B82F6', '#10B981', '#EF4444']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
-    });
-</script>
 @endsection

@@ -216,7 +216,7 @@ class BusinessFlowTest extends TestCase
 
     private function foundation(): array
     {
-        $role = Role::create(['name' => 'super_admin']);
+        $role = Role::create(['name' => 'owner']);
         $user = User::create(['name' => 'Tester', 'email' => 'tester@example.com', 'password' => Hash::make('password'), 'role_id' => $role->id, 'is_active' => true]);
         $client = Client::create(['code' => 'CLI-TEST', 'name' => 'Client Test', 'status' => 'active']);
         return [$user, $client];

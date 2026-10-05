@@ -33,7 +33,7 @@ class SendTenderDeadlineReminders extends Command
         }
 
         $recipients = User::where('is_active', true)
-            ->whereHas('role', fn ($query) => $query->whereIn('name', ['super_admin', 'management', 'tender_officer']))
+            ->whereHas('role', fn ($query) => $query->whereIn('name', ['owner', 'manager', 'admin']))
             ->get();
 
         foreach ($recipients as $recipient) {

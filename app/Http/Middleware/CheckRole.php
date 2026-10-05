@@ -11,6 +11,7 @@ class CheckRole
 {
     /**
      * Handle an incoming request.
+     * Hanya 3 role: owner, manager, admin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -22,13 +23,17 @@ class CheckRole
 
         $userRole = Auth::user()->role->name ?? '';
 
-        // Super Admin has full access to everything
-        if ($userRole === 'super_admin') {
-            return $next($request);
+        $allowed = [];
+        foreach ($roles as $r) {
+            foreach (explode(',', $r) as $sub) {
+                if (filled($sub)) {
+                    $allowed[] = trim($sub);
+                }
+            }
         }
 
-        // Check if user's role is allowed
-        if (in_array($userRole, $roles)) {
+        // Check if user's role is in the allowed list
+        if (in_array($userRole, $allowed, true)) {
             return $next($request);
         }
 
@@ -37,6 +42,6 @@ class CheckRole
             return response()->json(['message' => 'Anda tidak memiliki hak akses untuk membuka modul ini.'], 403);
         }
 
-        return redirect()->route('dashboard')->with('error', 'Akses ditolak! Peran Anda (' . ucwords(str_replace('_', ' ', $userRole)) . ') tidak memiliki wewenang membuka modul tersebut.');
+        return redirect()->route('dashboard')->with('error', 'Akses ditolak! Peran Anda (' . ucwords($userRole) . ') tidak memiliki wewenang membuka modul tersebut.');
     }
 }

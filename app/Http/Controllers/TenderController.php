@@ -19,28 +19,45 @@ class TenderController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Tender::with(['client', 'documents', 'items.product']);
+        $user = Auth::user();
+        $query = Tender::with(['client', 'documents', 'items.product', 'creator', 'approver']);
+
+        // Admin hanya melihat data yang ia input sendiri sesuai PRD
+        if ($user && $user->role && $user->role->name === 'admin') {
+            $query->where('created_by', $user->id);
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->approval_status);
+        }
+
+        if ($request->filled('metode_penanganan')) {
+            $query->where('metode_penanganan', $request->metode_penanganan);
         }
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('tender_number', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('nama_vendor_relasi', 'like', "%{$search}%");
             });
         }
 
-        $tenders = $query->orderBy('created_at', 'desc')->paginate(10);
+        $pendingCount = Tender::where('approval_status', 'pending')->count();
+        $tenders = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         $clients = Client::where('status', 'active')->get();
 
-        return view('tenders.index', compact('tenders', 'clients'));
+        return view('tenders.index', compact('tenders', 'clients', 'pendingCount'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $user = Auth::user();
         $validated = $request->validate([
             'tender_number' => 'required|unique:tenders,tender_number',
             'name' => 'required|string|max:200',
@@ -51,6 +68,8 @@ class TenderController extends Controller
             'estimated_value' => 'required|numeric|min:0',
             'bid_value' => 'nullable|numeric|min:0',
             'status' => 'required|string',
+            'metode_penanganan' => 'required|in:internal,vendor_relasi',
+            'nama_vendor_relasi' => 'required_if:metode_penanganan,vendor_relasi|nullable|string|max:200',
             'notes' => 'nullable|string',
             'items' => 'nullable|array',
             'items.*.product_id' => 'nullable|exists:products,id',
@@ -61,8 +80,19 @@ class TenderController extends Controller
             'items.*.notes' => 'nullable|string',
         ]);
 
-        $validated['created_by'] = Auth::id() ?? 1;
+        $validated['created_by'] = $user->id ?? 1;
+        $validated['found_date'] = $validated['found_date'] ?? now()->toDateString();
+        $validated['estimated_value'] = $validated['estimated_value'] ?? ($validated['bid_value'] ?? 0);
         $validated['bid_value'] = $validated['bid_value'] ?? $validated['estimated_value'];
+
+        // Sesuai PRD: Data yang diinput Admin berstatus Pending secara default
+        if ($user && $user->role && $user->role->name === 'admin') {
+            $validated['approval_status'] = 'pending';
+        } else {
+            $validated['approval_status'] = 'approved';
+            $validated['approved_by'] = $user->id ?? null;
+            $validated['approved_at'] = now();
+        }
 
         $items = $validated['items'] ?? [];
         unset($validated['items']);
@@ -70,14 +100,18 @@ class TenderController extends Controller
         $tender = Tender::create($validated);
         $tender->items()->createMany(array_values(array_filter($items, fn (array $item) => filled($item['item_name'] ?? null))));
 
-        return redirect()->route('tender.index')->with('success', 'Tender baru berhasil ditambahkan.');
+        $msg = ($validated['approval_status'] === 'pending')
+            ? 'Tender baru berhasil dicatat dan berstatus PENDING menunggu persetujuan Manager.'
+            : 'Tender baru berhasil ditambahkan.';
+
+        return redirect()->route('tender.index')->with('success', $msg);
     }
 
     public function update(Request $request, Tender $tender): RedirectResponse
     {
         $user = Auth::user();
-        $isSuperAdmin = ($user && $user->role && $user->role->name === 'super_admin');
-        if (!$isSuperAdmin && in_array($tender->status, ['Selesai', 'Kontrak', 'Batal'], true)) {
+        $canForceUpdate = ($user && $user->role && in_array($user->role->name, ['owner', 'manager'], true));
+        if (!$canForceUpdate && in_array($tender->status, ['Selesai', 'Kontrak', 'Batal'], true)) {
             return redirect()->route('tender.index')->with('error', 'Tender dengan status terminal tidak dapat diubah oleh pengguna biasa.');
         }
 
@@ -235,5 +269,39 @@ class TenderController extends Controller
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function approve(Request $request, Tender $tender): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || !$user->role || !in_array($user->role->name, ['manager', 'owner'], true)) {
+            return redirect()->route('tender.index')->with('error', 'Hanya Manager atau Owner yang berhak menyetujui (Approve) tender.');
+        }
+
+        $tender->update([
+            'approval_status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'approval_notes' => $request->input('notes'),
+        ]);
+
+        return redirect()->route('tender.index')->with('success', "Tender {$tender->tender_number} berhasil disetujui (Approved).");
+    }
+
+    public function reject(Request $request, Tender $tender): RedirectResponse
+    {
+        $user = Auth::user();
+        if (!$user || !$user->role || !in_array($user->role->name, ['manager', 'owner'], true)) {
+            return redirect()->route('tender.index')->with('error', 'Hanya Manager atau Owner yang berhak menolak (Reject) tender.');
+        }
+
+        $tender->update([
+            'approval_status' => 'rejected',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'approval_notes' => $request->input('notes', 'Ditolak oleh ' . $user->name),
+        ]);
+
+        return redirect()->route('tender.index')->with('success', "Tender {$tender->tender_number} telah ditolak (Rejected).");
     }
 }

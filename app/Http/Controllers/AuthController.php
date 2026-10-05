@@ -19,14 +19,9 @@ class AuthController extends Controller
     public function showLoginForm(): View
     {
         $accounts = [
-            ['role' => 'super_admin', 'label' => 'Super Admin', 'email' => 'superadmin@signalpanca.co.id', 'password' => 'password', 'desc' => 'Akses penuh ke seluruh sistem', 'badge' => 'bg-purple-100 text-purple-800'],
-            ['role' => 'management', 'label' => 'Management', 'email' => 'management@signalpanca.co.id', 'password' => 'password', 'desc' => 'Dashboard KPI, monitoring & laporan', 'badge' => 'bg-blue-100 text-blue-800'],
-            ['role' => 'tender_officer', 'label' => 'Tender Officer', 'email' => 'tender_officer@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola pipeline & dokumen tender', 'badge' => 'bg-amber-100 text-amber-800'],
-            ['role' => 'service_officer', 'label' => 'Service Officer', 'email' => 'service_officer@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola klien, kontrak & pekerjaan jasa', 'badge' => 'bg-emerald-100 text-emerald-800'],
-            ['role' => 'purchasing', 'label' => 'Purchasing', 'email' => 'purchasing@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola supplier & pengadaan barang', 'badge' => 'bg-indigo-100 text-indigo-800'],
-            ['role' => 'warehouse', 'label' => 'Warehouse', 'email' => 'warehouse@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola persediaan & pergerakan stok', 'badge' => 'bg-teal-100 text-teal-800'],
-            ['role' => 'sales', 'label' => 'Sales', 'email' => 'sales@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola transaksi penjualan barang', 'badge' => 'bg-rose-100 text-rose-800'],
-            ['role' => 'finance', 'label' => 'Finance', 'email' => 'finance@signalpanca.co.id', 'password' => 'password', 'desc' => 'Kelola invoice, tagihan & pembayaran', 'badge' => 'bg-cyan-100 text-cyan-800'],
+            ['role' => 'owner', 'label' => 'Owner', 'email' => 'owner@signalpanca.co.id', 'password' => 'password', 'desc' => 'Monitoring dan melihat laporan seluruh domain', 'badge' => 'bg-purple-100 text-purple-800'],
+            ['role' => 'manager', 'label' => 'Manager', 'email' => 'manager@signalpanca.co.id', 'password' => 'password', 'desc' => 'Pemeriksaan, persetujuan & pengendalian eksekusi', 'badge' => 'bg-emerald-100 text-emerald-800'],
+            ['role' => 'admin', 'label' => 'Admin', 'email' => 'admin@signalpanca.co.id', 'password' => 'password', 'desc' => 'Menerima dan menginput seluruh data operasional', 'badge' => 'bg-blue-100 text-blue-800'],
         ];
 
         return view('auth.login', compact('accounts'));
@@ -40,21 +35,21 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $managementRole = Role::where('name', 'management')->first();
+        $defaultRole = Role::where('name', 'admin')->first() ?? Role::first();
 
-        if (!$managementRole) {
+        if (!$defaultRole) {
             return back()->withErrors(['email' => 'Pendaftaran belum dapat diproses karena role default belum tersedia.'])->withInput();
         }
 
         User::create([
-            'role_id' => $managementRole->id,
+            'role_id' => $defaultRole->id,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'is_active' => false,
         ]);
 
-        return to_route('login')->with('status', 'Pendaftaran berhasil. Tunggu persetujuan Super Admin sebelum masuk ke sistem.');
+        return to_route('login')->with('status', 'Pendaftaran berhasil. Tunggu persetujuan Owner sebelum masuk ke sistem.');
     }
 
     public function login(Request $request): RedirectResponse

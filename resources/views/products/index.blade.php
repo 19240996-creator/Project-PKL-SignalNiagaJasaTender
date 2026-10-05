@@ -65,7 +65,7 @@
                                     <button @click="selectedProduct = {{ $p }}; adjustModal = true" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition" title="Penyesuaian Stok">
                                         <i class="fa-solid fa-boxes-packing"></i> Adjust Stok
                                     </button>
-                                    @if(auth()->user()->role?->name === 'super_admin')
+                                    @if(in_array(auth()->user()->role?->name, ['owner', 'manager', 'admin']))
                                         <button type="button" @click="selectedProduct = {{ $p }}; editModal = true" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold text-xs rounded-lg transition flex items-center gap-1" title="Edit Produk">
                                             <i class="fa-solid fa-pen-to-square"></i> Edit
                                         </button>
@@ -89,8 +89,8 @@
         </div>
     </div>
 
-    @if(auth()->user()->role?->name === 'super_admin')
-    <!-- Modal Edit Product (Super Admin Only) -->
+    @if(in_array(auth()->user()->role?->name, ['owner', 'manager', 'admin']))
+    <!-- Modal Edit Product -->
     <div x-show="editModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="editModal = false">
         <div @click.outside="editModal = false" class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl space-y-4 p-6">
             <div class="flex items-start justify-between border-b border-slate-100 pb-3">

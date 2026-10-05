@@ -48,11 +48,11 @@ Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->nam
 // Protected System Routes
 Route::middleware(['auth', 'audit'])->group(function () {
 
-    // Dashboard (Super Admin & Management & fallback for logged-in users)
+    // Dashboard (Semua role bisa akses)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Modul Tender (Super Admin & Tender Officer)
-    Route::middleware(['role:super_admin,tender_officer'])->group(function () {
+    // Modul Tender (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/tender', [TenderController::class, 'index'])->name('tender.index');
         Route::post('/tender', [TenderController::class, 'store'])->name('tender.store');
         Route::put('/tender/{tender}', [TenderController::class, 'update'])->name('tender.update');
@@ -61,10 +61,12 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::get('/tender/{tender}/documents/{document}', [TenderController::class, 'viewDocument'])->name('tender.documents.view');
         Route::post('/tender/{tender}/evaluations', [TenderController::class, 'storeEvaluation'])->name('tender.evaluations.store');
         Route::post('/tender/{tender}/convert-contract', [TenderController::class, 'convertToContract'])->name('tender.convert');
+        Route::post('/tender/{tender}/approve', [TenderController::class, 'approve'])->name('tender.approve');
+        Route::post('/tender/{tender}/reject', [TenderController::class, 'reject'])->name('tender.reject');
     });
 
-    // Modul Klien & Jasa & Kontrak (Super Admin & Service Officer)
-    Route::middleware(['role:super_admin,service_officer'])->group(function () {
+    // Modul Klien & Jasa & Kontrak (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
         Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
         Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
@@ -73,7 +75,10 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::get('/jasa', [ServiceJobController::class, 'index'])->name('jasa.index');
         Route::post('/jasa', [ServiceJobController::class, 'store'])->name('jasa.store');
         Route::put('/jasa/{serviceJob}', [ServiceJobController::class, 'update'])->name('jasa.update');
+        Route::delete('/jasa/{serviceJob}', [ServiceJobController::class, 'destroy'])->name('jasa.destroy');
         Route::post('/jasa/{serviceJob}/bill', [ServiceJobController::class, 'generateBill'])->name('jasa.bill');
+        Route::post('/jasa/{serviceJob}/approve', [ServiceJobController::class, 'approve'])->name('jasa.approve');
+        Route::post('/jasa/{serviceJob}/reject', [ServiceJobController::class, 'reject'])->name('jasa.reject');
 
         Route::get('/contracts', [ContractController::class, 'index'])->name('contracts.index');
         Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
@@ -81,8 +86,8 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
     });
 
-    // Quotation and Customer Order (Service Officer & Sales)
-    Route::middleware(['role:super_admin,service_officer,sales'])->group(function () {
+    // Quotation & Customer Order (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/commercial-documents', [CommercialDocumentController::class, 'index'])->name('commercial.index');
         Route::post('/commercial-documents/service-quotation', [CommercialDocumentController::class, 'storeServiceQuotation'])->name('commercial.service.store');
         Route::post('/commercial-documents/service-quotation/{quotation}/convert', [CommercialDocumentController::class, 'convertServiceQuotation'])->name('commercial.service.convert');
@@ -91,8 +96,8 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/commercial-documents/customer-order/{order}/convert', [CommercialDocumentController::class, 'convertOrder'])->name('commercial.order.convert');
     });
 
-    // Modul Supplier & Pengadaan (Super Admin & Purchasing)
-    Route::middleware(['role:super_admin,purchasing'])->group(function () {
+    // Modul Supplier & Pengadaan (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
         Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
         Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
@@ -103,28 +108,26 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/procurements/{procurement}/receive', [ProcurementController::class, 'receive'])->name('procurements.receive');
     });
 
-    // Modul Produk & Warehouse (Super Admin & Warehouse)
-    Route::middleware(['role:super_admin,warehouse'])->group(function () {
+    // Modul Produk & Warehouse (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-        Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
-    });
-
-    // Only Super Admin can permanently remove a product from the catalog.
-    Route::middleware(['role:super_admin'])->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+        Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
 
-    // Modul Penjualan / Trade (Super Admin & Sales)
-    Route::middleware(['role:super_admin,sales'])->group(function () {
+    // Modul Penjualan / Trade / Barang (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/perdagangan', [SalesController::class, 'index'])->name('perdagangan.index');
         Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
         Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
+        Route::post('/sales/{sale}/approve', [SalesController::class, 'approve'])->name('sales.approve');
+        Route::post('/sales/{sale}/reject', [SalesController::class, 'reject'])->name('sales.reject');
     });
 
-    // Modul Keuangan / Finance (Super Admin & Finance)
-    Route::middleware(['role:super_admin,finance'])->group(function () {
+    // Modul Keuangan / Finance (Admin input, Manager approve, Owner monitoring)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/finance', [InvoiceController::class, 'index'])->name('finance.index');
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
@@ -133,16 +136,16 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     });
 
-    // Modul Laporan (Super Admin & Management)
-    Route::middleware(['role:super_admin,management'])->group(function () {
+    // Modul Laporan (Admin riwayat sendiri, Manager & Owner laporan komprehensif)
+    Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/laporan', [ReportController::class, 'index'])->middleware('permission:reports.view')->name('laporan.index');
         Route::get('/laporan/export', [ReportController::class, 'export'])->middleware('permission:reports.export')->name('laporan.export');
         Route::get('/laporan/export/pdf', [ReportController::class, 'exportPdf'])->middleware('permission:reports.export')->name('laporan.export.pdf');
         Route::get('/laporan/export/xlsx', [ReportController::class, 'exportXlsx'])->middleware('permission:reports.export')->name('laporan.export.xlsx');
     });
 
-    // Modul Khusus Super Admin (Kelola Logo Klien Landing Page)
-    Route::middleware(['role:super_admin'])->group(function () {
+    // Pengaturan Sistem (Owner saja)
+    Route::middleware(['role:owner'])->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('/activity-logs/data', [ActivityLogController::class, 'data'])->name('activity-logs.data');
         Route::get('/users', [UserManagementController::class, 'index'])->middleware('permission:users.manage')->name('users.index');

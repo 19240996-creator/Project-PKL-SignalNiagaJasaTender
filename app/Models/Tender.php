@@ -21,10 +21,16 @@ class Tender extends Model
         'deadline',
         'estimated_value',
         'bid_value',
+        'metode_penanganan',
+        'nama_vendor_relasi',
         'status',
+        'approval_status',
+        'approval_notes',
         'result',
         'notes',
         'created_by',
+        'approved_by',
+        'approved_at',
     ];
 
     protected $casts = [
@@ -42,6 +48,11 @@ class Tender extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function documents(): HasMany

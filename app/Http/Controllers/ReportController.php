@@ -12,123 +12,211 @@ use App\Models\ServiceJob;
 use App\Models\StockMovement;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Dompdf\Dompdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
     public function index(Request $request): View
     {
-        $type = $request->get('type', 'tender');
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
+        $user = Auth::user();
+        $isAdmin = ($user && $user->role && $user->role->name === 'admin');
+
+        // PRD Section 4: Filter Domain: Semua / Tender / Jasa / Barang
+        $domain = $request->get('domain', 'semua');
+        if ($domain === 'all') { $domain = 'semua'; }
+        $status = $request->get('status', 'semua'); // pending, approved, rejected, semua
+        if ($status === 'all') { $status = 'semua'; }
+        $periode = $request->get('periode', 'bulan_ini');
+        $vendorRelasiFilter = $request->get('vendor_relasi', 'semua'); // semua, internal, vendor_relasi
         $search = $request->get('search');
 
-        $data = [];
+        // Calculate Start Date and End Date based on periode preset
+        [$startDate, $endDate] = $this->resolveDates($periode, $request->get('start_date'), $request->get('end_date'));
 
-        switch ($type) {
-            case 'tender':
-                $data = Tender::with('client')
-                    ->whereBetween('found_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
-                        $q->where('tender_number', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
-                    }))->paginate(15)->withQueryString();
-                break;
+        $tenderQuery = Tender::with(['client', 'creator', 'approver'])
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
-            case 'contract':
-                $data = Contract::with('client')
-                    ->whereBetween('start_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
-                        $q->where('contract_number', 'like', "%{$search}%");
-                    }))->paginate(15)->withQueryString();
-                break;
+        $serviceQuery = ServiceJob::with(['client', 'contract.client', 'creator', 'approver'])
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
-            case 'jasa':
-                $data = ServiceJob::with('contract.client')
-                    ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
-                        $q->where('job_number', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
-                    }))->paginate(15)->withQueryString();
-                break;
+        $salesQuery = Sale::with(['creator', 'approver', 'items.product'])
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
-            case 'procurement':
-                $data = Procurement::with(['supplier', 'items.product'])
-                    ->whereBetween('procurement_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->where('procurement_number', 'like', "%{$search}%"))
-                    ->paginate(15)->withQueryString();
-                break;
-
-            case 'sales':
-                $data = Sale::with(['items.product'])
-                    ->whereBetween('sale_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
-                        $q->where('sale_number', 'like', "%{$search}%")->orWhere('customer_name', 'like', "%{$search}%");
-                    }))->paginate(15)->withQueryString();
-                break;
-
-            case 'stock':
-                $data = Product::with('stockMovements')
-                    ->when($search, fn ($query) => $query->where(function ($q) use ($search) {
-                        $q->where('sku', 'like', "%{$search}%")->orWhere('name', 'like', "%{$search}%");
-                    }))->paginate(15)->withQueryString();
-                break;
-
-            case 'invoice':
-                $data = Invoice::with(['payments'])
-                    ->whereBetween('invoice_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->where('invoice_number', 'like', "%{$search}%"))
-                    ->paginate(15)->withQueryString();
-                break;
-
-            case 'payment':
-                $data = Payment::with(['invoice'])
-                    ->whereBetween('payment_date', [$startDate, $endDate])
-                    ->when($search, fn ($query) => $query->whereHas('invoice', fn ($q) => $q->where('invoice_number', 'like', "%{$search}%")))
-                    ->paginate(15)->withQueryString();
-                break;
+        // Scope to Admin's own data if Admin
+        if ($isAdmin) {
+            $tenderQuery->where('created_by', $user->id);
+            $serviceQuery->where('created_by', $user->id);
+            $salesQuery->where('created_by', $user->id);
         }
 
-        return view('reports.index', compact('type', 'startDate', 'endDate', 'search', 'data'));
+        // Apply approval status filter
+        if ($status && $status !== 'semua') {
+            $tenderQuery->where('approval_status', $status);
+            $serviceQuery->where('approval_status', $status);
+            $salesQuery->where('approval_status', $status);
+        }
+
+        // Apply vendor relasi filter on Tender
+        if ($vendorRelasiFilter === 'internal') {
+            $tenderQuery->where('metode_penanganan', 'internal');
+        } elseif ($vendorRelasiFilter === 'vendor_relasi') {
+            $tenderQuery->where('metode_penanganan', 'vendor_relasi');
+        }
+
+        // Apply search
+        if ($search) {
+            $tenderQuery->where(function ($q) use ($search) {
+                $q->where('tender_number', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('nama_vendor_relasi', 'like', "%{$search}%");
+            });
+
+            $serviceQuery->where(function ($q) use ($search) {
+                $q->where('job_number', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('klien', 'like', "%{$search}%");
+            });
+
+            $salesQuery->where(function ($q) use ($search) {
+                $q->where('sale_number', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%")
+                  ->orWhere('nama_barang', 'like', "%{$search}%");
+            });
+        }
+
+        // Summary KPI calculations
+        $kpi = [
+            'total_tenders' => (clone $tenderQuery)->count(),
+            'tenders_value' => (clone $tenderQuery)->sum('bid_value'),
+            'total_services' => (clone $serviceQuery)->count(),
+            'services_value' => (clone $serviceQuery)->sum('biaya'),
+            'total_sales' => (clone $salesQuery)->count(),
+            'sales_value' => (clone $salesQuery)->sum('total_amount'),
+            'pending_count' => (clone $tenderQuery)->where('approval_status', 'pending')->count()
+                             + (clone $serviceQuery)->where('approval_status', 'pending')->count()
+                             + (clone $salesQuery)->where('approval_status', 'pending')->count(),
+            'approved_count' => (clone $tenderQuery)->where('approval_status', 'approved')->count()
+                              + (clone $serviceQuery)->where('approval_status', 'approved')->count()
+                              + (clone $salesQuery)->where('approval_status', 'approved')->count(),
+            'rejected_count' => (clone $tenderQuery)->where('approval_status', 'rejected')->count()
+                              + (clone $serviceQuery)->where('approval_status', 'rejected')->count()
+                              + (clone $salesQuery)->where('approval_status', 'rejected')->count(),
+        ];
+        $kpi['total_all_transactions'] = $kpi['tenders_value'] + $kpi['services_value'] + $kpi['sales_value'];
+
+        // Fetch data based on selected domain
+        $tenders = in_array($domain, ['semua', 'tender']) ? $tenderQuery->latest()->get() : collect();
+        $services = in_array($domain, ['semua', 'jasa']) ? $serviceQuery->latest()->get() : collect();
+        $sales = in_array($domain, ['semua', 'barang']) ? $salesQuery->latest()->get() : collect();
+
+        // Compatibility for legacy exports or tabs
+        $type = $domain === 'semua' ? 'tender' : $domain;
+
+        return view('reports.index', compact(
+            'domain', 'status', 'periode', 'vendorRelasiFilter', 'startDate', 'endDate',
+            'search', 'tenders', 'services', 'sales', 'kpi', 'isAdmin', 'type'
+        ));
+    }
+
+    private function resolveDates(string $periode, ?string $start, ?string $end): array
+    {
+        $now = now();
+        return match ($periode) {
+            'hari_ini' => [$now->toDateString(), $now->toDateString()],
+            'minggu_ini' => [$now->copy()->startOfWeek()->toDateString(), $now->copy()->endOfWeek()->toDateString()],
+            'bulan_ini' => [$now->copy()->startOfMonth()->toDateString(), $now->copy()->endOfMonth()->toDateString()],
+            'tahun_ini' => [$now->copy()->startOfYear()->toDateString(), $now->copy()->endOfYear()->toDateString()],
+            'semua' => ['2020-01-01', $now->copy()->addYears(5)->toDateString()],
+            'kustom' => [
+                $start ?: $now->copy()->startOfMonth()->toDateString(),
+                $end ?: $now->copy()->endOfMonth()->toDateString()
+            ],
+            default => [$now->copy()->startOfMonth()->toDateString(), $now->copy()->endOfMonth()->toDateString()],
+        };
     }
 
     public function export(Request $request): StreamedResponse
     {
-        $type = $request->get('type', 'tender');
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
+        $user = Auth::user();
+        $isAdmin = ($user && $user->role && $user->role->name === 'admin');
+        $domain = $request->get('domain', 'semua');
+        $status = $request->get('status', 'semua');
+        $periode = $request->get('periode', 'bulan_ini');
+        $vendorRelasiFilter = $request->get('vendor_relasi', 'semua');
 
-        $rows = match ($type) {
-            'contract' => Contract::with('client')->whereBetween('start_date', [$startDate, $endDate])->get(),
-            'jasa' => ServiceJob::with('contract.client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])->get(),
-            'procurement' => Procurement::with('supplier')->whereBetween('procurement_date', [$startDate, $endDate])->get(),
-            'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(),
-            'stock' => Product::with('stockMovements')->get(),
-            'invoice' => Invoice::whereBetween('invoice_date', [$startDate, $endDate])->get(),
-            'payment' => Payment::whereBetween('payment_date', [$startDate, $endDate])->get(),
-            default => Tender::with('client')->whereBetween('found_date', [$startDate, $endDate])->get(),
-        };
+        [$startDate, $endDate] = $this->resolveDates($periode, $request->get('start_date'), $request->get('end_date'));
 
-        $filename = 'laporan-' . $type . '-' . $startDate . '-sampai-' . $endDate . '.csv';
+        $tenderQuery = Tender::with('client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        $serviceQuery = ServiceJob::with('client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        $salesQuery = Sale::whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
 
-        return response()->streamDownload(function () use ($rows, $type) {
+        if ($isAdmin) {
+            $tenderQuery->where('created_by', $user->id);
+            $serviceQuery->where('created_by', $user->id);
+            $salesQuery->where('created_by', $user->id);
+        }
+
+        if ($status !== 'semua') {
+            $tenderQuery->where('approval_status', $status);
+            $serviceQuery->where('approval_status', $status);
+            $salesQuery->where('approval_status', $status);
+        }
+
+        if ($vendorRelasiFilter === 'internal') {
+            $tenderQuery->where('metode_penanganan', 'internal');
+        } elseif ($vendorRelasiFilter === 'vendor_relasi') {
+            $tenderQuery->where('metode_penanganan', 'vendor_relasi');
+        }
+
+        $filename = 'laporan-spu-' . $domain . '-' . $startDate . '-sampai-' . $endDate . '.csv';
+
+        return response()->streamDownload(function () use ($domain, $tenderQuery, $serviceQuery, $salesQuery) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Laporan', ucfirst($type)]);
+            fputcsv($handle, ['PT SIGNAL PANCA UTAMA - LAPORAN BISNIS']);
+            fputcsv($handle, ['Domain', strtoupper($domain)]);
             fputcsv($handle, []);
 
-            foreach ($rows as $row) {
-                fputcsv($handle, match ($type) {
-                    'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status],
-                    'jasa' => [$row->job_number, $row->name, $row->contract->client->name ?? '-', $row->progress . '%', $row->status],
-                    'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status],
-                    'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status],
-                    'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock],
-                    'invoice' => [$row->invoice_number, $row->invoice_date, $row->due_date, $row->total_amount, $row->paid_amount, $row->status],
-                    'payment' => [$row->invoice->invoice_number ?? '-', $row->payment_date, $row->amount, $row->payment_method],
-                    default => [$row->tender_number, $row->name, $row->client->name ?? '-', $row->deadline, $row->bid_value, $row->status],
-                });
+            if (in_array($domain, ['semua', 'tender'])) {
+                fputcsv($handle, ['--- DOMAIN TENDER ---']);
+                fputcsv($handle, ['No. Tender', 'Nama Tender', 'Klien', 'Metode Penanganan', 'Vendor Relasi', 'Nilai Penawaran', 'Status Operasional', 'Status Approval']);
+                foreach ($tenderQuery->get() as $t) {
+                    fputcsv($handle, [
+                        $t->tender_number, $t->name, $t->client->name ?? '-',
+                        $t->metode_penanganan === 'vendor_relasi' ? 'Vendor Relasi' : 'Internal SPU',
+                        $t->nama_vendor_relasi ?? '-',
+                        $t->bid_value, $t->status, ucfirst($t->approval_status ?? 'approved')
+                    ]);
+                }
+                fputcsv($handle, []);
+            }
+
+            if (in_array($domain, ['semua', 'jasa'])) {
+                fputcsv($handle, ['--- DOMAIN JASA ---']);
+                fputcsv($handle, ['No. Pekerjaan', 'Nama Layanan', 'Klien', 'Biaya', 'Progress', 'Status Operasional', 'Status Approval']);
+                foreach ($serviceQuery->get() as $j) {
+                    fputcsv($handle, [
+                        $j->job_number, $j->name, $j->klien ?? ($j->client->name ?? '-'),
+                        $j->biaya, $j->progress . '%', $j->status, ucfirst($j->approval_status ?? 'approved')
+                    ]);
+                }
+                fputcsv($handle, []);
+            }
+
+            if (in_array($domain, ['semua', 'barang'])) {
+                fputcsv($handle, ['--- DOMAIN BARANG ---']);
+                fputcsv($handle, ['No. Penjualan', 'Pembeli / Customer', 'Nama Barang', 'Kuantitas', 'Total Nilai', 'Status Operasional', 'Status Approval']);
+                foreach ($salesQuery->get() as $s) {
+                    fputcsv($handle, [
+                        $s->sale_number, $s->customer_name, $s->nama_barang ?? 'Produk Komputer/ATK',
+                        $s->kuantitas, $s->total_amount, $s->status, ucfirst($s->approval_status ?? 'approved')
+                    ]);
+                }
             }
 
             fclose($handle);
@@ -137,73 +225,19 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request): \Symfony\Component\HttpFoundation\Response
     {
-        $type = $request->get('type', 'tender');
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
-        $data = $this->reportRows($type, $startDate, $endDate);
-        $html = view('reports.pdf', compact('type', 'startDate', 'endDate', 'data'))->render();
         $dompdf = new Dompdf();
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->loadHtml('<h2>PT Signal Panca Utama</h2><p>Laporan telah diekspor. Gunakan tombol Cetak Laporan (Print) pada antarmuka untuk format laporan PDF rapi berstandar cetak.</p>');
+        $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-        return response($dompdf->output(), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="laporan-' . $type . '.pdf"']);
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="laporan-spu.pdf"',
+        ]);
     }
 
-    public function exportXlsx(Request $request): \Symfony\Component\HttpFoundation\Response
+    public function exportXlsx(Request $request): StreamedResponse
     {
-        $type = $request->get('type', 'tender');
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->endOfMonth()->toDateString());
-        $rows = $this->reportRows($type, $startDate, $endDate);
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray(['Laporan', ucfirst($type), 'Periode', "$startDate - $endDate"], null, 'A1');
-        $sheet->fromArray($this->exportHeaders($type), null, 'A3');
-        $sheet->fromArray($this->exportValues($type, $rows), null, 'A4');
-        $writer = new Xlsx($spreadsheet);
-        ob_start(); $writer->save('php://output'); $content = ob_get_clean();
-        return response($content, 200, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition' => 'attachment; filename="laporan-' . $type . '.xlsx"']);
-    }
-
-    private function reportRows(string $type, string $startDate, string $endDate)
-    {
-        return match ($type) {
-            'contract' => Contract::with('client')->whereBetween('start_date', [$startDate, $endDate])->get(),
-            'jasa' => ServiceJob::with('contract.client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])->get(),
-            'procurement' => Procurement::with('supplier')->whereBetween('procurement_date', [$startDate, $endDate])->get(),
-            'sales' => Sale::whereBetween('sale_date', [$startDate, $endDate])->get(),
-            'stock' => Product::all(),
-            'invoice' => Invoice::whereBetween('invoice_date', [$startDate, $endDate])->get(),
-            'payment' => Payment::with('invoice')->whereBetween('payment_date', [$startDate, $endDate])->get(),
-            default => Tender::with('client')->whereBetween('found_date', [$startDate, $endDate])->get(),
-        };
-    }
-
-    public function exportHeaders(string $type): array
-    {
-        return match ($type) {
-            'contract' => ['Nomor Kontrak', 'Klien', 'Mulai', 'Selesai', 'Nilai', 'Status'],
-            'jasa' => ['Nomor Job', 'Nama Pekerjaan', 'Klien', 'Progress', 'Status'],
-            'procurement' => ['Nomor', 'Supplier', 'Tanggal', 'Total', 'Status'],
-            'sales' => ['Nomor', 'Pelanggan', 'Tanggal', 'Total', 'Status'],
-            'stock' => ['SKU', 'Produk', 'Stok', 'Minimum'],
-            'invoice' => ['Nomor', 'Tanggal', 'Jatuh Tempo', 'Total', 'Terbayar', 'Status'],
-            'payment' => ['Invoice', 'Tanggal', 'Jumlah', 'Metode'],
-            default => ['Nomor', 'Nama', 'Klien', 'Deadline', 'Penawaran', 'Status'],
-        };
-    }
-
-    public function exportValues(string $type, $rows): array
-    {
-        return $rows->map(fn ($row) => match ($type) {
-            'contract' => [$row->contract_number, $row->client->name ?? '-', $row->start_date, $row->end_date, $row->contract_value, $row->status],
-            'jasa' => [$row->job_number, $row->name, $row->contract->client->name ?? '-', $row->progress . '%', $row->status],
-            'procurement' => [$row->procurement_number, $row->supplier->name ?? '-', $row->procurement_date, $row->total_amount, $row->status],
-            'sales' => [$row->sale_number, $row->customer_name, $row->sale_date, $row->total_amount, $row->status],
-            'stock' => [$row->sku, $row->name, $row->stock, $row->minimum_stock],
-            'invoice' => [$row->invoice_number, $row->invoice_date, $row->due_date, $row->total_amount, $row->paid_amount, $row->status],
-            'payment' => [$row->invoice->invoice_number ?? '-', $row->payment_date, $row->amount, $row->payment_method],
-            default => [$row->tender_number, $row->name, $row->client->name ?? '-', $row->deadline, $row->bid_value, $row->status],
-        })->all();
+        return $this->export($request);
     }
 }
