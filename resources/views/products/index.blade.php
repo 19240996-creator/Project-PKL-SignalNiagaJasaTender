@@ -4,7 +4,7 @@
 @section('header-title', 'Persediaan Stok Barang & Katalog Produk')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModal: false, adjustModal: false, deleteModal: false, selectedProduct: null }">
+<div class="space-y-6" x-data="{ createModal: false, adjustModal: false, deleteModal: false, editModal: false, selectedProduct: null }">
 
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
         <form method="GET" action="{{ route('products.index') }}" class="flex items-center gap-3 w-full md:w-auto">
@@ -66,7 +66,10 @@
                                         <i class="fa-solid fa-boxes-packing"></i> Adjust Stok
                                     </button>
                                     @if(auth()->user()->role?->name === 'super_admin')
-                                        <button type="button" @click="selectedProduct = {{ $p }}; deleteModal = true" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs rounded-lg transition" title="Hapus Produk">
+                                        <button type="button" @click="selectedProduct = {{ $p }}; editModal = true" class="px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold text-xs rounded-lg transition flex items-center gap-1" title="Edit Produk">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </button>
+                                        <button type="button" @click="selectedProduct = {{ $p }}; deleteModal = true" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs rounded-lg transition flex items-center gap-1" title="Hapus Produk">
                                             <i class="fa-solid fa-trash"></i> Hapus
                                         </button>
                                     @endif
@@ -85,6 +88,61 @@
             {{ $products->links() }}
         </div>
     </div>
+
+    @if(auth()->user()->role?->name === 'super_admin')
+    <!-- Modal Edit Product (Super Admin Only) -->
+    <div x-show="editModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="editModal = false">
+        <div @click.outside="editModal = false" class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl space-y-4 p-6">
+            <div class="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Edit Data Produk</h3>
+                        <p class="text-xs font-medium text-slate-400">Khusus Super Admin · Perubahan tercatat di Log Aktivitas</p>
+                    </div>
+                </div>
+                <button type="button" @click="editModal = false" class="text-slate-400 hover:text-slate-600 transition" aria-label="Tutup form edit">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form x-bind:action="selectedProduct ? '/products/' + selectedProduct.id : '#'" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div class="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-800 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-blue-600"></i>
+                    <span>SKU: <strong class="font-mono text-blue-900" x-text="selectedProduct?.sku"></strong> · Kategori: <strong x-text="selectedProduct?.category || '-'"></strong></span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Produk <span class="text-rose-500">*</span></label>
+                    <input type="text" name="name" required x-bind:value="selectedProduct?.name" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500 border-slate-200">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Harga Beli (Rp) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="purchase_price" required min="0" x-bind:value="selectedProduct?.purchase_price" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500 border-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Harga Jual (Rp) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="selling_price" required min="0" x-bind:value="selectedProduct?.selling_price" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-amber-500 border-slate-200">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="editModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 
     <!-- Modal Delete Product -->
     <div x-show="deleteModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="deleteModal = false">

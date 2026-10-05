@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Client;
 use App\Models\Tender;
 use App\Models\TenderDocument;
@@ -76,26 +77,64 @@ class TenderController extends Controller
     {
         $user = Auth::user();
         $isSuperAdmin = ($user && $user->role && $user->role->name === 'super_admin');
-        if (!$isSuperAdmin && in_array($tender->status, ['Selesai', 'Menang', 'Kalah', 'Batal'], true)) {
-            return redirect()->route('tender.index')->with('error', 'Tender dengan status selesai/terminal tidak dapat diubah oleh pengguna biasa.');
+        if (!$isSuperAdmin && in_array($tender->status, ['Selesai', 'Kontrak', 'Batal'], true)) {
+            return redirect()->route('tender.index')->with('error', 'Tender dengan status terminal tidak dapat diubah oleh pengguna biasa.');
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:200',
-            'client_id' => 'required|exists:clients,id',
+            'name' => 'sometimes|required|string|max:200',
+            'client_id' => 'sometimes|required|exists:clients,id',
             'source' => 'nullable|string|max:100',
-            'found_date' => 'required|date',
+            'found_date' => 'sometimes|required|date',
             'deadline' => 'nullable|date',
-            'estimated_value' => 'required|numeric|min:0',
+            'estimated_value' => 'sometimes|required|numeric|min:0',
             'bid_value' => 'nullable|numeric|min:0',
-            'status' => 'required|string',
+            'status' => 'required|string|in:Ditemukan,Evaluasi,Persiapan Dokumen,Penawaran,Menang,Kalah,Kontrak,Selesai,Batal',
             'result' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
 
+        if (isset($validated['status'])) {
+            if ($validated['status'] === 'Menang') {
+                $validated['result'] = 'Menang';
+            } elseif ($validated['status'] === 'Kalah') {
+                $validated['result'] = 'Kalah';
+            } elseif (in_array($validated['status'], ['Ditemukan', 'Evaluasi', 'Persiapan Dokumen', 'Penawaran'], true)) {
+                $validated['result'] = null;
+            }
+        }
+
+        $oldStatus = $tender->status;
+        $oldBidValue = (float) $tender->bid_value;
+        $oldName = $tender->name;
+
         $tender->update($validated);
 
-        return redirect()->route('tender.index')->with('success', 'Data tender berhasil diperbarui.');
+        // Mark as audit_logged to prevent duplicate in AuditActivity middleware
+        $request->attributes->set('audit_logged', true);
+
+        // Record to AuditLog
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update',
+            'table_name' => 'tender.update',
+            'record_id' => $tender->id,
+            'old_values' => [
+                'tender' => $tender->tender_number,
+                'status' => $oldStatus,
+                'bid_value' => $oldBidValue,
+            ],
+            'new_values' => [
+                'tender' => $tender->tender_number,
+                'status' => $tender->status,
+                'bid_value' => (float) $tender->bid_value,
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return redirect()->route('tender.index')->with('success', "Status pipeline tender \"{$tender->tender_number}\" berhasil diperbarui ke tahap \"{$tender->status}\".");
     }
 
     public function destroy(Tender $tender): RedirectResponse

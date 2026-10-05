@@ -19,6 +19,11 @@ class AuditActivity
             : null;
 
         $response = $next($request);
+
+        if ($request->attributes->get('audit_logged')) {
+            return $response;
+        }
+
         $isMutation = in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'], true);
         $isSuccessful = $response->isSuccessful() || $response->isRedirection();
 

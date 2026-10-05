@@ -26,6 +26,15 @@ class ServiceJobController extends Controller
         }
 
         $serviceJobs = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        // Pastikan setiap record pekerjaan jasa sinkron otomatis persentase progress-nya
+        foreach ($serviceJobs as $job) {
+            $expectedProgress = $job->calculateProgress();
+            if ($job->progress !== $expectedProgress) {
+                $job->syncProgress();
+            }
+        }
+
         $contracts = Contract::with('client')->where('status', 'Aktif')->get();
 
         return view('services.index', compact('serviceJobs', 'contracts'));
@@ -40,13 +49,16 @@ class ServiceJobController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'status' => 'required|string',
-            'progress' => 'required|integer|min:0|max:100',
             'notes' => 'nullable|string',
         ]);
 
-        ServiceJob::create($validated);
+        // Progress awal otomatis 100% jika langsung berstatus Selesai, atau 0% untuk pekerjaan baru
+        $validated['progress'] = ($validated['status'] === 'Selesai') ? 100 : 0;
 
-        return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil ditambahkan.');
+        $job = ServiceJob::create($validated);
+        $job->syncProgress();
+
+        return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil ditambahkan dengan progress otomatis.');
     }
 
     public function update(Request $request, ServiceJob $serviceJob): RedirectResponse
@@ -56,11 +68,15 @@ class ServiceJobController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'status' => 'required|string',
-            'progress' => 'required|integer|min:0|max:100',
             'notes' => 'nullable|string',
         ]);
 
+        if ($validated['status'] === 'Selesai') {
+            $validated['progress'] = 100;
+        }
+
         $serviceJob->update($validated);
+        $serviceJob->syncProgress();
 
         return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil diperbarui.');
     }
@@ -68,12 +84,12 @@ class ServiceJobController extends Controller
     public function generateBill(Request $request, ServiceJob $serviceJob): RedirectResponse
     {
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0.01',
             'due_date' => 'required|date',
             'notes' => 'nullable|string',
         ]);
 
-        $subtotal = $validated['amount'];
+        $subtotal = (float) $validated['amount'];
         $taxAmount = $subtotal * 0.11;
         $totalAmount = $subtotal + $taxAmount;
 
@@ -113,8 +129,13 @@ class ServiceJobController extends Controller
                 'price' => $subtotal,
                 'subtotal' => $subtotal,
             ]);
+
+            $serviceJob->refresh();
+            $serviceJob->syncProgress();
         });
 
-        return redirect()->route('invoices.index')->with('success', 'Invoice/Tagihan Jasa berhasil diterbitkan.');
+        $currentProgress = $serviceJob->fresh()->progress;
+
+        return redirect()->route('jasa.index')->with('success', "Invoice/Tagihan Jasa berhasil diterbitkan. Progress pekerjaan otomatis diperbarui menjadi {$currentProgress}%.");
     }
 }

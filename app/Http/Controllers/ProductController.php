@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Validation\ValidationException;
@@ -65,19 +66,49 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
+        // Only super_admin can edit product data
+        if (Auth::user()->role?->name !== 'super_admin') {
+            abort(403, 'Hanya Super Admin yang dapat mengedit data produk.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:200',
-            'category' => 'nullable|string|max:100',
-            'unit' => 'required|string|max:30',
             'purchase_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
-            'minimum_stock' => 'required|numeric|min:0',
-            'is_active' => 'required|boolean',
         ]);
+
+        // Capture old values before update
+        $oldValues = [
+            'name' => $product->name,
+            'purchase_price' => (float) $product->purchase_price,
+            'selling_price' => (float) $product->selling_price,
+        ];
 
         $product->update($validated);
 
-        return redirect()->route('products.index')->with('success', 'Data produk berhasil diperbarui.');
+        // Mark as audit_logged to prevent duplicate in AuditActivity middleware
+        $request->attributes->set('audit_logged', true);
+
+        // Log changes to audit_logs
+        $newValues = [
+            'name' => $product->name,
+            'purchase_price' => (float) $product->purchase_price,
+            'selling_price' => (float) $product->selling_price,
+        ];
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'update',
+            'table_name' => 'products',
+            'record_id' => $product->id,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return redirect()->route('products.index')->with('success', "Produk \"{$product->name}\" berhasil diperbarui. Perubahan tercatat di log aktivitas.");
     }
 
     public function adjustStock(Request $request, Product $product): RedirectResponse

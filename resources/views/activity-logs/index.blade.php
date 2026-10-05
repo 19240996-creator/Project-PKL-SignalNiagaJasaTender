@@ -66,7 +66,19 @@
                                         <div class="mt-1 truncate text-xs text-slate-400" x-text="summary(log.old_values)"></div>
                                     </div>
                                 </template>
-                                <template x-if="log.action !== 'delete' && log.new_values">
+                                <template x-if="log.action === 'update' && log.old_values && log.new_values">
+                                    <div class="space-y-1">
+                                        <template x-for="(val, key) in log.new_values" :key="key">
+                                            <div x-show="log.old_values[key] !== undefined && String(log.old_values[key]) !== String(val)" class="text-xs">
+                                                <span class="font-semibold text-slate-600" x-text="formatKey(key) + ':'"></span>
+                                                <span class="text-rose-500 line-through mr-1" x-text="formatValue(key, log.old_values[key])"></span>
+                                                <i class="fa-solid fa-arrow-right text-[10px] text-slate-400 mx-0.5"></i>
+                                                <span class="text-emerald-600 font-semibold" x-text="formatValue(key, val)"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template x-if="log.action !== 'delete' && !(log.action === 'update' && log.old_values) && log.new_values">
                                     <div class="truncate text-xs text-slate-500" x-text="summary(log.new_values)"></div>
                                 </template>
                             </td>
@@ -128,6 +140,24 @@
             },
             formatRole(role) {
                 return role.replaceAll('_', ' ');
+            },
+            formatKey(key) {
+                const map = {
+                    name: 'Nama Produk',
+                    purchase_price: 'Harga Beli',
+                    selling_price: 'Harga Jual',
+                };
+                return map[key] || key.replaceAll('_', ' ');
+            },
+            formatValue(key, val) {
+                if (val === null || val === undefined) return '-';
+                if (key.includes('price') || key.includes('amount') || key.includes('nominal')) {
+                    const num = Number(val);
+                    if (!isNaN(num)) {
+                        return 'Rp ' + num.toLocaleString('id-ID');
+                    }
+                }
+                return val;
             },
             summary(values) {
                 return Object.entries(values).filter(([key]) => !['created_at', 'updated_at'].includes(key)).map(([key, value]) => `${key}: ${value ?? '-'}`).join(' · ');

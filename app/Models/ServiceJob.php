@@ -37,4 +37,38 @@ class ServiceJob extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function getTotalBilledAttribute(): float
+    {
+        return (float) $this->invoices()
+            ->where('status', '!=', 'Cancelled')
+            ->sum('subtotal');
+    }
+
+    public function calculateProgress(): int
+    {
+        if ($this->status === 'Selesai') {
+            return 100;
+        }
+
+        $contractValue = (float) ($this->contract?->contract_value ?? 0);
+        if ($contractValue > 0) {
+            $totalBilled = $this->total_billed;
+            return min(100, (int) round(($totalBilled / $contractValue) * 100));
+        }
+
+        return (int) ($this->progress ?? 0);
+    }
+
+    public function syncProgress(): void
+    {
+        $calculated = $this->calculateProgress();
+        $updates = ['progress' => $calculated];
+
+        if ($calculated >= 100 && $this->status !== 'Selesai') {
+            $updates['status'] = 'Selesai';
+        }
+
+        $this->update($updates);
+    }
 }

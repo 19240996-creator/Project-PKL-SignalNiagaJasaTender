@@ -21,7 +21,7 @@ class SalesController extends Controller
             ->paginate(10);
 
         $products = Product::where('is_active', true)->get();
-        $tenders = Tender::all();
+        $tenders = Tender::with('client')->get();
 
         return view('sales.index', compact('sales', 'products', 'tenders'));
     }

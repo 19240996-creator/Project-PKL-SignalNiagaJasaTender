@@ -78,32 +78,71 @@
                 <button @click="createModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <form action="{{ route('sales.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('sales.store') }}" method="POST" class="space-y-4"
+                  x-data="{
+                      selectedTender: '',
+                      customerName: '',
+                      customerPhone: '',
+                      autoFilled: false,
+                      tenderClients: {
+                          @foreach($tenders as $tdr)
+                              @if($tdr->client)
+                              '{{ $tdr->id }}': {
+                                  name: '{{ addslashes($tdr->client->company_name ?? $tdr->client->name) }}',
+                                  phone: '{{ addslashes($tdr->client->phone ?? '') }}'
+                              },
+                              @endif
+                          @endforeach
+                      },
+                      onTenderChange() {
+                          if (this.selectedTender && this.tenderClients[this.selectedTender]) {
+                              const client = this.tenderClients[this.selectedTender];
+                              this.customerName = client.name;
+                              this.customerPhone = client.phone;
+                              this.autoFilled = true;
+                          } else {
+                              this.autoFilled = false;
+                          }
+                      }
+                  }">
                 @csrf
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Pelanggan / Perusahaan</label>
-                        <input type="text" name="customer_name" required placeholder="PT Mega Utama..." class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nomor Telepon Pelanggan</label>
-                        <input type="text" name="customer_phone" placeholder="081234567890" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
 
+                {{-- Tender Terkait di atas supaya auto-fill terlihat jelas --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tanggal Penjualan</label>
-                        <input type="date" name="sale_date" required value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tender Terkait (Opsional)</label>
-                        <select name="tender_id" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="tender_id" x-model="selectedTender" @change="onTenderChange()"
+                                class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Tidak Terikat Tender --</option>
                             @foreach($tenders as $tdr)
                                 <option value="{{ $tdr->id }}">{{ $tdr->tender_number }} - {{ $tdr->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tanggal Penjualan</label>
+                        <input type="date" name="sale_date" required value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                {{-- Auto-fill indicator --}}
+                <div x-show="autoFilled" x-transition class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Data pelanggan otomatis terisi dari klien tender terkait. Anda tetap bisa mengubahnya.</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Pelanggan / Perusahaan</label>
+                        <input type="text" name="customer_name" x-model="customerName" required placeholder="PT Mega Utama..."
+                               class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                               :class="autoFilled ? 'bg-blue-50 border-blue-300' : ''">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nomor Telepon Pelanggan</label>
+                        <input type="text" name="customer_phone" x-model="customerPhone" placeholder="081234567890"
+                               class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                               :class="autoFilled ? 'bg-blue-50 border-blue-300' : ''">
                     </div>
                 </div>
 

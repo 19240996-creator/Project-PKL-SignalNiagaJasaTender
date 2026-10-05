@@ -4,7 +4,31 @@
 @section('header-title', 'Pipeline & Dokumen Tender')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModal: false, uploadModal: false, convertModal: false, evaluationModal: false, selectedTender: null }">
+<div class="space-y-6" x-data="{
+    createModal: false,
+    uploadModal: false,
+    convertModal: false,
+    evaluationModal: false,
+    statusModal: false,
+    editModal: false,
+    selectedTender: null,
+    statusForm: {
+        status: '',
+        bid_value: '',
+        notes: ''
+    },
+    openStatusModal(tender) {
+        this.selectedTender = tender;
+        this.statusForm.status = tender.status;
+        this.statusForm.bid_value = tender.bid_value || tender.estimated_value || '';
+        this.statusForm.notes = tender.notes || '';
+        this.statusModal = true;
+    },
+    openEditModal(tender) {
+        this.selectedTender = tender;
+        this.editModal = true;
+    }
+}">
 
     <!-- Action & Filter Bar -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
@@ -70,22 +94,23 @@
                                     <span class="text-slate-400">-</span>
                                 @endif
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 whitespace-nowrap">
                                 @php
                                     $badgeColor = match($tender->status) {
-                                        'Ditemukan' => 'bg-slate-100 text-slate-700 border-slate-300',
-                                        'Evaluasi' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                        'Persiapan Dokumen' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                        'Penawaran' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                        'Menang' => 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
-                                        'Kalah' => 'bg-rose-100 text-rose-800 border-rose-200',
-                                        'Kontrak' => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                                        default => 'bg-slate-100 text-slate-700'
+                                        'Ditemukan' => 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200',
+                                        'Evaluasi' => 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
+                                        'Persiapan Dokumen' => 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+                                        'Penawaran' => 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
+                                        'Menang' => 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold hover:bg-emerald-200',
+                                        'Kalah' => 'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200',
+                                        'Kontrak' => 'bg-indigo-100 text-indigo-800 border-indigo-300 hover:bg-indigo-200',
+                                        default => 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                     };
                                 @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-medium border {{ $badgeColor }}">
-                                    {{ $tender->status }}
-                                </span>
+                                <button type="button" @click="openStatusModal({{ $tender }})" class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border {{ $badgeColor }} transition cursor-pointer shadow-sm hover:scale-105" title="Klik untuk mengubah status pipeline">
+                                    <span>{{ $tender->status }}</span>
+                                    <i class="fa-solid fa-pen text-[10px] opacity-40 group-hover:opacity-100 transition"></i>
+                                </button>
                             </td>
                             <td class="p-4">
                                 @if($tender->documents->isNotEmpty())
@@ -116,22 +141,30 @@
                                 @endif
                             </td>
                             <td class="p-4 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center justify-center gap-2">
-                                    <div class="w-32 flex justify-center">
-                                        @if($tender->status === 'Menang' || $tender->result === 'Menang')
-                                            <button @click="selectedTender = {{ $tender }}; convertModal = true" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Konversi ke Kontrak Jasa">
-                                                <i class="fa-solid fa-file-signature text-[11px]"></i> Buat Kontrak
-                                            </button>
-                                        @elseif($tender->status === 'Evaluasi')
-                                            <button type="button" @click="selectedTender = {{ $tender }}; evaluationModal = true" class="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-lg shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Form Evaluasi Tender">
-                                                <i class="fa-solid fa-clipboard-check text-[11px]"></i> Evaluasi
-                                            </button>
-                                        @endif
-                                    </div>
+                                <div class="inline-flex items-center justify-center gap-1.5">
+                                    @if($tender->status === 'Evaluasi')
+                                        <button type="button" @click="selectedTender = {{ $tender }}; evaluationModal = true" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-lg shadow-sm transition inline-flex items-center gap-1" title="Form Evaluasi Tender">
+                                            <i class="fa-solid fa-clipboard-check text-[11px]"></i> Evaluasi
+                                        </button>
+                                    @endif
+
+                                    <button type="button" @click="openEditModal({{ $tender }})" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition" title="Edit Data Tender">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
 
                                     <button @click="selectedTender = {{ $tender }}; uploadModal = true" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg transition" title="Upload Dokumen">
                                         <i class="fa-solid fa-upload"></i>
                                     </button>
+
+                                    @if(auth()->user()->role?->name === 'super_admin')
+                                        <form action="{{ route('tender.destroy', $tender) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data tender {{ $tender->tender_number }}?');" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-8 h-8 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs rounded-lg transition" title="Hapus Tender">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -343,6 +376,171 @@
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" @click="evaluationModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm rounded-xl shadow">Simpan Evaluasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Update Pipeline Status -->
+    <div x-show="statusModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="statusModal = false">
+        <div @click.outside="statusModal = false" class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl p-6 space-y-4">
+            <div class="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-arrows-spin text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Update Status Pipeline Tender</h3>
+                        <p class="text-xs font-medium text-slate-400">Pindahkan tahapan tender sesuai progres lelang saat ini</p>
+                    </div>
+                </div>
+                <button type="button" @click="statusModal = false" class="text-slate-400 hover:text-slate-600 transition" aria-label="Tutup modal status">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-1 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nomor Tender:</span>
+                    <span class="font-mono font-bold text-blue-700" x-text="selectedTender?.tender_number"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nama Tender:</span>
+                    <span class="font-semibold text-slate-800 text-right truncate max-w-[280px]" x-text="selectedTender?.name"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status Saat Ini:</span>
+                    <span class="font-bold text-purple-700" x-text="selectedTender?.status"></span>
+                </div>
+            </div>
+
+            <form x-bind:action="selectedTender ? '/tender/' + selectedTender.id : '#'" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1.5">Pilih Tahapan Pipeline Baru <span class="text-rose-500">*</span></label>
+                    <select name="status" x-model="statusForm.status" required class="w-full px-3.5 py-2.5 border rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 bg-white border-slate-200">
+                        <option value="Ditemukan">1. Ditemukan (Info tender baru diidentifikasi)</option>
+                        <option value="Evaluasi">2. Evaluasi (Kajian teknis & kelayakan bisnis)</option>
+                        <option value="Persiapan Dokumen">3. Persiapan Dokumen (Penyusunan berkas & administrasi)</option>
+                        <option value="Penawaran">4. Penawaran (Dokumen penawaran harga diajukan)</option>
+                        <option value="Menang">5. Menang (Dinyatakan menang, lanjut ke kontrak)</option>
+                        <option value="Kalah">6. Kalah (Gagal / tidak terpilih)</option>
+                        <option value="Kontrak">7. Kontrak (Resmi menjadi kontrak kerja)</option>
+                        <option value="Batal">8. Batal (Tender dibatalkan oleh pihak klien)</option>
+                    </select>
+                </div>
+
+                <div x-show="statusForm.status === 'Penawaran' || statusForm.status === 'Menang'" x-transition class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nilai Penawaran Final (Rp)</label>
+                    <input type="number" name="bid_value" x-model="statusForm.bid_value" min="0" placeholder="Contoh: 4850000" class="w-full px-3.5 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 border-slate-200">
+                    <p class="text-[11px] text-slate-400">Update nilai penawaran riil yang diajukan atau disepakati.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan Progres / Alasan Perubahan</label>
+                    <textarea name="notes" x-model="statusForm.notes" rows="3" placeholder="Contoh: Panitia mengumumkan hasil evaluasi dokumen penawaran harga..." class="w-full px-3.5 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 border-slate-200"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="statusModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Simpan Status Baru
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 6: Edit Full Tender Data -->
+    <div x-show="editModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="editModal = false">
+        <div @click.outside="editModal = false" class="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Edit Data Tender</h3>
+                        <p class="text-xs font-medium text-slate-400">Edit informasi dan tahapan tender</p>
+                    </div>
+                </div>
+                <button type="button" @click="editModal = false" class="text-slate-400 hover:text-slate-600 transition" aria-label="Tutup modal edit">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form x-bind:action="selectedTender ? '/tender/' + selectedTender.id : '#'" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nomor Tender</label>
+                        <input type="text" disabled x-bind:value="selectedTender?.tender_number" class="w-full px-3 py-2 border rounded-xl text-sm bg-slate-100 text-slate-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Klien / Instansi</label>
+                        <select name="client_id" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            @foreach($clients as $c)
+                                <option value="{{ $c->id }}" x-bind:selected="selectedTender?.client_id == {{ $c->id }}">{{ $c->name }} ({{ $c->company_name ?? '-' }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Tender Pekerjaan <span class="text-rose-500">*</span></label>
+                    <input type="text" name="name" required x-bind:value="selectedTender?.name" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tanggal Ditemukan</label>
+                        <input type="date" name="found_date" required x-bind:value="selectedTender?.found_date ? selectedTender.found_date.substring(0,10) : ''" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Deadline Tender</label>
+                        <input type="date" name="deadline" x-bind:value="selectedTender?.deadline ? selectedTender.deadline.substring(0,10) : ''" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nilai Estimasi (Rp) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="estimated_value" required min="0" x-bind:value="selectedTender?.estimated_value" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nilai Penawaran (Rp)</label>
+                        <input type="number" name="bid_value" min="0" x-bind:value="selectedTender?.bid_value" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Status Pipeline <span class="text-rose-500">*</span></label>
+                    <select name="status" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="Ditemukan" x-bind:selected="selectedTender?.status === 'Ditemukan'">Ditemukan</option>
+                        <option value="Evaluasi" x-bind:selected="selectedTender?.status === 'Evaluasi'">Evaluasi</option>
+                        <option value="Persiapan Dokumen" x-bind:selected="selectedTender?.status === 'Persiapan Dokumen'">Persiapan Dokumen</option>
+                        <option value="Penawaran" x-bind:selected="selectedTender?.status === 'Penawaran'">Penawaran</option>
+                        <option value="Menang" x-bind:selected="selectedTender?.status === 'Menang'">Menang</option>
+                        <option value="Kalah" x-bind:selected="selectedTender?.status === 'Kalah'">Kalah</option>
+                        <option value="Kontrak" x-bind:selected="selectedTender?.status === 'Kontrak'">Kontrak</option>
+                        <option value="Batal" x-bind:selected="selectedTender?.status === 'Batal'">Batal</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan</label>
+                    <textarea name="notes" rows="2" x-bind:value="selectedTender?.notes" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="editModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm rounded-xl shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                    </button>
                 </div>
             </form>
         </div>

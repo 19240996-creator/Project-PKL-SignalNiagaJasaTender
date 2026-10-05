@@ -107,12 +107,12 @@ Route::middleware(['auth', 'audit'])->group(function () {
     Route::middleware(['role:super_admin,warehouse'])->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
     });
 
     // Only Super Admin can permanently remove a product from the catalog.
     Route::middleware(['role:super_admin'])->group(function () {
+        Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     });
 
