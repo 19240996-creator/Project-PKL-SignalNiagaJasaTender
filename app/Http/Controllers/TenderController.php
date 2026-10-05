@@ -114,6 +114,14 @@ class TenderController extends Controller
         $file = $request->file('file');
         $path = $file->store('tender_documents', 'public');
 
+        $previousDocuments = $tender->documents()->get();
+
+        foreach ($previousDocuments as $previousDocument) {
+            Storage::disk('public')->delete($previousDocument->file_path);
+        }
+
+        $tender->documents()->delete();
+
         TenderDocument::create([
             'tender_id' => $tender->id,
             'uploaded_by' => Auth::id() ?? 1,
@@ -124,6 +132,23 @@ class TenderController extends Controller
         ]);
 
         return redirect()->route('tender.index')->with('success', 'Dokumen tender berhasil diunggah.');
+    }
+
+    public function viewDocument(Tender $tender, TenderDocument $document)
+    {
+        abort_unless($document->tender_id === $tender->id, 404);
+
+        if (!Storage::disk('public')->exists($document->file_path)) {
+            return redirect()->route('tender.index')->with('error', 'File dokumen tidak ditemukan di penyimpanan.');
+        }
+
+        return response()->file(
+            Storage::disk('public')->path($document->file_path),
+            [
+                'Content-Type' => $document->file_type ?: 'application/octet-stream',
+                'Content-Disposition' => 'inline; filename="' . basename($document->file_path) . '"',
+            ]
+        );
     }
 
     public function storeEvaluation(Request $request, Tender $tender): RedirectResponse
@@ -142,6 +167,14 @@ class TenderController extends Controller
             'notes' => $validated['notes'] ?? null,
             'evaluated_at' => now(),
         ]);
+
+        $pipelineUpdate = match ($validated['decision']) {
+            'Proceed' => ['status' => 'Penawaran', 'result' => null],
+            'Reject' => ['status' => 'Kalah', 'result' => 'Kalah'],
+            default => ['status' => 'Evaluasi', 'result' => null],
+        };
+
+        $tender->update($pipelineUpdate);
 
         return redirect()->route('tender.index')->with('success', 'Evaluasi tender berhasil dicatat.');
     }

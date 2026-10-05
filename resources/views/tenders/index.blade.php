@@ -88,9 +88,20 @@
                                 </span>
                             </td>
                             <td class="p-4">
-                                <span class="text-xs font-semibold text-slate-600">
-                                    <i class="fa-solid fa-paperclip text-slate-400"></i> {{ $tender->documents->count() }} Dokumen
-                                </span>
+                                @if($tender->documents->isNotEmpty())
+                                    <div class="space-y-1.5">
+                                        @foreach($tender->documents as $document)
+                                            <a href="{{ route('tender.documents.view', [$tender, $document]) }}" target="_blank" rel="noopener" class="flex items-center gap-1.5 max-w-40 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline" title="Buka dokumen terbaru: {{ $document->document_name }}">
+                                                <i class="fa-solid fa-file-arrow-up text-slate-400 shrink-0"></i>
+                                                <span class="truncate">{{ $document->document_name }}</span>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400">
+                                        <i class="fa-solid fa-paperclip text-slate-400"></i> Belum ada dokumen
+                                    </span>
+                                @endif
                             </td>
                             <td class="p-4">
                                 @if($tender->items->isNotEmpty())

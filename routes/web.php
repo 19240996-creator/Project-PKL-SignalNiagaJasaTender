@@ -58,6 +58,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::put('/tender/{tender}', [TenderController::class, 'update'])->name('tender.update');
         Route::delete('/tender/{tender}', [TenderController::class, 'destroy'])->name('tender.destroy');
         Route::post('/tender/{tender}/upload', [TenderController::class, 'uploadDocument'])->name('tender.upload');
+        Route::get('/tender/{tender}/documents/{document}', [TenderController::class, 'viewDocument'])->name('tender.documents.view');
         Route::post('/tender/{tender}/evaluations', [TenderController::class, 'storeEvaluation'])->name('tender.evaluations.store');
         Route::post('/tender/{tender}/convert-contract', [TenderController::class, 'convertToContract'])->name('tender.convert');
     });

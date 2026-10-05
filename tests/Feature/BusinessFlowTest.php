@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Role;
 use App\Models\StockMovement;
 use App\Models\Tender;
+use App\Models\TenderDocument;
 use App\Models\TenderEvaluation;
 use App\Models\User;
 use App\Notifications\TenderDeadlineReminder;
@@ -18,6 +19,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BusinessFlowTest extends TestCase
@@ -75,6 +78,53 @@ class BusinessFlowTest extends TestCase
 
         $response->assertRedirect();
         $this->assertDatabaseHas('tender_evaluations', ['tender_id' => $tender->id, 'decision' => 'Proceed', 'score' => 88]);
+        $this->assertDatabaseHas('tenders', ['id' => $tender->id, 'status' => 'Penawaran']);
+    }
+
+    public function test_rejected_tender_moves_to_lost_status(): void
+    {
+        [$user, $client] = $this->foundation();
+        $tender = Tender::create(['client_id' => $client->id, 'tender_number' => 'TDR-REJECT-001', 'name' => 'Tender Ditolak', 'found_date' => '2026-09-13', 'status' => 'Evaluasi', 'estimated_value' => 100, 'bid_value' => 90, 'created_by' => $user->id]);
+
+        $response = $this->actingAs($user)->post(route('tender.evaluations.store', $tender), ['score' => 40, 'decision' => 'Reject', 'notes' => 'Tidak memenuhi syarat']);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('tender_evaluations', ['tender_id' => $tender->id, 'decision' => 'Reject']);
+        $this->assertDatabaseHas('tenders', ['id' => $tender->id, 'status' => 'Kalah', 'result' => 'Kalah']);
+    }
+
+    public function test_uploading_tender_document_replaces_previous_document(): void
+    {
+        [$user, $client] = $this->foundation();
+        Storage::fake('public');
+        $tender = Tender::create([
+            'client_id' => $client->id,
+            'tender_number' => 'TDR-DOCUMENT-001',
+            'name' => 'Tender Dokumen',
+            'found_date' => '2026-09-13',
+            'status' => 'Penawaran',
+            'estimated_value' => 100,
+            'bid_value' => 90,
+            'created_by' => $user->id,
+        ]);
+
+        $this->actingAs($user)->post(route('tender.upload', $tender), [
+            'document_name' => 'Proposal Lama',
+            'file' => UploadedFile::fake()->create('proposal-lama.pdf', 10, 'application/pdf'),
+        ]);
+        $oldPath = TenderDocument::query()->where('tender_id', $tender->id)->value('file_path');
+
+        $this->actingAs($user)->post(route('tender.upload', $tender), [
+            'document_name' => 'Proposal Terbaru',
+            'file' => UploadedFile::fake()->create('proposal-terbaru.pdf', 10, 'application/pdf'),
+        ]);
+
+        $this->assertDatabaseCount('tender_documents', 1);
+        $this->assertDatabaseHas('tender_documents', [
+            'tender_id' => $tender->id,
+            'document_name' => 'Proposal Terbaru',
+        ]);
+        Storage::disk('public')->assertMissing($oldPath);
     }
 
     public function test_deadline_command_notifies_business_roles(): void
