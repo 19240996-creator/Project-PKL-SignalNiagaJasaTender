@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SignalNiagaJasaTender') — PT Signal Panca Utama</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,21 +16,13 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
                         navy: {
-                            800: '#0F1E36',
-                            900: '#0B1727',
-                            950: '#07101C',
-                        },
-                        corporate: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
+                            800: '#0F172A',
+                            900: '#020617',
                         }
                     }
                 }
@@ -44,13 +36,31 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #F4F7FB; color: #0f172a; }
-        .sidebar-item-active { background-color: #2563eb !important; color: #ffffff !important; font-weight: 600; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .sidebar-item-active i { color: #ffffff !important; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+            letter-spacing: -0.015em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.025em;
+        }
+        .sidebar-item-active {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            color: #FFFFFF !important;
+            font-weight: 600;
+            border-left: 3px solid #3B82F6;
+        }
+        .sidebar-item-active i {
+            color: #60A5FA !important;
+        }
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-[#F4F7FB] antialiased min-h-screen flex flex-col text-slate-800" x-data="{ sidebarOpen: false }">
+<body class="bg-[#F8FAFC] antialiased min-h-screen flex flex-col text-slate-800" x-data="{ sidebarOpen: false }">
 
     @php
         $role = Auth::user()->role->name ?? '';
@@ -72,13 +82,13 @@
         $totalPending = $pendingTenders + $pendingServices + $pendingSales;
     @endphp
 
-    <div class="flex h-screen overflow-hidden bg-[#F4F7FB]">
-        <!-- Sidebar Corporate Navy -->
-        <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-[#0B1727] text-white border-r border-slate-800/80 transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static flex flex-col justify-between"
+    <div class="flex h-screen overflow-hidden bg-[#F8FAFC]">
+        <!-- Sidebar Corporate Charcoal Navy -->
+        <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-[#0F172A] text-slate-300 border-r border-slate-800 transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static flex flex-col justify-between"
                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
             <div>
                 <!-- Brand Header -->
-                <div class="h-16 flex items-center px-5 border-b border-white/10 bg-[#07101C] text-white justify-between">
+                <div class="h-16 flex items-center px-5 border-b border-slate-800 bg-[#090E17] text-white justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-md bg-white p-1 flex items-center justify-center shadow-xs shrink-0">
                             <img src="{{ asset('images/logo-icon.png') }}" alt="SPU" class="h-full w-full object-contain">
@@ -193,14 +203,14 @@
             </div>
 
             <!-- Footer User Profile -->
-            <div class="p-3 border-t border-white/10 bg-[#07101C] flex items-center justify-between">
+            <div class="p-3 border-t border-slate-800 bg-[#090E17] flex items-center justify-between">
                 <div class="flex items-center space-x-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-md bg-blue-900/80 border border-blue-400/30 text-blue-200 font-bold flex items-center justify-center text-xs shrink-0">
+                    <div class="w-8 h-8 rounded-md bg-slate-800 border border-slate-700 text-slate-200 font-bold flex items-center justify-center text-xs shrink-0">
                         {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
                     </div>
                     <div class="truncate">
                         <div class="text-xs font-semibold text-white truncate leading-tight">{{ Auth::user()->name ?? 'Pengguna' }}</div>
-                        <div class="text-[10px] text-blue-300 font-medium uppercase">{{ $role }}</div>
+                        <div class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{{ $role }}</div>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
@@ -236,8 +246,8 @@
                         </a>
                     @endif
 
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-                        <i class="fa-solid fa-shield-halved text-[10px] text-blue-600"></i>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                        <i class="fa-solid fa-shield-halved text-[10px] text-slate-500"></i>
                         {{ ucfirst($role) }}
                     </span>
                 </div>
