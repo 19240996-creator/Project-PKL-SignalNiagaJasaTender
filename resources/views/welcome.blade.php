@@ -18,6 +18,10 @@
             scroll-behavior: smooth;
         }
 
+        section[id], footer[id] {
+            scroll-margin-top: 80px;
+        }
+
         :root {
             --navy: #0F172A;
             --navy-light: #1E293B;
@@ -85,28 +89,50 @@
         }
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand img { height: 38px; width: auto; }
-        .brand-text { line-height: 1.15; }
-        .brand-name { font-weight: 700; font-size: 18px; color: var(--ink); letter-spacing: -.02em; }
-        .brand-sub { font-size: 10px; font-weight: 600; color: var(--blue); letter-spacing: .06em; text-transform: uppercase; }
-        .nav-links { display: flex; align-items: center; gap: 32px; }
+        .brand-text { line-height: 1.2; }
+        .brand-name { font-weight: 800; font-size: 17.5px; color: var(--ink); letter-spacing: -.02em; }
+        .brand-sub { font-size: 11px; font-weight: 600; color: var(--blue); letter-spacing: .02em; }
+
+        /* Capsule Pill Navbar */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #E8EEF5;
+            padding: 5px 6px;
+            border-radius: 999px;
+            border: 1px solid #CBD5E1;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+        }
         .nav-links a {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 500;
-            color: var(--mute);
-            transition: color .2s;
-            position: relative;
+            color: #334155;
+            padding: 7px 18px;
+            border-radius: 999px;
+            transition: all .2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.2;
         }
-        .nav-links a:hover { color: var(--ink); }
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px; left: 0;
-            width: 0; height: 2px;
-            background: var(--blue);
-            transition: width .2s ease;
+        .nav-links a:hover {
+            color: #0F172A;
+            background: rgba(255, 255, 255, 0.45);
         }
-        .nav-links a:hover::after { width: 100%; }
-        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .nav-links a.active {
+            background: #FFFFFF;
+            color: #1D4ED8;
+            font-weight: 700;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.06);
+        }
+        .header-actions { display: flex; align-items: center; }
+        .btn-portal {
+            padding: 8px 20px;
+            font-size: 13.5px;
+            border-radius: 999px;
+        }
 
         .btn {
             display: inline-flex;
@@ -299,20 +325,23 @@
         .section-header-center { text-align: center; }
         .section-header-center .section-subtitle { margin: 0 auto; }
 
+
         /* ─── CLIENT MARQUEE ─────────────────────────────── */
         .clients-section {
-            padding: 56px 0;
+            padding: 52px 0;
+            background: #f8fafc;
+            border-top: 1px solid var(--hairline);
             border-bottom: 1px solid var(--hairline);
             overflow: hidden;
         }
         .clients-label {
             text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--subtle);
-            letter-spacing: .04em;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--mute);
+            letter-spacing: .06em;
             text-transform: uppercase;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .marquee-track {
             position: relative;
@@ -328,8 +357,8 @@
             z-index: 2;
             pointer-events: none;
         }
-        .marquee-track::before { left: 0; background: linear-gradient(90deg, #fff, transparent); }
-        .marquee-track::after { right: 0; background: linear-gradient(270deg, #fff, transparent); }
+        .marquee-track::before { left: 0; background: linear-gradient(90deg, #f8fafc, transparent); }
+        .marquee-track::after { right: 0; background: linear-gradient(270deg, #f8fafc, transparent); }
         .marquee-strip {
             display: flex;
             width: max-content;
@@ -455,641 +484,527 @@
         .check-teal { color: var(--teal); }
         .check-amber { color: var(--amber); }
 
-        /* ─── BUSINESS PILLARS ─────────────────────────── */
+        /* ─── BUSINESS PILLARS (FLIP CARDS) ─────────────── */
         .pillar-section-bg {
-            background: var(--surface);
+            background: #ffffff;
+            padding: 88px 0 96px;
+            border-bottom: 1px solid var(--hairline);
         }
         .pillar-intro {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
-            gap: 48px;
-            align-items: end;
-            margin-bottom: 44px;
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 48px;
         }
-        .pillar-intro .section-header { margin-bottom: 0; }
-        .pillar-note {
-            padding: 16px 20px;
-            border-left: 3px solid var(--blue);
-            background: rgba(26,109,227,.04);
-            border-radius: 0 8px 8px 0;
-            color: var(--body);
-            font-size: 14px;
-            line-height: 1.7;
+        .pillar-intro .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .pillar-intro .section-title {
+            color: var(--ink);
+            font-size: clamp(2rem, 3.2vw, 2.75rem);
+            font-weight: 800;
+            letter-spacing: -.03em;
+            margin-bottom: 12px;
+        }
+        .pillar-intro .section-subtitle {
+            color: var(--mute);
+            font-size: 14.5px;
+            line-height: 1.65;
         }
         .pillar-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
-            gap: 20px;
-            align-items: stretch;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
         }
-        .pillar-card {
+        .flip-card {
+            background-color: transparent;
+            perspective: 1200px;
+            height: 490px;
+            cursor: pointer;
+            outline: none;
+            user-select: none;
+        }
+        .flip-card:focus-visible .flip-card-front,
+        .flip-card:focus-visible .flip-card-back {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.45);
+        }
+        .flip-card-inner {
             position: relative;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            overflow: hidden;
-            background: var(--canvas);
-            border: 1px solid var(--hairline);
-            border-radius: var(--radius-lg);
-            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
-        /* Thin solid accent line at top */
-        .pillar-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            z-index: 3;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        .flip-card.is-flipped .flip-card-inner {
+            transform: rotateY(180deg);
         }
-        .pillar-card-primary::before { background: var(--blue); }
-        .pillar-card-secondary:nth-child(2)::before { background: #7c3aed; }
-        .pillar-card-secondary:nth-child(3)::before { background: var(--teal); }
-        .pillar-card:hover {
-            border-color: #d0d5dd;
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-3px);
-        }
-        .pillar-card-primary { grid-row: span 2; }
-        .pillar-card-image {
-            position: relative;
-            overflow: hidden;
-            background: #dbeafe;
-        }
-        .pillar-card-primary .pillar-card-image { min-height: 286px; }
-        .pillar-card-secondary .pillar-card-image { height: 148px; }
-        .pillar-card-secondary:nth-child(2) .pillar-card-image {
-            height: 180px;
-        }
-        .pillar-card-secondary:nth-child(2) .pillar-card-image img {
-            object-position: 68% 38%;
-        }
-        .pillar-card-image::after {
-            content: '';
+        .flip-card-front,
+        .flip-card-back {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, transparent 52%, rgba(12,29,54,.42));
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--hairline);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow .2s ease, border-color .2s ease;
         }
-        .pillar-card-image img {
+        .flip-card:hover .flip-card-front,
+        .flip-card:hover .flip-card-back {
+            border-color: #93c5fd;
+            box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+        }
+        /* Front face */
+        .flip-card-front {
+            background: #ffffff;
+        }
+        .flip-card-image {
+            height: 190px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            background: #e2e8f0;
+        }
+        .flip-card-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+            transition: transform .45s ease;
         }
-        .pillar-card:hover .pillar-card-image img { transform: scale(1.04); }
-        .pillar-card-index {
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            z-index: 2;
+        .flip-card:hover .flip-card-front img {
+            transform: scale(1.04);
+        }
+        .flip-card-content {
+            padding: 22px 22px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .flip-card-kicker {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--blue);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .flip-card-front h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.35;
+            margin-bottom: 10px;
+        }
+        .flip-card-front p {
+            font-size: 13px;
+            color: var(--body);
+            line-height: 1.6;
+            margin-bottom: auto;
+        }
+        .flip-hint {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 42px;
-            height: 28px;
-            border: 1px solid rgba(255,255,255,.45);
-            border-radius: 7px;
-            background: rgba(12,29,54,.55);
-            backdrop-filter: blur(6px);
-            color: #fff;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .04em;
-        }
-        .pillar-card-body { padding: 26px 28px 28px; }
-        .pillar-card-secondary .pillar-card-body { padding: 20px 22px 22px; }
-        .pillar-card-kicker {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: .09em;
-            text-transform: uppercase;
-        }
-        .pillar-card-primary .pillar-card-kicker { color: var(--blue); }
-        .pillar-card-secondary:nth-child(2) .pillar-card-kicker { color: #7c3aed; }
-        .pillar-card-secondary:nth-child(3) .pillar-card-kicker { color: var(--teal); }
-        .pillar-card-kicker::before {
-            content: '';
-            width: 20px;
-            height: 2px;
-            background: currentColor;
-        }
-        .pillar-card h3 {
-            margin-bottom: 10px;
-            color: var(--ink);
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -.03em;
-            line-height: 1.2;
-        }
-        .pillar-card-secondary h3 { font-size: 20px; }
-        .pillar-card p {
-            color: var(--body);
-            font-size: 14px;
-            line-height: 1.7;
-        }
-        .pillar-features {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px 18px;
-            margin-top: 22px;
-            padding-top: 20px;
-            border-top: 1px solid var(--hairline);
-            list-style: none;
-        }
-        .pillar-features li {
-            display: flex;
-            gap: 8px;
-            color: var(--body);
-            font-size: 12px;
-            font-weight: 600;
-            line-height: 1.45;
-        }
-        .pillar-features li i { margin-top: 3px; font-size: 10px; }
-        .pillar-card-primary .pillar-features li i { color: var(--blue); }
-        .pillar-card-secondary:nth-child(2) .pillar-features li i { color: #7c3aed; }
-        .pillar-card-secondary:nth-child(3) .pillar-features li i { color: var(--teal); }
-        .pillar-card-secondary .pillar-features {
-            display: block;
+            gap: 7px;
             margin-top: 16px;
             padding-top: 14px;
-        }
-        .pillar-card-secondary .pillar-features li + li { margin-top: 8px; }
-
-        @media (max-width: 800px) {
-            .pillar-intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
-            .pillar-note { padding: 14px 16px; }
-            .pillar-grid { grid-template-columns: 1fr; }
-            .pillar-card-primary { grid-row: auto; }
-            .pillar-card-primary .pillar-card-image { min-height: 230px; }
-        }
-        @media (max-width: 500px) {
-            .pillar-card-body, .pillar-card-secondary .pillar-card-body { padding: 20px; }
-            .pillar-features { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 800px) {
-            .feature-block {
-                grid-template-columns: 1fr;
-                gap: 32px;
-                padding: 48px 0;
-            }
-            .feature-block:nth-child(even) .feature-image { order: 0; }
-            .feature-image img { height: 240px; }
-        }
-
-        /* ─── KBLI CARDS ─────────────────────────────────── */
-        .kbli-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
-        }
-        .kbli-card {
-            padding: 24px 20px;
-            background: var(--canvas);
-            border: 1px solid var(--hairline);
-            border-radius: var(--radius);
-            transition: all .25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .kbli-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 3px;
-            background: var(--blue);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform .25s ease;
-        }
-        .kbli-card:hover { border-color: #DBEAFE; box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .kbli-card:hover::after { transform: scaleX(1); }
-        .kbli-code {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            background: var(--blue-soft);
-            color: var(--blue);
-            font-size: 11px;
-            font-weight: 800;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            letter-spacing: .04em;
-            margin-bottom: 12px;
-        }
-        .kbli-card h4 {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 6px;
-            line-height: 1.3;
-        }
-        .kbli-card p {
+            border-top: 1px solid var(--hairline);
             font-size: 12px;
-            color: var(--mute);
-            line-height: 1.5;
+            font-weight: 600;
+            color: var(--blue);
         }
-        @media (max-width: 1000px) { .kbli-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 640px) { .kbli-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        /* KBLI qualification panel */
-        #kbli {
-            padding: 78px 0 84px;
-            background: #f4f7f8;
+        .flip-hint i {
+            font-size: 11px;
         }
-        #kbli .section-header {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(280px, .7fr);
-            align-items: end;
-            gap: 64px;
-            margin-bottom: 34px;
-            text-align: left;
+        /* Back face */
+        .flip-card-back {
+            background: #0f172a;
+            color: #f8fafc;
+            transform: rotateY(180deg);
+            padding: 26px 22px 20px;
+            justify-content: space-between;
         }
-        #kbli .section-header-center .section-subtitle {
+        .flip-card-back .flip-card-kicker {
+            color: #60a5fa;
+            margin-bottom: 6px;
+        }
+        .flip-card-back h3 {
+            font-size: 17.5px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.35;
+            margin-bottom: 10px;
+        }
+        .flip-card-back p {
+            font-size: 12.5px;
+            color: rgba(226, 232, 240, 0.78);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .flip-feature-list {
+            list-style: none;
+            padding: 0;
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .flip-feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.88);
+            line-height: 1.45;
+        }
+        .flip-feature-list li i {
+            color: #38bdf8;
+            font-size: 11px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .flip-hint-back {
+            border-top-color: rgba(255, 255, 255, 0.12);
+            color: #93c5fd;
+        }
+        @media (max-width: 980px) {
+            .pillar-grid {
+                grid-template-columns: 1fr;
+                max-width: 460px;
+                margin: 0 auto;
+                gap: 20px;
+            }
+            .flip-card {
+                height: 480px;
+            }
+        }
+
+        /* ─── KBLI QUALIFICATION SECTION ─────────────────── */
+        #kbli {
+            padding: 88px 0 96px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--hairline);
+        }
+        #kbli .section-header-center {
+            text-align: center;
+            max-width: 620px;
+            margin: 0 auto 44px;
         }
         #kbli .section-label {
             display: inline-flex;
             align-items: center;
-            gap: 9px;
-            margin-bottom: 10px;
+            gap: 8px;
             color: var(--blue);
-        }
-        #kbli .section-label::before {
-            content: '';
-            width: 22px;
-            height: 1px;
-            background: currentColor;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
         #kbli .section-title {
-            max-width: 520px;
-            margin-bottom: 0;
             color: var(--ink);
-            font-size: clamp(2rem, 3.3vw, 3rem);
-            letter-spacing: -.045em;
+            font-size: clamp(2rem, 3.2vw, 2.75rem);
+            font-weight: 800;
+            letter-spacing: -.03em;
+            margin-bottom: 12px;
         }
         #kbli .section-subtitle {
-            max-width: 390px;
-            color: var(--body);
-            font-size: 14px;
-            line-height: 1.7;
+            color: var(--mute);
+            font-size: 14.5px;
+            line-height: 1.65;
         }
         #kbli .kbli-grid {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 0;
-            border-top: 1px solid var(--hairline);
-            border-bottom: 1px solid var(--hairline);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
         }
         #kbli .kbli-card {
             display: flex;
             flex-direction: column;
-            min-height: 182px;
-            padding: 21px 18px 19px;
-            border: 0;
-            border-right: 1px solid var(--hairline);
-            border-radius: 0;
-            background: transparent;
-            box-shadow: none;
-            transition: background-color .2s ease, padding-top .2s ease;
-        }
-        #kbli .kbli-card:first-child {
-            border-left: 1px solid var(--hairline);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius);
+            padding: 22px 18px;
+            transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            position: relative;
         }
         #kbli .kbli-card:hover {
-            padding-top: 18px;
-            border-color: var(--hairline);
-            background: #fff;
-            box-shadow: none;
-            transform: none;
+            transform: translateY(-3px);
+            border-color: #93c5fd;
+            box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
         }
-        #kbli .kbli-card::after {
-            top: 0;
-            right: auto;
-            bottom: auto;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--blue);
-            transform: scaleX(0);
-        }
-        #kbli .kbli-card:hover::after {
-            transform: scaleX(1);
+        #kbli .kbli-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
         }
         #kbli .kbli-code {
-            align-self: flex-start;
-            margin-bottom: 18px;
-            padding: 0;
-            border-bottom: 1px solid #a7c6d0;
-            border-radius: 0;
-            background: transparent;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11.5px;
+            font-weight: 700;
             color: var(--blue);
-            font-size: 11px;
-            letter-spacing: .08em;
+            background: var(--blue-soft);
+            border: 1px solid var(--blue-pale);
+            border-radius: 6px;
+            padding: 3px 7px;
+            letter-spacing: .02em;
         }
-        #kbli .kbli-card h4 {
-            margin-bottom: 8px;
-            color: var(--ink);
-            font-size: 14px;
-            line-height: 1.25;
-        }
-        #kbli .kbli-card p {
-            margin-top: auto;
-            color: var(--mute);
-            font-size: 12px;
-            line-height: 1.55;
-        }
-        @media (max-width: 1000px) {
-            #kbli .kbli-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            #kbli .kbli-card:nth-child(3) { border-right: 0; }
-            #kbli .kbli-card:nth-child(n+4) { border-top: 1px solid var(--hairline); }
-            #kbli .kbli-card:nth-child(4) { border-left: 1px solid var(--hairline); }
-        }
-        @media (max-width: 640px) {
-            #kbli { padding: 62px 0 68px; }
-            #kbli .section-header { display: block; margin-bottom: 28px; }
-            #kbli .section-subtitle { margin-top: 16px; }
-            #kbli .kbli-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #kbli .kbli-card,
-            #kbli .kbli-card:nth-child(n) {
-                min-height: 168px;
-                border-top: 1px solid var(--hairline);
-                border-left: 1px solid var(--hairline);
-                border-right: 0;
-            }
-            #kbli .kbli-card:nth-child(-n+2) { border-top: 0; }
-            #kbli .kbli-card:nth-child(odd) { border-left: 1px solid var(--hairline); }
-            #kbli .kbli-card:nth-child(even) { border-left: 1px solid var(--hairline); }
-            #kbli .kbli-card:last-child { grid-column: span 2; }
-        }
-
-        /* ─── PROCESS FLOW ────────────────────────────────── */
-        .process-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            position: relative;
-        }
-        .process-grid::before {
-            content: '';
-            position: absolute;
-            top: 28px;
-            left: 14%;
-            right: 14%;
-            height: 2px;
-            background: repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 8px, transparent 8px 16px);
-            z-index: 1;
-        }
-        .process-step {
-            text-align: center;
-            padding: 0 20px;
-            position: relative;
-            z-index: 2;
-        }
-        .process-num {
+        #kbli .kbli-icon {
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px; height: 56px;
-            margin: 0 auto 20px;
-            border-radius: 16px;
-            font-weight: 800;
-            font-size: 20px;
-        }
-        .process-step:nth-child(1) .process-num { background: rgba(37,99,235,.15); color: #60A5FA; }
-        .process-step:nth-child(2) .process-num { background: rgba(14,165,233,.15); color: #7DD3FC; }
-        .process-step:nth-child(3) .process-num { background: rgba(99,102,241,.15); color: #A5B4FC; }
-        .process-step:nth-child(4) .process-num { background: rgba(22,163,74,.15); color: #86EFAC; }
-        .process-step h4 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-        .process-step p {
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: var(--mute);
             font-size: 13px;
-            color: rgba(255,255,255,.5);
+            transition: all .2s ease;
+        }
+        #kbli .kbli-card:hover .kbli-icon {
+            background: var(--blue-soft);
+            border-color: var(--blue-pale);
+            color: var(--blue);
+        }
+        #kbli .kbli-card h4 {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+        #kbli .kbli-card p {
+            font-size: 12px;
+            color: var(--body);
             line-height: 1.6;
+            margin-top: auto;
         }
-        @media (max-width: 800px) {
-            .process-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
-            .process-grid::before { display: none; }
+        @media (max-width: 1100px) {
+            #kbli .kbli-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
         }
-        @media (max-width: 500px) {
-            .process-grid { grid-template-columns: 1fr; }
+        @media (max-width: 700px) {
+            #kbli { padding: 64px 0 70px; }
+            #kbli .kbli-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
+        @media (max-width: 480px) {
+            #kbli .kbli-grid { grid-template-columns: 1fr; }
         }
 
-        /* Integrated business flow */
+        /* ─── ALUR BISNIS (PROCESS FLOW) ─────────────────── */
         #alur {
-            padding: 78px 0 82px;
-            background: #09172b;
+            padding: 84px 0 92px;
+            background: #ffffff;
+            border-top: 1px solid var(--hairline);
         }
-        #alur .section-header {
-            max-width: 580px;
-            margin-bottom: 40px;
-            text-align: left;
+        #alur .section-header-center {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 44px;
+        }
+        #alur .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
         #alur .section-title {
-            margin-bottom: 14px;
-            color: #f8fafc;
-            font-size: clamp(2rem, 3.4vw, 3rem);
-            letter-spacing: -.045em;
+            color: var(--ink);
+            font-size: clamp(2rem, 3.2vw, 2.75rem);
+            font-weight: 800;
+            letter-spacing: -.03em;
+            margin-bottom: 12px;
         }
         #alur .section-subtitle {
-            max-width: 500px;
-            font-size: 14px;
-            line-height: 1.7;
+            color: var(--mute);
+            font-size: 14.5px;
+            line-height: 1.65;
         }
         #alur .process-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 16px;
-            padding: 0;
-        }
-        #alur .process-grid::before {
-            top: 50px;
-            left: 12.5%;
-            right: 12.5%;
-            height: 1px;
-            background: rgba(96, 165, 250, .45);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
         }
         #alur .process-step {
-            min-height: 220px;
-            padding: 24px 22px 22px;
-            text-align: left;
-            border: 1px solid rgba(148, 163, 184, .2);
-            border-radius: 10px;
-            background: rgba(16, 36, 66, .72);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035);
-            transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
-        }
-        #alur .process-step:first-child {
-            border-left: 1px solid rgba(148, 163, 184, .2);
-        }
-        #alur .process-step:last-child {
-            padding-right: 28px;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid var(--hairline);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+            box-shadow: var(--shadow-sm);
         }
         #alur .process-step:hover {
-            border-color: rgba(96, 165, 250, .65);
-            background: #132b4e;
             transform: translateY(-3px);
+            border-color: #93C5FD;
+            box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.07);
         }
-        #alur .process-num {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            margin: 0 0 28px;
-            border: 1px solid rgba(147, 197, 253, .65);
-            border-radius: 50%;
-            background: #102442;
-            color: #bfdbfe;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 13px;
-            z-index: 2;
+        #alur .step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
         }
-        #alur .process-step:nth-child(2) .process-num,
-        #alur .process-step:nth-child(3) .process-num,
-        #alur .process-step:nth-child(4) .process-num {
-            background: #102442;
-            color: #bfdbfe;
+        #alur .step-num {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--blue);
+            background: var(--blue-soft);
+            border: 1px solid var(--blue-pale);
+            border-radius: 6px;
+            padding: 3px 8px;
+            letter-spacing: .04em;
+        }
+        #alur .step-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--hairline);
+            border-radius: 8px;
+            color: var(--mute);
+            font-size: 14px;
+            transition: all .2s ease;
+        }
+        #alur .process-step:hover .step-icon {
+            background: var(--blue-soft);
+            border-color: var(--blue-pale);
+            color: var(--blue);
         }
         #alur .process-step h4 {
-            margin-bottom: 10px;
-            color: #f8fafc;
-            font-size: 15px;
+            font-size: 15.5px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 8px;
             line-height: 1.35;
         }
         #alur .process-step p {
-            max-width: 220px;
-            color: rgba(226, 232, 240, .58);
-            font-size: 12px;
-            line-height: 1.65;
-        }
-        @media (max-width: 800px) {
-            #alur { padding: 72px 0 78px; }
-            #alur .process-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 16px;
-            }
-            #alur .process-grid::before { display: none; }
-            #alur .process-step,
-            #alur .process-step:first-child,
-            #alur .process-step:last-child {
-                min-height: 210px;
-                padding: 22px 20px 20px;
-                border: 1px solid rgba(148, 163, 184, .2);
-            }
-            #alur .process-step:nth-child(n+3) { padding-top: 22px; border-top: 1px solid rgba(148, 163, 184, .2); }
-        }
-        @media (max-width: 500px) {
-            #alur .process-grid { grid-template-columns: 1fr; }
-            #alur .process-step,
-            #alur .process-step:first-child,
-            #alur .process-step:last-child,
-            #alur .process-step:nth-child(odd) {
-                min-height: 0;
-                padding: 22px 20px 22px;
-                border: 1px solid rgba(148, 163, 184, .2);
-            }
-            #alur .process-step:first-child {
-                padding-top: 22px;
-            }
-            #alur .process-num { margin: 0 0 18px; }
-        }
-
-        #alur .process-grid,
-        #alur .process-step,
-        #alur .process-step:nth-child(n+3) {
-            border: 1px solid rgba(148, 163, 184, .2);
-        }
-        #alur .process-grid::before {
-            display: none;
-        }
-
-        .cta-actions .btn-ghost:hover,
-        .cta-actions .btn-ghost:focus,
-        .cta-actions .btn-ghost:focus-visible,
-        .cta-actions .btn-ghost:active {
-            background: rgba(255, 255, 255, .08);
-            border-color: rgba(147, 197, 253, .55) !important;
-            color: #f8fafc !important;
-            box-shadow: none;
-        }
-
-        /* ─── CTA SECTION ─────────────────────────────────── */
-        .cta-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-        }
-        .cta-inner {
-            text-align: center;
-            max-width: 620px;
-            margin: 0 auto;
-        }
-        .cta-inner h2 {
-            font-size: clamp(1.8rem, 3vw, 2.4rem);
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -.025em;
-            margin-bottom: 16px;
-        }
-        .cta-inner p {
-            font-size: 16px;
-            color: rgba(255,255,255,.55);
-            margin-bottom: 32px;
+            font-size: 12.5px;
+            color: var(--body);
             line-height: 1.6;
+            margin-top: auto;
         }
-        .cta-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        @media (max-width: 900px) {
+            #alur { padding: 68px 0 74px; }
+            #alur .process-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        }
+        @media (max-width: 540px) {
+            #alur .process-grid { grid-template-columns: 1fr; gap: 14px; }
+        }
+
 
         /* ─── FOOTER ──────────────────────────────────────── */
         .site-footer {
-            background: var(--navy);
+            background: #0c1929;
             color: rgba(255,255,255,.5);
-            padding: 64px 0 0;
-            border-top: 1px solid rgba(255,255,255,.06);
+            padding: 56px 0 0;
         }
         .footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 48px;
+            grid-template-columns: 1.4fr 0.9fr 0.9fr 1.8fr;
+            gap: 36px;
         }
-        .footer-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        .footer-brand img { height: 36px; width: auto; border-radius: 8px; background: #fff; padding: 3px; }
-        .footer-brand span { font-weight: 800; font-size: 18px; color: #fff; }
-        .footer-desc { font-size: 13px; line-height: 1.7; margin-bottom: 20px; max-width: 380px; }
-        .footer-contact { font-size: 12px; line-height: 1.8; }
-        .footer-contact i { color: var(--blue-muted); margin-right: 6px; width: 14px; text-align: center; }
+        .footer-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .footer-brand img { height: 34px; width: auto; border-radius: 6px; background: #fff; padding: 3px; }
+        .footer-brand-text .brand-name { font-weight: 800; font-size: 17px; color: #fff; line-height: 1.2; }
+        .footer-brand-text .brand-sub { font-size: 11px; color: var(--blue-muted); font-weight: 500; letter-spacing: .02em; }
+        .footer-desc { font-size: 12.5px; line-height: 1.7; max-width: 320px; color: rgba(255,255,255,.42); }
         .footer-heading {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
-            color: #fff;
-            letter-spacing: .04em;
+            color: var(--blue-muted);
+            letter-spacing: .05em;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .footer-links { list-style: none; padding: 0; }
         .footer-links li { margin-bottom: 10px; }
         .footer-links a {
             font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,.45);
+            font-weight: 400;
+            color: rgba(255,255,255,.55);
             transition: color .2s;
         }
-        .footer-links a:hover { color: #60A5FA; }
-        .footer-bottom {
-            margin-top: 48px;
-            padding: 20px 0;
-            border-top: 1px solid rgba(255,255,255,.08);
-            text-align: center;
+        .footer-links a:hover { color: #fff; }
+        .footer-contact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .footer-contact-list li {
+            margin: 0;
+            padding: 0;
+        }
+        .footer-contact-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,.55);
+            text-decoration: none;
+            transition: color .2s ease;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+        .footer-contact-link i {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,.14);
+            color: var(--blue-muted);
             font-size: 12px;
-            color: rgba(255,255,255,.3);
+            transition: all .2s ease;
+            background: rgba(255,255,255,.03);
+        }
+        .footer-contact-link span {
+            flex: 1;
+        }
+        .footer-contact-link:hover {
+            color: #ffffff;
+        }
+        .footer-contact-link:hover i {
+            border-color: #60a5fa;
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.15);
+        }
+        .footer-bottom {
+            margin-top: 40px;
+            padding: 18px 0;
+            border-top: 1px solid rgba(255,255,255,.07);
+            text-align: center;
+            font-size: 11.5px;
+            color: rgba(255,255,255,.28);
+            line-height: 1.7;
         }
 
-        @media (max-width: 800px) {
-            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+        @media (max-width: 900px) {
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+        }
+        @media (max-width: 540px) {
+            .site-footer { padding: 40px 0 0; }
+            .footer-grid { grid-template-columns: 1fr; gap: 28px; }
         }
 
         /* ─── PAGE LOAD ENTRANCE ANIMATIONS ───────────────── */
@@ -1194,7 +1109,7 @@
             </a>
 
             <nav class="nav-links">
-                <a href="#beranda">Beranda</a>
+                <a href="#beranda" class="active">Beranda</a>
                 <a href="#layanan">Layanan</a>
                 <a href="#kbli">Kualifikasi</a>
                 <a href="#alur">Alur Bisnis</a>
@@ -1202,9 +1117,8 @@
             </nav>
 
             <div class="header-actions">
-                <a href="{{ route('login') }}" class="btn btn-ghost">Masuk</a>
-                <a href="{{ route('login') }}" class="btn btn-primary">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Portal Sistem
+                <a href="{{ route('login') }}" class="btn btn-primary btn-portal">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk Portal
                 </a>
             </div>
 
@@ -1306,164 +1220,221 @@
         </div>
     </section>
 
-    <!-- ═══ LAYANAN / DOMAIN BISNIS (Zigzag with Photos) ═══ -->
+    <!-- ═══ LAYANAN / DOMAIN BISNIS (Interactive Flip Cards) ═══ -->
     <section class="section pillar-section-bg" id="layanan">
         <div class="container">
             <div class="pillar-intro reveal">
-                <div class="section-header">
-                    <div class="section-label">Tiga Pilar Bisnis</div>
-                    <h2 class="section-title">Satu alur kerja untuk tiga area utama</h2>
-                    <p class="section-subtitle">Dari peluang tender hingga barang diterima pelanggan, setiap domain dikelola dengan data yang saling terhubung.</p>
-                </div>
-                <p class="pillar-note">Struktur ini membantu tim menjaga keputusan, dokumen, dan transaksi tetap berada dalam satu sumber data yang dapat ditelusuri.</p>
+                <h2 class="section-title">Layanan Utama Perusahaan</h2>
+                <p class="section-subtitle">Tiga domain operasional terintegrasi untuk akurasi data tender, pelaksanaan jasa, dan rantai suplai barang.</p>
             </div>
 
             <div class="pillar-grid">
-                <article class="pillar-card pillar-card-primary reveal">
-                    <div class="pillar-card-image">
-                        <span class="pillar-card-index">01</span>
-                        <img src="{{ asset('images/hero-corporate.jpg') }}" alt="Manajemen Tender PT Signal Panca Utama">
+                {{-- Widget 1: Manajemen Tender --}}
+                <div class="flip-card reveal" tabindex="0" role="button" aria-expanded="false" aria-label="Detail Manajemen Tender">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="flip-card-image">
+                                <img src="{{ asset('images/hero-corporate.jpg') }}" alt="Manajemen Tender PT Signal Panca Utama">
+                            </div>
+                            <div class="flip-card-content">
+                                <div class="flip-card-kicker">Domain Utama</div>
+                                <h3>Manajemen Tender</h3>
+                                <p>Pengelolaan siklus pengadaan tender LPSE & BUMN dari pemantauan jadwal, penyusunan dokumen, hingga konversi ke kontrak kerja.</p>
+                                <div class="flip-hint">
+                                    <i class="fa-solid fa-arrow-rotate-right"></i> Klik kartu untuk penjelasan
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div>
+                                <div class="flip-card-kicker">Alur Lengkap</div>
+                                <h3>Manajemen Tender</h3>
+                                <p>Sistem terpadu memfasilitasi pelacakan peluang tender instansi pemerintah & BUMN secara transparan dengan audit berkas yang rapi.</p>
+                                <ul class="flip-feature-list">
+                                    <li><i class="fa-solid fa-check"></i> <span>Monitoring pengumuman LPSE & batas waktu penawaran</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Manajemen berkas kualifikasi teknis & administrasi</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Perhitungan HPS dan kalkulasi margin penawaran</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Otomatisasi konversi status tender menang menjadi SPK & kontrak</span></li>
+                                </ul>
+                            </div>
+                            <div class="flip-hint flip-hint-back">
+                                <i class="fa-solid fa-arrow-rotate-left"></i> Klik untuk membalik kembali
+                            </div>
+                        </div>
                     </div>
-                    <div class="pillar-card-body">
-                        <div class="pillar-card-kicker">Domain utama</div>
-                        <h3>Manajemen Tender</h3>
-                        <p>Pantau peluang LPSE dan BUMN, siapkan dokumen penawaran, lalu kelola pipeline sampai tender beralih menjadi kontrak kerja.</p>
-                        <ul class="pillar-features">
-                            <li><i class="fa-solid fa-check"></i><span>Pipeline tender aktif</span></li>
-                            <li><i class="fa-solid fa-check"></i><span>Peringatan deadline</span></li>
-                            <li><i class="fa-solid fa-check"></i><span>Konversi ke kontrak</span></li>
-                            <li><i class="fa-solid fa-check"></i><span>Arsip dokumen terpusat</span></li>
-                        </ul>
-                    </div>
-                </article>
+                </div>
 
-                <article class="pillar-card pillar-card-secondary reveal reveal-delay-1">
-                    <div class="pillar-card-image">
-                        <span class="pillar-card-index">02</span>
-                        <img src="{{ asset('images/section-finance.jpg') }}" alt="Manajemen Jasa dan Keuangan">
+                {{-- Widget 2: Manajemen Jasa --}}
+                <div class="flip-card reveal reveal-delay-1" tabindex="0" role="button" aria-expanded="false" aria-label="Detail Manajemen Jasa">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="flip-card-image">
+                                <img src="{{ asset('images/section-finance.jpg') }}" alt="Manajemen Jasa dan Keuangan">
+                            </div>
+                            <div class="flip-card-content">
+                                <div class="flip-card-kicker">Jasa & Keuangan</div>
+                                <h3>Manajemen Jasa & Kontrak</h3>
+                                <p>Pencatatan klien, kontrak kerja, pemantauan progres pengerjaan jasa, fee komisi rekanan, dan penagihan invoice termin bertahap.</p>
+                                <div class="flip-hint">
+                                    <i class="fa-solid fa-arrow-rotate-right"></i> Klik kartu untuk penjelasan
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div>
+                                <div class="flip-card-kicker">Alur Kerja</div>
+                                <h3>Manajemen Jasa & Kontrak</h3>
+                                <p>Memastikan setiap kesepakatan jasa tercatat legal, hak komisi mitra terkelola, dan pembayaran termin terpantau tanpa jeda.</p>
+                                <ul class="flip-feature-list">
+                                    <li><i class="fa-solid fa-check"></i> <span>Basis data rekanan klien & riwayat penugasan terpusat</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Klausul kontrak jasa & skema komisi fee terintegrasi</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Pelacakan milestone progres penyelesaian pekerjaan</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Penerbitan invoice termin dengan riwayat pembayaran</span></li>
+                                </ul>
+                            </div>
+                            <div class="flip-hint flip-hint-back">
+                                <i class="fa-solid fa-arrow-rotate-left"></i> Klik untuk membalik kembali
+                            </div>
+                        </div>
                     </div>
-                    <div class="pillar-card-body">
-                        <div class="pillar-card-kicker">Domain pendukung</div>
-                        <h3>Manajemen Jasa</h3>
-                        <p>Kelola klien, kontrak, progres pekerjaan, fee komisi, dan tagihan termin dalam satu alur.</p>
-                        <ul class="pillar-features">
-                            <li><i class="fa-solid fa-check"></i><span>Kontrak dan fee komisi</span></li>
-                            <li><i class="fa-solid fa-check"></i><span>Invoice dan riwayat pembayaran</span></li>
-                        </ul>
-                    </div>
-                </article>
+                </div>
 
-                <article class="pillar-card pillar-card-secondary reveal reveal-delay-2">
-                    <div class="pillar-card-image">
-                        <span class="pillar-card-index">03</span>
-                        <img src="{{ asset('images/section-warehouse.jpg') }}" alt="Gudang dan Pengadaan Barang">
+                {{-- Widget 3: Perdagangan & Pengadaan --}}
+                <div class="flip-card reveal reveal-delay-2" tabindex="0" role="button" aria-expanded="false" aria-label="Detail Perdagangan dan Pengadaan">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="flip-card-image">
+                                <img src="{{ asset('images/section-warehouse.jpg') }}" alt="Gudang dan Pengadaan Barang">
+                            </div>
+                            <div class="flip-card-content">
+                                <div class="flip-card-kicker">Logistik & Gudang</div>
+                                <h3>Perdagangan & Pengadaan</h3>
+                                <p>Pengelolaan stok persediaan gudang, penerimaan suplai distributor, mutasi barang, serta validasi kuantitas saat transaksi penjualan.</p>
+                                <div class="flip-hint">
+                                    <i class="fa-solid fa-arrow-rotate-right"></i> Klik kartu untuk penjelasan
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div>
+                                <div class="flip-card-kicker">Alur Pasok</div>
+                                <h3>Perdagangan & Pengadaan</h3>
+                                <p>Menghubungkan rantai pasok supplier hingga barang diterima pelanggan dengan kontrol stok otomatis tanpa selisih kuantitas.</p>
+                                <ul class="flip-feature-list">
+                                    <li><i class="fa-solid fa-check"></i> <span>Penerimaan pengadaan supplier otomatis menambah stok</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Validasi batas minimum stok saat transaksi penjualan</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Rekapitulasi mutasi stok keluar-masuk secara real-time</span></li>
+                                    <li><i class="fa-solid fa-check"></i> <span>Integrasi faktur tagihan dan laporan ketersediaan</span></li>
+                                </ul>
+                            </div>
+                            <div class="flip-hint flip-hint-back">
+                                <i class="fa-solid fa-arrow-rotate-left"></i> Klik untuk membalik kembali
+                            </div>
+                        </div>
                     </div>
-                    <div class="pillar-card-body">
-                        <div class="pillar-card-kicker">Domain pendukung</div>
-                        <h3>Perdagangan & Pengadaan</h3>
-                        <p>Hubungkan supplier, stok gudang, transaksi penjualan, dan invoice dengan kontrol yang jelas.</p>
-                        <ul class="pillar-features">
-                            <li><i class="fa-solid fa-check"></i><span>Validasi stok saat penjualan</span></li>
-                            <li><i class="fa-solid fa-check"></i><span>Rekap mutasi barang</span></li>
-                        </ul>
-                    </div>
-                </article>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ═══ RUANG LINGKUP KBLI ═══ -->
-    <section class="section section-alt" id="kbli">
+    <section class="section" id="kbli">
         <div class="container">
-            <div class="section-header section-header-center kbli-header reveal">
-                <div class="kbli-heading">
-                    <div class="section-label">Kualifikasi Resmi</div>
-                    <h2 class="section-title">Ruang Lingkup KBLI</h2>
-                </div>
-                <p class="section-subtitle">Klasifikasi Baku Lapangan Usaha Indonesia resmi yang dimiliki PT Signal Panca Utama.</p>
+            <div class="section-header section-header-center reveal">
+                <h2 class="section-title">Ruang Lingkup KBLI</h2>
+                <p class="section-subtitle">Klasifikasi Baku Lapangan Usaha Indonesia terdaftar resmi untuk legalitas & operasional PT Signal Panca Utama.</p>
             </div>
 
             <div class="kbli-grid">
                 <div class="kbli-card reveal">
-                    <span class="kbli-code">46100</span>
+                    <div class="kbli-header">
+                        <span class="kbli-code">KBLI 46100</span>
+                        <div class="kbli-icon"><i class="fa-solid fa-handshake"></i></div>
+                    </div>
                     <h4>Perdagangan Balas Jasa</h4>
-                    <p>Perdagangan besar atas dasar balas jasa (fee) atau kontrak.</p>
+                    <p>Perdagangan besar atas dasar balas jasa (fee) atau kontrak keagenan komersial.</p>
                 </div>
                 <div class="kbli-card reveal reveal-delay-1">
-                    <span class="kbli-code">46422</span>
+                    <div class="kbli-header">
+                        <span class="kbli-code">KBLI 46422</span>
+                        <div class="kbli-icon"><i class="fa-solid fa-print"></i></div>
+                    </div>
                     <h4>Percetakan & Penerbitan</h4>
-                    <p>Perdagangan besar barang percetakan dalam berbagai bentuk.</p>
+                    <p>Perdagangan besar barang percetakan, dokumen formal, dan materi publikasi.</p>
                 </div>
                 <div class="kbli-card reveal reveal-delay-2">
-                    <span class="kbli-code">46499</span>
-                    <h4>Perlengkapan Rumah Tangga</h4>
-                    <p>Perdagangan besar perlengkapan kantor dan rumah tangga.</p>
+                    <div class="kbli-header">
+                        <span class="kbli-code">KBLI 46499</span>
+                        <div class="kbli-icon"><i class="fa-solid fa-building-columns"></i></div>
+                    </div>
+                    <h4>Perlengkapan Kantor</h4>
+                    <p>Perdagangan besar perlengkapan kantor, perabot, dan perkakas operasional instansi.</p>
                 </div>
                 <div class="kbli-card reveal reveal-delay-3">
-                    <span class="kbli-code">46511</span>
+                    <div class="kbli-header">
+                        <span class="kbli-code">KBLI 46511</span>
+                        <div class="kbli-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                    </div>
                     <h4>Komputer & IT Equipment</h4>
-                    <p>Perdagangan besar komputer, server, dan perangkat IT.</p>
+                    <p>Perdagangan besar komputer, server, perangkat jaringan, dan infrastruktur IT.</p>
                 </div>
                 <div class="kbli-card reveal reveal-delay-4">
-                    <span class="kbli-code">46900</span>
-                    <h4>Berbagai Macam Barang</h4>
-                    <p>Perdagangan besar berbagai macam barang pengadaan umum.</p>
+                    <div class="kbli-header">
+                        <span class="kbli-code">KBLI 46900</span>
+                        <div class="kbli-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    </div>
+                    <h4>Perdagangan Umum</h4>
+                    <p>Perdagangan besar aneka ragam barang pengadaan umum dan distribusi komoditas.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══ ALUR BISNIS ═══ -->
-    <section class="section section-dark" id="alur">
+    <section class="section" id="alur">
         <div class="container">
             <div class="section-header section-header-center reveal">
-                <div class="section-label">Proses Terintegrasi</div>
                 <h2 class="section-title">Alur Bisnis End-to-End</h2>
                 <p class="section-subtitle">Seluruh transaksi terhubung untuk transparansi data dan auditabilitas penuh.</p>
             </div>
 
             <div class="process-grid">
-                <div class="process-step">
-                    <div class="process-num">1</div>
-                    <h4>Tender Menang</h4>
-                    <p>Tender dimenangkan dan dikonversi otomatis menjadi kontrak kerja jasa.</p>
+                <div class="process-step reveal">
+                    <div class="step-header">
+                        <span class="step-num">01</span>
+                        <div class="step-icon"><i class="fa-solid fa-file-contract"></i></div>
+                    </div>
+                    <h4>Tender & Kontrak</h4>
+                    <p>Tender LPSE/BUMN yang dimenangkan dikonversi langsung menjadi kontrak kerja resmi.</p>
                 </div>
-                <div class="process-step">
-                    <div class="process-num">2</div>
+                <div class="process-step reveal reveal-delay-1">
+                    <div class="step-header">
+                        <span class="step-num">02</span>
+                        <div class="step-icon"><i class="fa-solid fa-boxes-packing"></i></div>
+                    </div>
                     <h4>Pengadaan Barang</h4>
-                    <p>Barang diterima dari supplier langsung menambah stok persediaan gudang.</p>
+                    <p>Barang diterima dari supplier langsung tercatat dan menambah persediaan gudang.</p>
                 </div>
-                <div class="process-step">
-                    <div class="process-num">3</div>
+                <div class="process-step reveal reveal-delay-2">
+                    <div class="step-header">
+                        <span class="step-num">03</span>
+                        <div class="step-icon"><i class="fa-solid fa-cart-flatbed"></i></div>
+                    </div>
                     <h4>Penjualan & Stok</h4>
-                    <p>Transaksi penjualan memvalidasi dan mengurangi stok secara akurat.</p>
+                    <p>Transaksi penjualan memvalidasi kuantitas stok secara otomatis tanpa selisih.</p>
                 </div>
-                <div class="process-step">
-                    <div class="process-num">4</div>
+                <div class="process-step reveal reveal-delay-3">
+                    <div class="step-header">
+                        <span class="step-num">04</span>
+                        <div class="step-icon"><i class="fa-solid fa-receipt"></i></div>
+                    </div>
                     <h4>Invoice & Pelunasan</h4>
-                    <p>Tagihan diterbitkan dan pembayaran terupdate otomatis dalam laporan.</p>
+                    <p>Tagihan termin diterbitkan dan rekonsiliasi pembayaran tersinkronisasi dalam laporan.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ═══ CTA ═══ -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-inner reveal">
-                <h2>Siap mengelola bisnis lebih efisien?</h2>
-                <p>Masuk ke portal manajemen internal untuk memantau tender, kontrak, persediaan, dan keuangan dalam satu platform.</p>
-                <div class="cta-actions">
-                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Masuk ke Portal
-                    </a>
-                    <a href="#layanan" class="btn btn-ghost btn-lg" style="border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.7);">
-                        <i class="fa-solid fa-layer-group"></i> Lihat Layanan
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- ═══ FOOTER ═══ -->
     <footer class="site-footer" id="kontak">
@@ -1472,16 +1443,14 @@
                 <div>
                     <div class="footer-brand">
                         <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama">
-                        <span>PT Signal Panca Utama</span>
+                        <div class="footer-brand-text">
+                            <div class="brand-name">Signal Panca Utama</div>
+                            <div class="brand-sub">Tender · Jasa · Perdagangan</div>
+                        </div>
                     </div>
                     <p class="footer-desc">
-                        Sistem Manajemen Bisnis Internal terintegrasi untuk Tender, Jasa, dan Perdagangan Barang. Memusatkan data perusahaan untuk transparansi dan performa bisnis.
+                        Perusahaan perdagangan, jasa, dan pengadaan tender terpercaya di Karawang, Jawa Barat. Mitra bisnis BUMN dan instansi pemerintah.
                     </p>
-                    <div class="footer-contact">
-                        <div><i class="fa-solid fa-location-dot"></i> Jl Rubaya Buher SPU Mansion Kavling Cahaya, Karangpawitan, Kec. Karawang Bar., Karawang, Jawa Barat 41315</div>
-                        <div><i class="fa-solid fa-phone"></i> (021) 7890-1234</div>
-                        <div><i class="fa-solid fa-envelope"></i> info@signalpanca.co.id</div>
-                    </div>
                 </div>
 
                 <div>
@@ -1491,71 +1460,133 @@
                         <li><a href="#layanan">Layanan</a></li>
                         <li><a href="#kbli">Kualifikasi KBLI</a></li>
                         <li><a href="#alur">Alur Bisnis</a></li>
-                        <li><a href="#kontak">Kontak</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <div class="footer-heading">Akses Sistem</div>
-                    <p style="font-size:13px;margin-bottom:16px;">Portal manajemen internal perusahaan untuk staf dan management.</p>
-                    <a href="{{ route('login') }}" class="btn btn-primary" style="width:100%;">
-                        Masuk Portal <i class="fa-solid fa-arrow-right" style="font-size:12px;"></i>
-                    </a>
+                    <div class="footer-heading">Layanan</div>
+                    <ul class="footer-links">
+                        <li><a href="{{ route('login') }}">Portal Sistem</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="footer-heading">Hubungi Kami</div>
+                    <ul class="footer-contact-list">
+                        <li>
+                            <a href="https://maps.google.com/?q=Jl+Rubaya+Buher+SPU+Mansion+Kavling+Cahaya,+Karawang,+Jawa+Barat+41315" target="_blank" rel="noopener noreferrer" class="footer-contact-link" title="Buka lokasi di Google Maps">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>Jl Rubaya Buher SPU Mansion Kavling Cahaya, Karawang, Jawa Barat 41315</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:info@signalpanca.co.id" class="footer-contact-link" title="Kirim Email">
+                                <i class="fa-solid fa-envelope"></i>
+                                <span>info@signalpanca.co.id</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:02178901234" class="footer-contact-link" title="Hubungi Telepon">
+                                <i class="fa-solid fa-phone"></i>
+                                <span>(021) 7890-1234</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
+                Dikembangkan oleh Tim Internal IT<br>
                 &copy; {{ date('Y') }} PT Signal Panca Utama. Seluruh hak cipta dilindungi.
             </div>
         </div>
     </footer>
 
     <script>
-        // Smooth scroll for anchor links with custom easing
+        // Header, sections & navigation elements
+        const header = document.getElementById('siteHeader');
+        const sections = document.querySelectorAll('section[id], footer[id]');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        let ticking = false;
+        let isManualScroll = false;
+        let manualScrollTimer = null;
+
+        // Smooth scroll for anchor links with instantaneous visual feedback
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
-                e.preventDefault();
                 const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
+                if (!targetId) return;
+
+                if (targetId === '#') {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#beranda'));
+                    return;
+                }
+
                 const target = document.querySelector(targetId);
                 if (!target) return;
 
-                const headerHeight = document.getElementById('siteHeader').offsetHeight;
-                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-                const startPosition = window.pageYOffset;
-                const distance = targetPosition - startPosition;
-                const duration = Math.min(1200, Math.max(600, Math.abs(distance) * 0.5));
-                let startTime = null;
+                e.preventDefault();
 
-                // Cubic bezier easing (ease-out-quart)
-                function easeOutQuart(t) {
-                    return 1 - Math.pow(1 - t, 4);
-                }
+                // 1. Instant feedback: highlight the active capsule immediately without delay
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === targetId);
+                });
 
-                function animate(currentTime) {
-                    if (!startTime) startTime = currentTime;
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const eased = easeOutQuart(progress);
-                    window.scrollTo(0, startPosition + distance * eased);
-                    if (progress < 1) requestAnimationFrame(animate);
-                }
-                requestAnimationFrame(animate);
+                // 2. Prevent scroll spy from intermediate flickering during smooth transit
+                isManualScroll = true;
+                clearTimeout(manualScrollTimer);
+                manualScrollTimer = setTimeout(() => {
+                    isManualScroll = false;
+                }, 700);
+
+                // 3. Smooth scroll with header offset
+                const headerHeight = header ? header.offsetHeight : 72;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 6);
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
             });
         });
 
-        // Header scroll shadow
-        const header = document.getElementById('siteHeader');
-        let ticking = false;
+        // Header scroll shadow and active nav spy
         window.addEventListener('scroll', () => {
             if (!ticking) {
                 requestAnimationFrame(() => {
-                    header.classList.toggle('scrolled', window.scrollY > 10);
+                    if (header) {
+                        header.classList.toggle('scrolled', window.scrollY > 10);
+                    }
+
+                    // Only spy when not in manual click transition
+                    if (!isManualScroll) {
+                        const isBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 60);
+                        if (isBottom) {
+                            navLinks.forEach(link => {
+                                link.classList.toggle('active', link.getAttribute('href') === '#kontak');
+                            });
+                        } else {
+                            const scrollPos = window.scrollY + 140;
+                            sections.forEach(section => {
+                                const top = section.offsetTop;
+                                const height = section.offsetHeight;
+                                const id = section.getAttribute('id');
+                                if (scrollPos >= top && scrollPos < top + height) {
+                                    navLinks.forEach(link => {
+                                        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                                    });
+                                }
+                            });
+                        }
+                    }
+
                     ticking = false;
                 });
                 ticking = true;
             }
-        });
+        }, { passive: true });
 
         // Mobile menu toggle
         const toggle = document.getElementById('mobileToggle');
@@ -1586,6 +1617,21 @@
             });
         }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
         reveals.forEach(el => observer.observe(el));
+
+        // Interactive 3D flip card toggle
+        document.querySelectorAll('.flip-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('is-flipped');
+                const isFlipped = this.classList.contains('is-flipped');
+                this.setAttribute('aria-expanded', isFlipped);
+            });
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
     </script>
 
 </body>
