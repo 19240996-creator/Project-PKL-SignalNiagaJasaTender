@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -62,8 +61,11 @@ return new class extends Migration
             }
         });
 
-        // Allow contract_id in service_jobs to be nullable for direct standalone services
-        DB::statement('ALTER TABLE service_jobs MODIFY contract_id BIGINT UNSIGNED NULL');
+        // Allow contract_id in service_jobs to be nullable for direct standalone services.
+        // Schema::change() keeps this migration compatible with SQLite test databases.
+        Schema::table('service_jobs', function (Blueprint $table) {
+            $table->foreignId('contract_id')->nullable()->change();
+        });
 
         // 3. Sales table: Add approval_status, catatan_pengiriman, nama_barang, kuantitas, harga_satuan
         Schema::table('sales', function (Blueprint $table) {
