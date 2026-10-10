@@ -17,6 +17,8 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ServiceJobController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TenderController;
+use App\Http\Controllers\TenderRabController;
+use App\Http\Controllers\TenderProjectController;
 use App\Http\Controllers\UserManagementController;
 use App\Models\PartnerLogo;
 use Illuminate\Support\Facades\Route;
@@ -51,18 +53,53 @@ Route::middleware(['auth', 'audit'])->group(function () {
     // Dashboard (Semua role bisa akses)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Modul Tender (Admin input, Manager approve, Owner monitoring)
+    // Modul Tender (Submenu 1: Administrasi, Submenu 2: RAB, Submenu 3: Lapangan/Proyek)
     Route::middleware(['role:owner,manager,admin'])->group(function () {
+        // 1. Administrasi Tender
         Route::get('/tender', [TenderController::class, 'index'])->name('tender.index');
+        Route::get('/tender/administrasi', [TenderController::class, 'index'])->name('tender.administrasi');
         Route::post('/tender', [TenderController::class, 'store'])->name('tender.store');
         Route::put('/tender/{tender}', [TenderController::class, 'update'])->name('tender.update');
         Route::delete('/tender/{tender}', [TenderController::class, 'destroy'])->name('tender.destroy');
+        Route::post('/tender/{tender}/request-deletion', [TenderController::class, 'requestDeletion'])->name('tender.request-deletion');
+        Route::post('/tender/{tender}/approve-deletion', [TenderController::class, 'approveDeletion'])->name('tender.approve-deletion');
+        Route::post('/tender/{tender}/reject-deletion', [TenderController::class, 'rejectDeletion'])->name('tender.reject-deletion');
         Route::post('/tender/{tender}/upload', [TenderController::class, 'uploadDocument'])->name('tender.upload');
         Route::get('/tender/{tender}/documents/{document}', [TenderController::class, 'viewDocument'])->name('tender.documents.view');
-        Route::post('/tender/{tender}/evaluations', [TenderController::class, 'storeEvaluation'])->name('tender.evaluations.store');
-        Route::post('/tender/{tender}/convert-contract', [TenderController::class, 'convertToContract'])->name('tender.convert');
+        Route::post('/tender/{tender}/submit', [TenderController::class, 'submitForApproval'])->name('tender.submit');
         Route::post('/tender/{tender}/approve', [TenderController::class, 'approve'])->name('tender.approve');
         Route::post('/tender/{tender}/reject', [TenderController::class, 'reject'])->name('tender.reject');
+        Route::post('/tender/{tender}/revise', [TenderController::class, 'revise'])->name('tender.revise');
+        Route::post('/tender/{tender}/evaluations', [TenderController::class, 'storeEvaluation'])->name('tender.evaluations.store');
+        Route::post('/tender/{tender}/convert-contract', [TenderController::class, 'convertToContract'])->name('tender.convert');
+
+        // 2. Estimasi / RAB
+        Route::get('/tender/rab', [TenderRabController::class, 'index'])->name('tender.rab.index');
+        Route::get('/tender/{tender}/rab', [TenderRabController::class, 'show'])->name('tender.rab.show');
+        Route::post('/tender/{tender}/rab/items', [TenderRabController::class, 'storeItem'])->name('tender.rab.items.store');
+        Route::put('/tender/{tender}/rab/items/{item}', [TenderRabController::class, 'updateItem'])->name('tender.rab.items.update');
+        Route::delete('/tender/{tender}/rab/items/{item}', [TenderRabController::class, 'destroyItem'])->name('tender.rab.items.destroy');
+        Route::post('/tender/{tender}/rab/submit', [TenderRabController::class, 'submitRab'])->name('tender.rab.submit');
+        Route::post('/tender/{tender}/rab/approve', [TenderRabController::class, 'approveRab'])->name('tender.rab.approve');
+        Route::post('/tender/{tender}/rab/reject', [TenderRabController::class, 'rejectRab'])->name('tender.rab.reject');
+        Route::post('/tender/{tender}/rab/revise', [TenderRabController::class, 'reviseRab'])->name('tender.rab.revise');
+
+        // 3. Lapangan / Proyek
+        Route::get('/tender/proyek', [TenderProjectController::class, 'index'])->name('tender.proyek.index');
+        Route::get('/tender/{tender}/proyek', [TenderProjectController::class, 'show'])->name('tender.proyek.show');
+        Route::match(['post', 'put'], '/tender/{tender}/proyek/status', [TenderProjectController::class, 'updateStatus'])->name('tender.proyek.status');
+        Route::match(['post', 'put'], '/tender/{tender}/proyek/status/update', [TenderProjectController::class, 'updateStatus'])->name('tender.proyek.status.update');
+        Route::post('/tender/{tender}/proyek/allocate-material', [TenderProjectController::class, 'allocateMaterial'])->name('tender.proyek.allocate-material');
+        Route::post('/tender/{tender}/proyek/material/allocate', [TenderProjectController::class, 'allocateMaterial'])->name('tender.proyek.material.allocate');
+        Route::post('/tender/{tender}/proyek/record-material-usage', [TenderProjectController::class, 'recordMaterialUsage'])->name('tender.proyek.record-material-usage');
+        Route::post('/tender/{tender}/proyek/material/use', [TenderProjectController::class, 'recordMaterialUsage'])->name('tender.proyek.material.use');
+        Route::post('/tender/{tender}/proyek/assignments', [TenderProjectController::class, 'storeAssignment'])->name('tender.proyek.assignments.store');
+        Route::match(['post', 'put'], '/tender/{tender}/proyek/assignments/{assignment}', [TenderProjectController::class, 'updateAssignment'])->name('tender.proyek.assignments.update');
+        Route::delete('/tender/{tender}/proyek/assignments/{assignment}', [TenderProjectController::class, 'destroyAssignment'])->name('tender.proyek.assignments.destroy');
+        Route::post('/tender/{tender}/proyek/logs', [TenderProjectController::class, 'storeLog'])->name('tender.proyek.logs.store');
+        Route::delete('/tender/{tender}/proyek/logs/{log}', [TenderProjectController::class, 'destroyLog'])->name('tender.proyek.logs.destroy');
+        Route::match(['post', 'put'], '/tender/{tender}/proyek/vendor-progress', [TenderProjectController::class, 'updateVendorProgress'])->name('tender.proyek.vendor-progress');
+        Route::match(['post', 'put'], '/tender/{tender}/proyek/vendor/update', [TenderProjectController::class, 'updateVendorProgress'])->name('tender.proyek.vendor.update');
     });
 
     // Modul Klien & Jasa & Kontrak (Admin input, Manager approve, Owner monitoring)

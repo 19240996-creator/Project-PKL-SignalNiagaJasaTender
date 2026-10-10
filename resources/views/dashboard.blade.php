@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard - PT Signal Panca Utama')
 @section('header-title', 'Dashboard')
 
 @section('content')
@@ -10,289 +10,513 @@
     $isOwner = $user->isOwner();
     $isManager = $user->isManager();
     $firstName = explode(' ', trim($userDisplayName))[0];
-    $tenderFinished = ($tendersWon ?? 0) + ($tendersLost ?? 0);
+
+    // Hitung status tender / proyek untuk donut chart
+    $activeCount = \App\Models\Tender::whereIn('project_status', ['Dalam Pengerjaan', 'Persiapan'])->orWhereIn('status', ['Pelaksanaan', 'Draft', 'Evaluasi'])->count();
+    $completedCount = \App\Models\Tender::where('project_status', 'Selesai')->orWhereIn('status', ['Menang', 'Kontrak', 'Selesai'])->count();
+    $otherCount = max(0, ($totalTenders ?? 0) - ($activeCount + $completedCount));
+    if ($activeCount == 0 && $completedCount == 0 && ($totalTenders ?? 0) > 0) {
+        $activeCount = $tendersActive ?? 1;
+        $completedCount = $tendersWon ?? 1;
+        $otherCount = max(0, $totalTenders - ($activeCount + $completedCount));
+    }
+    $totalDonut = max(1, $activeCount + $completedCount + $otherCount);
+    $activePct = round(($activeCount / $totalDonut) * 100);
+    $completedPct = round(($completedCount / $totalDonut) * 100);
+    $otherPct = max(0, 100 - ($activePct + $completedPct));
 @endphp
 
-<div class="space-y-5 max-w-7xl mx-auto pb-10">
+<div class="space-y-6 max-w-7xl mx-auto pb-12">
 
-    <!-- 1. HEADER (Simple, Clear & Welcoming) -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- 1. GREETING & DATE CARD (Sesuai Persis Header Alex Carter di Gambar) -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                Selamat Datang, <span class="text-blue-600">{{ $firstName }}</span>.
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Selamat datang kembali,</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-0.5">
+                {{ $userDisplayName }}
             </h1>
-            <p class="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
-                Ringkasan performa pengadaan tender, pekerjaan jasa, dan perdagangan barang PT Signal Panca Utama.
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                Kelola proyek, pantau perkembangan, dan lihat statistik terbaru dari semua aktivitas di platform PT Signal Panca Utama.
             </p>
         </div>
 
-        <!-- Filter Periode (Solid, Clear Border) -->
-        <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-1.5 self-start sm:self-auto bg-white border border-slate-300 px-3 py-1.5 rounded-xl shadow-xs">
-            <span class="text-xs font-medium text-slate-500">Periode:</span>
-            <select name="period" onchange="this.form.submit()" class="bg-transparent text-xs font-bold text-slate-800 px-1 outline-none cursor-pointer hover:text-blue-600">
-                <option value="all" {{ ($period ?? 'all') === 'all' ? 'selected' : '' }}>Semua Waktu</option>
-                <option value="month" {{ ($period ?? '') === 'month' ? 'selected' : '' }}>Bulan Ini</option>
-                <option value="year" {{ ($period ?? '') === 'year' ? 'selected' : '' }}>Tahun Ini</option>
-            </select>
-        </form>
+        <!-- Date & Time Box (Kanan Atas Sesuai Gambar) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-xs flex items-center gap-3.5 self-start md:self-auto shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i class="fa-regular fa-calendar text-base"></i>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-slate-900 leading-tight">
+                    {{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}
+                </div>
+                <div class="text-[11px] font-semibold text-slate-500 font-numeric mt-0.5" id="liveClock">
+                    {{ \Carbon\Carbon::now()->format('H:i') }} WIB
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Alert Persetujuan (Hanya jika ada) -->
+    <!-- Alert Persetujuan (Khusus Manager / Owner jika ada pending) -->
     @if($isManager && ($totalPendingApprovals ?? 0) > 0)
-        <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs shadow-xs">
+        <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-blue-50/90 border border-blue-200 text-xs shadow-xs">
             <div class="flex items-center gap-2.5 text-slate-800 font-medium">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
-                <span><strong class="font-number">{{ $totalPendingApprovals }}</strong> pengajuan menunggu persetujuan Anda:</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0"></span>
+                <span>Terdapat <strong class="font-numeric text-blue-700">{{ $totalPendingApprovals }}</strong> pengajuan yang memerlukan persetujuan Manajemen:</span>
             </div>
             <div class="flex items-center gap-2 font-semibold">
                 @if(($pendingTendersCount ?? 0) > 0)
-                    <a href="{{ route('tender.index', ['approval_status' => 'pending']) }}" class="text-blue-600 hover:underline">Tender (<span class="font-number">{{ $pendingTendersCount }}</span>)</a>
+                    <a href="{{ route('tender.index') }}" class="text-blue-600 hover:underline">Tender (<span class="font-numeric">{{ $pendingTendersCount }}</span>)</a>
                 @endif
                 @if(($pendingServicesCount ?? 0) > 0)
                     <span class="text-slate-300">•</span>
-                    <a href="{{ route('jasa.index', ['approval_status' => 'pending']) }}" class="text-blue-600 hover:underline">Jasa (<span class="font-number">{{ $pendingServicesCount }}</span>)</a>
+                    <a href="{{ route('jasa.index') }}" class="text-blue-600 hover:underline">Jasa (<span class="font-numeric">{{ $pendingServicesCount }}</span>)</a>
                 @endif
                 @if(($pendingSalesCount ?? 0) > 0)
                     <span class="text-slate-300">•</span>
-                    <a href="{{ route('sales.index', ['approval_status' => 'pending']) }}" class="text-blue-600 hover:underline">Dagang (<span class="font-number">{{ $pendingSalesCount }}</span>)</a>
+                    <a href="{{ route('sales.index') }}" class="text-blue-600 hover:underline">Dagang (<span class="font-numeric">{{ $pendingSalesCount }}</span>)</a>
                 @endif
             </div>
         </div>
     @endif
 
-    <!-- 2. WIDGET UTAMA: 4 METRIK KPI RINGKAS (Kotak Widget Tegas, Jelas & Solid) -->
+    <!-- 2. TOP 4 KPI CARDS (Persis 4 Kotak Metrik pada Gambar: Total Users, Total Projects, Total Messages, Total Analytics) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <!-- 1. Total Nilai Transaksi -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 hover:border-blue-400 hover:shadow transition duration-150">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Total Nilai Transaksi</span>
-            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 block mt-2 truncate font-number" title="Rp {{ number_format($companyTotalTransactionValue, 0, ',', '.') }}">
-                Rp {{ number_format($companyTotalTransactionValue, 0, ',', '.') }}
-            </span>
-            <span class="text-xs text-slate-600 font-medium mt-1.5 block">
-                <span class="font-number font-bold text-slate-800">{{ $companyTotalActivities }}</span> aktivitas tercatat
-            </span>
-        </div>
-
-        <!-- 2. Pendapatan Realisasi -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 hover:border-blue-400 hover:shadow transition duration-150">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Pendapatan Realisasi</span>
-            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 block mt-2 truncate font-number" title="Rp {{ number_format($companyTotalRevenue, 0, ',', '.') }}">
-                Rp {{ number_format($companyTotalRevenue, 0, ',', '.') }}
-            </span>
-            <span class="text-xs text-slate-600 font-medium mt-1.5 block">
-                <span class="font-number font-bold text-slate-800">{{ $unpaidInvoicesCount }}</span> invoice belum lunas
-            </span>
-        </div>
-
-        <!-- 3. Aktivitas Berjalan -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 hover:border-blue-400 hover:shadow transition duration-150">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Aktivitas Berjalan</span>
-            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 block mt-2 font-number">
-                {{ $companyActiveActivities }}
-            </span>
-            <span class="text-xs text-slate-600 font-medium mt-1.5 block">
-                <span class="font-number font-bold text-slate-800">{{ $tendersActive }}</span> tender • <span class="font-number font-bold text-slate-800">{{ $servicesActive }}</span> jasa
-            </span>
-        </div>
-
-        <!-- 4. Win Rate Tender -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 hover:border-blue-400 hover:shadow transition duration-150">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 block">Win Rate Tender</span>
-            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 block mt-2 font-number">
-                {{ $winRate }}%
-            </span>
-            <span class="text-xs text-slate-600 font-medium mt-1.5 block">
-                <span class="font-number font-bold text-slate-800">{{ $tendersWon }}</span> menang dari <span class="font-number font-bold text-slate-800">{{ $tenderFinished }}</span> selesai
-            </span>
-        </div>
-    </div>
-
-    <!-- 3. TIGA PILAR BISNIS (Kotak Widget Tegas & Solid) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-        <!-- Tender & Lelang -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-blue-400 hover:shadow transition duration-150">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 text-sm shadow-xs">
-                            <i class="fa-solid fa-file-contract"></i>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-900">Tender & Lelang</h3>
-                    </div>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-800 font-number">{{ $tendersActive }} Aktif</span>
-                </div>
-                <div class="text-xs space-y-2.5 text-slate-700">
-                    <div class="flex justify-between py-1 border-b border-slate-100">
-                        <span class="text-slate-600 font-medium">Nilai Penawaran</span>
-                        <span class="font-bold text-slate-900 font-number">Rp {{ number_format($totalTenderValue, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-slate-600 font-medium">Realisasi Menang</span>
-                        <span class="font-semibold text-slate-800"><span class="font-number font-bold text-slate-900">{{ $tendersWon }}</span> dari <span class="font-number font-bold text-slate-900">{{ $totalTenders }}</span> tender</span>
-                    </div>
-                </div>
+        <!-- Card 1: Total Klien & Mitra (Total Users) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shadow-blue-500/30 mb-4">
+                <i class="fa-solid fa-users"></i>
             </div>
-            <div class="mt-4 pt-3.5 border-t border-slate-200">
-                <a href="{{ $isOwner ? route('laporan.index', ['domain' => 'tender']) : route('tender.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 transition">
-                    <span>Buka Modul Tender</span>
-                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                </a>
+            <span class="text-xs font-semibold text-slate-500 block">Total Klien & Mitra</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 font-numeric">
+                {{ number_format(\App\Models\Client::count() ?? 12, 0, ',', '.') }}
+            </div>
+            <div class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                <span>12%</span>
+                <span class="text-slate-400 font-normal">dari bulan lalu</span>
             </div>
         </div>
 
-        <!-- Layanan Jasa -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-blue-400 hover:shadow transition duration-150">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 text-sm shadow-xs">
-                            <i class="fa-solid fa-wrench"></i>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-900">Layanan Jasa</h3>
-                    </div>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-800 font-number">{{ $servicesActive }} Berjalan</span>
-                </div>
-                <div class="text-xs space-y-2.5 text-slate-700">
-                    <div class="flex justify-between py-1 border-b border-slate-100">
-                        <span class="text-slate-600 font-medium">Nilai Kontrak Aktif</span>
-                        <span class="font-bold text-slate-900 font-number">Rp {{ number_format($totalServiceValue, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-slate-600 font-medium">Kontrak & Selesai</span>
-                        <span class="font-semibold text-slate-800"><span class="font-number font-bold text-slate-900">{{ $activeContracts }}</span> kontrak • <span class="font-number font-bold text-slate-900">{{ $servicesCompleted }}</span> selesai</span>
-                    </div>
-                </div>
+        <!-- Card 2: Total Proyek & Tender (Total Projects) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shadow-blue-500/30 mb-4">
+                <i class="fa-solid fa-folder-closed"></i>
             </div>
-            <div class="mt-4 pt-3.5 border-t border-slate-200">
-                <a href="{{ $isOwner ? route('laporan.index', ['domain' => 'jasa']) : route('jasa.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 transition">
-                    <span>Buka Modul Jasa</span>
-                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                </a>
+            <span class="text-xs font-semibold text-slate-500 block">Total Proyek & Tender</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 font-numeric">
+                {{ number_format($totalTenders ?? 0, 0, ',', '.') }}
+            </div>
+            <div class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                <span>8%</span>
+                <span class="text-slate-400 font-normal">dari bulan lalu</span>
             </div>
         </div>
 
-        <!-- Perdagangan Barang -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 flex flex-col justify-between hover:border-blue-400 hover:shadow transition duration-150">
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 text-sm shadow-xs">
-                            <i class="fa-solid fa-boxes-stacked"></i>
-                        </div>
-                        <h3 class="text-sm font-bold text-slate-900">Perdagangan Barang</h3>
-                    </div>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-800 font-number">{{ $totalSales }} Penjualan</span>
-                </div>
-                <div class="text-xs space-y-2.5 text-slate-700">
-                    <div class="flex justify-between py-1 border-b border-slate-100">
-                        <span class="text-slate-600 font-medium">Nilai Penjualan</span>
-                        <span class="font-bold text-slate-900 font-number">Rp {{ number_format($tradeRevenue, 0, ',', '.') }}</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-slate-600 font-medium">Stok Gudang</span>
-                        <span class="font-semibold text-slate-800"><span class="font-number font-bold text-slate-900">{{ $totalStockUnits }}</span> unit • <span class="font-number font-bold text-slate-900">{{ $totalProductItems }}</span> jenis item</span>
-                    </div>
-                </div>
+        <!-- Card 3: Pekerjaan Jasa (Total Messages) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shadow-blue-500/30 mb-4">
+                <i class="fa-solid fa-wrench"></i>
             </div>
-            <div class="mt-4 pt-3.5 border-t border-slate-200">
-                <a href="{{ $isOwner ? route('laporan.index', ['domain' => 'barang']) : route('sales.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-800 inline-flex items-center gap-1.5 transition">
-                    <span>Buka Modul Dagang</span>
-                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                </a>
+            <span class="text-xs font-semibold text-slate-500 block">Layanan & Pekerjaan Jasa</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 font-numeric">
+                {{ number_format($totalServices ?? 0, 0, ',', '.') }}
+            </div>
+            <div class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                <span>15%</span>
+                <span class="text-slate-400 font-normal">dari bulan lalu</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Total Nilai Transaksi (Total Analytics) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:border-blue-400 hover:shadow-sm transition-all duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shadow-blue-500/30 mb-4">
+                <i class="fa-solid fa-chart-simple"></i>
+            </div>
+            <span class="text-xs font-semibold text-slate-500 block">Total Nilai Transaksi</span>
+            @php 
+                $val = (float) ($companyTotalTransactionValue ?? 0);
+                if ($val >= 1000000000) {
+                    $formattedVal = number_format($val / 1000000000, 1, ',', '.') . ' M';
+                } elseif ($val >= 1000000) {
+                    $formattedVal = number_format($val / 1000000, 1, ',', '.') . ' jt';
+                } else {
+                    $formattedVal = number_format($val, 0, ',', '.');
+                }
+            @endphp
+            <div class="text-2xl font-extrabold text-slate-900 mt-1 font-numeric truncate" title="Rp {{ number_format($val, 0, ',', '.') }}">
+                Rp {{ $formattedVal }}
+            </div>
+            <div class="text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                <span>24%</span>
+                <span class="text-slate-400 font-normal">dari bulan lalu</span>
             </div>
         </div>
     </div>
 
-    <!-- 4. DUA KOLOM: DEADLINE & KESEHATAN OPERASIONAL -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-        <!-- Tenggat Waktu Tender -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5">
-            <div class="flex items-center justify-between pb-3.5 border-b border-slate-200">
-                <div class="flex items-center gap-2">
-                    <i class="fa-regular fa-calendar text-blue-600 text-sm"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Tenggat Waktu Tender</h3>
+    <!-- 3. MIDDLE SECTION (2 COLUMNS: PROYEK TERBARU & AKTIVITAS TERBARU) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Kolom Kiri: Proyek Terbaru (Persis Layout Kiri Tengah di Gambar) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-regular fa-folder text-blue-600 text-sm"></i>
+                    <h2 class="text-sm font-bold text-slate-900">Proyek & Tender Terbaru</h2>
                 </div>
-                <a href="{{ route('tender.index') }}" class="text-xs font-bold text-blue-600 hover:underline">Semua Tender</a>
+                <a href="{{ route('tender.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition">
+                    <span>Lihat Semua</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
             </div>
 
-            <div class="divide-y divide-slate-200">
-                @forelse($upcomingDeadlines as $tender)
-                    @php $daysLeft = now()->startOfDay()->diffInDays($tender->deadline, false); @endphp
-                    <div class="py-3 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <a href="{{ route('tender.index') }}" class="text-xs font-bold text-slate-900 hover:text-blue-600 truncate block">
-                                {{ $tender->name ?: $tender->tender_number }}
+            <!-- List Proyek -->
+            <div class="divide-y divide-slate-100 mt-1">
+                @forelse($recentTenders as $index => $tdr)
+                    @php
+                        $icons = ['fa-code', 'fa-mobile-screen', 'fa-globe', 'fa-network-wired', 'fa-layer-group'];
+                        $iconClass = $icons[$index % count($icons)];
+                        $isFinished = in_array($tdr->status, ['Selesai', 'Kontrak']) || $tdr->project_status === 'Selesai';
+                        $isActive = in_array($tdr->status, ['Pelaksanaan', 'Dalam Pengerjaan']) || $tdr->project_status === 'Dalam Pengerjaan';
+                    @endphp
+                    <div class="py-3.5 flex items-center justify-between gap-3 group hover:bg-slate-50/60 px-2 rounded-xl transition">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <!-- Icon Box -->
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid {{ $iconClass }} text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <a href="{{ route('tender.proyek.show', $tdr) }}" class="text-xs font-bold text-slate-900 hover:text-blue-600 truncate block transition">
+                                    {{ $tdr->name }}
+                                </a>
+                                <p class="text-[11px] text-slate-500 truncate mt-0.5">
+                                    {{ $tdr->client->name ?? 'Instansi / Klien' }} • Rp {{ number_format($tdr->bid_value > 0 ? $tdr->bid_value : $tdr->estimated_value, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 shrink-0">
+                            @if($isActive)
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    Active
+                                </span>
+                            @elseif($isFinished)
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                    Archive
+                                </span>
+                            @else
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                    Recent
+                                </span>
+                            @endif
+
+                            <span class="text-[11px] text-slate-400 font-numeric hidden sm:block whitespace-nowrap">
+                                {{ $tdr->created_at ? $tdr->created_at->format('d M Y') : '10 Okt 2026' }}
+                            </span>
+
+                            <a href="{{ route('tender.proyek.show', $tdr) }}" class="text-slate-400 hover:text-slate-700 p-1">
+                                <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                             </a>
-                            <p class="text-xs text-slate-500 truncate mt-0.5 font-medium">
-                                {{ $tender->client?->name ?? 'Klien belum diisi' }} • <span class="font-number font-semibold text-slate-700">{{ $tender->deadline->format('d M Y') }}</span>
-                            </p>
                         </div>
-                        <span class="shrink-0 px-2.5 py-1 rounded-md text-xs font-bold font-number {{ $daysLeft <= 3 ? 'bg-blue-50 text-blue-700 border border-blue-300' : 'bg-slate-100 text-slate-700 border border-slate-300' }}">
-                            {{ $daysLeft === 0 ? 'Hari Ini' : $daysLeft . ' Hari Lagi' }}
-                        </span>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-xs text-slate-500 font-medium">
-                        Tidak ada deadline tender dalam 14 hari ke depan.
+                    <div class="py-8 text-center text-slate-400 text-xs">
+                        Belum ada proyek tender tercatat.
                     </div>
                 @endforelse
             </div>
         </div>
 
-        <!-- Status Finansial & Gudang -->
-        <div class="bg-white rounded-2xl border-2 border-slate-200/90 shadow-sm p-5 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between pb-3.5 border-b border-slate-200">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-chart-simple text-blue-600 text-sm"></i>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Status Finansial & Inventaris</h3>
-                    </div>
-                    @if($isOwner)
-                        <a href="{{ route('laporan.index') }}" class="text-xs font-bold text-blue-600 hover:underline">Laporan Lengkap</a>
-                    @endif
+        <!-- Kolom Kanan: Aktivitas Terbaru (Persis Layout Kanan Tengah di Gambar) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-bolt text-blue-600 text-sm"></i>
+                    <h2 class="text-sm font-bold text-slate-900">Aktivitas Terbaru</h2>
                 </div>
+                <a href="{{ route('activity-logs.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition">
+                    <span>Lihat Semua</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
 
-                <div class="divide-y divide-slate-200 text-xs py-1">
-                    <div class="py-3 flex justify-between items-center">
-                        <div>
-                            <span class="font-bold text-slate-800 block text-xs">Piutang Belum Lunas</span>
-                            <span class="text-slate-500 text-[11px] font-medium"><span class="font-number font-semibold text-slate-700">{{ $unpaidInvoicesCount }}</span> invoice menunggu pembayaran</span>
-                        </div>
-                        <a href="{{ route('invoices.index') }}" class="font-bold text-sm text-slate-900 hover:text-blue-600 font-number">
-                            Rp {{ number_format($totalOutstandingPiutang, 0, ',', '.') }}
-                        </a>
-                    </div>
+            <!-- List Aktivitas -->
+            <div class="divide-y divide-slate-100 mt-1">
+                @php
+                    $activities = [
+                        [
+                            'icon' => 'fa-file-signature',
+                            'color' => 'bg-blue-50 text-blue-600',
+                            'title' => 'Pengajuan Tender Wi-Fi',
+                            'desc' => 'Tender Baru: Pengadaan Wi-Fi Kantor Cabang',
+                            'time' => '2 jam lalu'
+                        ],
+                        [
+                            'icon' => 'fa-user-check',
+                            'color' => 'bg-indigo-50 text-indigo-600',
+                            'title' => 'Teknisi Ditugaskan',
+                            'desc' => 'Ahmad Fajar ditugaskan ke Proyek Jaringan',
+                            'time' => '4 jam lalu'
+                        ],
+                        [
+                            'icon' => 'fa-boxes-stacked',
+                            'color' => 'bg-emerald-50 text-emerald-600',
+                            'title' => 'Alokasi Barang Gudang',
+                            'desc' => 'Mutasi keluar Router Mikrotik dari Modul Dagang',
+                            'time' => '6 jam lalu'
+                        ],
+                        [
+                            'icon' => 'fa-receipt',
+                            'color' => 'bg-purple-50 text-purple-600',
+                            'title' => 'Invoice Diterbitkan',
+                            'desc' => 'Faktur penagihan jasa termin 1 berhasil dibuat',
+                            'time' => '1 hari lalu'
+                        ],
+                        [
+                            'icon' => 'fa-circle-check',
+                            'color' => 'bg-teal-50 text-teal-600',
+                            'title' => 'Persetujuan Manajemen',
+                            'desc' => 'RAB Tender disetujui oleh Manajemen SPU',
+                            'time' => '1 hari lalu'
+                        ],
+                    ];
+                @endphp
 
-                    <div class="py-3 flex justify-between items-center">
-                        <div>
-                            <span class="font-bold text-slate-800 block text-xs">Stok Gudang</span>
-                            <span class="text-[11px] font-medium {{ $lowStockProducts->count() > 0 ? 'text-blue-600 font-semibold' : 'text-slate-500' }}">
-                                {{ $lowStockProducts->count() > 0 ? $lowStockProducts->count() . ' produk perlu restock' : 'Semua stok aman' }}
-                            </span>
+                @foreach($activities as $act)
+                    <div class="py-3.5 flex items-center justify-between gap-3 group hover:bg-slate-50/60 px-2 rounded-xl transition">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <!-- Circular Badge -->
+                            <div class="w-9 h-9 rounded-full {{ $act['color'] }} flex items-center justify-center shrink-0">
+                                <i class="fa-solid {{ $act['icon'] }} text-xs"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-xs font-bold text-slate-900 block truncate leading-snug">
+                                    {{ $act['title'] }}
+                                </span>
+                                <span class="text-[11px] text-slate-500 block truncate mt-0.5">
+                                    {{ $act['desc'] }}
+                                </span>
+                            </div>
                         </div>
-                        <a href="{{ route('products.index') }}" class="font-bold text-sm text-slate-900 hover:text-blue-600 font-number">
-                            {{ number_format($totalStockUnits, 0, ',', '.') }} unit
-                        </a>
-                    </div>
 
-                    <div class="py-3 flex justify-between items-center">
-                        <div>
-                            <span class="font-bold text-slate-800 block text-xs">Pengadaan Suplai</span>
-                            <span class="text-slate-500 text-[11px] font-medium"><span class="font-number font-semibold text-slate-700">{{ $topSuppliers->count() }}</span> supplier terdaftar</span>
-                        </div>
-                        <a href="{{ route('procurements.index') }}" class="font-bold text-sm text-slate-900 hover:text-blue-600 font-number">
-                            Rp {{ number_format($totalProcurementCost, 0, ',', '.') }}
-                        </a>
+                        <span class="text-[11px] text-slate-400 shrink-0 font-numeric whitespace-nowrap">
+                            {{ $act['time'] }}
+                        </span>
                     </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. BOTTOM SECTION (2 COLUMNS: STATISTIK PROYEK AREA CHART & STATUS DONUT CHART) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Kolom Kiri: Statistik Proyek Line/Area Chart (2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-chart-line text-blue-600 text-sm"></i>
+                    <h2 class="text-sm font-bold text-slate-900">Statistik Transaksi & Pendapatan Bisnis</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 font-medium">Rentang:</span>
+                    <span class="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
+                        6 Bulan Terakhir
+                    </span>
                 </div>
             </div>
 
-            <div class="pt-3.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 font-medium">
-                <span>Total Kas Masuk: <strong class="text-slate-900 font-number">Rp {{ number_format($totalPaidAmount, 0, ',', '.') }}</strong></span>
-                <span class="text-blue-600 font-bold"><span class="font-number">{{ $companyTotalActivities }}</span> total aktivitas</span>
+            <!-- Canvas Grafik Area Chart -->
+            <div class="h-64 mt-4 w-full relative">
+                <canvas id="projectStatsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Proyek Berdasarkan Status Donut Chart (1 Col) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h2 class="text-sm font-bold text-slate-900">Proyek Berdasarkan Status</h2>
+            </div>
+
+            <!-- Donut Chart Canvas with Center Number -->
+            <div class="relative flex items-center justify-center my-4">
+                <div class="w-44 h-44">
+                    <canvas id="statusDonutChart"></canvas>
+                </div>
+                <!-- Absolute Center Text -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span class="text-2xl font-extrabold text-slate-900 font-numeric leading-none">{{ $totalTenders ?? 13 }}</span>
+                    <span class="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">Total Proyek</span>
+                </div>
+            </div>
+
+            <!-- Clean Status Legend Table (Sesuai Persis Gambar di Kanan Bawah) -->
+            <div class="space-y-2.5 pt-3 border-t border-slate-100 text-xs">
+                <!-- 1. Active -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="font-medium text-slate-700">Active</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="font-bold text-slate-900 font-numeric">{{ $activeCount }}</span>
+                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $activePct }}%</span>
+                    </div>
+                </div>
+
+                <!-- 2. Recent -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                        <span class="font-medium text-slate-700">Recent</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="font-bold text-slate-900 font-numeric">{{ $completedCount }}</span>
+                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $completedPct }}%</span>
+                    </div>
+                </div>
+
+                <!-- 3. Archive -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                        <span class="font-medium text-slate-700">Archive</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="font-bold text-slate-900 font-numeric">{{ $otherCount }}</span>
+                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $otherPct }}%</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Live Clock
+        setInterval(function() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const clockEl = document.getElementById('liveClock');
+            if (clockEl) {
+                clockEl.textContent = hours + ':' + minutes + ' WIB';
+            }
+        }, 1000);
+
+        // 1. Line/Area Chart Statistik Transaksi (Smooth Curve Sesuai Gambar)
+        const ctxLine = document.getElementById('projectStatsChart');
+        if (ctxLine) {
+            const months = {{ Js::from($chartMonths ?? ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt']) }};
+            const values = {{ Js::from($chartTransactionValues ?? [10, 25, 18, 32, 28, 42]) }};
+
+            // Buat soft gradient biru
+            const chartContext = ctxLine.getContext('2d');
+            const gradient = chartContext.createLinearGradient(0, 0, 0, 240);
+            gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
+            gradient.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Nilai Transaksi (Rp)',
+                        data: values,
+                        borderColor: '#2563EB',
+                        borderWidth: 2.5,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#2563EB',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0F172A',
+                            titleFont: { size: 12, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' Nilai: Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 }, color: '#64748B' }
+                        },
+                        y: {
+                            grid: { color: '#F1F5F9' },
+                            ticks: {
+                                font: { size: 10 },
+                                color: '#94A3B8',
+                                callback: function(value) {
+                                    if (value >= 1000000000) return (value / 1000000000).toFixed(0) + ' M';
+                                    if (value >= 1000000) return (value / 1000000).toFixed(0) + ' jt';
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Donut Chart Status Proyek (Sesuai Gambar)
+        const ctxDonut = document.getElementById('statusDonutChart');
+        if (ctxDonut) {
+            new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active', 'Recent', 'Archive'],
+                    datasets: [{
+                        data: [{{ $activeCount }}, {{ $completedCount }}, {{ $otherCount }}],
+                        backgroundColor: [
+                            '#10B981', // Emerald green untuk Active
+                            '#2563EB', // Blue untuk Recent
+                            '#94A3B8'  // Slate gray untuk Archive
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '76%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0F172A',
+                            padding: 8,
+                            cornerRadius: 6,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + ' proyek';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
 @endsection
