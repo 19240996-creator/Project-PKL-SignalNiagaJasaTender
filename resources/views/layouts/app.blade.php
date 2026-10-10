@@ -278,16 +278,26 @@
                         </div>
 
                         <!-- 3. Domain Jasa -->
-                        <a href="{{ route('jasa.index') }}" 
-                           class="group flex items-center justify-between px-3.5 py-2.5 text-xs font-medium rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all {{ request()->routeIs('jasa.*') ? 'sidebar-item-active' : '' }}">
-                            <div class="flex items-center space-x-2.5 truncate">
-                                <i class="fa-solid fa-wrench w-5 text-center text-slate-400 group-hover:text-white"></i>
-                                <span class="ml-1 truncate">Jasa & Servis</span>
+                        @php $isJasaActive = request()->routeIs('jasa.*'); @endphp
+                        <div x-data="{ jasaOpen: {{ $isJasaActive ? 'true' : 'false' }} }" class="space-y-1">
+                            <button type="button" @click="jasaOpen = !jasaOpen"
+                                    :aria-expanded="jasaOpen.toString()"
+                                    class="w-full group flex items-center justify-between px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all {{ $isJasaActive ? 'text-white bg-white/10' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
+                                <div class="flex items-center space-x-2.5 truncate">
+                                    <i class="fa-solid fa-screwdriver-wrench w-5 text-center {{ $isJasaActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-white' }}"></i>
+                                    <span class="ml-1 truncate">Jasa</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    @if($pendingServices > 0)<span class="px-1.5 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded-full">{{ $pendingServices }}</span>@endif
+                                    <i class="fa-solid text-[10px] text-slate-400" :class="jasaOpen ? 'fa-chevron-up text-blue-400' : 'fa-chevron-down'"></i>
+                                </div>
+                            </button>
+                            <div x-show="jasaOpen" x-transition class="pl-4 pr-1 py-1 space-y-1" x-cloak>
+                                <a href="{{ route('jasa.teknisi.index') }}" class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('jasa.teknisi.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}"><i class="fa-solid fa-user-gear w-4 text-center mr-2.5"></i><span>Teknisi</span></a>
+                                <a href="{{ route('jasa.instalasi.index') }}" class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('jasa.instalasi.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}"><i class="fa-solid fa-satellite-dish w-4 text-center mr-2.5"></i><span>Instalasi</span></a>
+                                <a href="{{ route('jasa.maintenance.index') }}" class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('jasa.maintenance.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}"><i class="fa-solid fa-screwdriver-wrench w-4 text-center mr-2.5"></i><span>Perbaikan / Maintenance</span></a>
                             </div>
-                            @if($pendingServices > 0)
-                                <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded-full">{{ $pendingServices }}</span>
-                            @endif
-                        </a>
+                        </div>
 
                         <!-- 4. Domain Dagang -->
                         @php

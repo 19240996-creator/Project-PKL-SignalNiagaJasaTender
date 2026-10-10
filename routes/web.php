@@ -15,12 +15,15 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ServiceJobController;
+use App\Http\Controllers\ServiceOperationsController;
+use App\Http\Controllers\TechnicianController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TenderController;
 use App\Http\Controllers\TenderRabController;
 use App\Http\Controllers\TenderProjectController;
 use App\Http\Controllers\UserManagementController;
 use App\Models\PartnerLogo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -121,6 +124,22 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
         Route::put('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
         Route::delete('/contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
+    });
+
+    // Operasional Jasa: teknisi, instalasi, dan maintenance
+    Route::middleware(['role:owner,manager,admin,technician'])->group(function () {
+        Route::get('/jasa/teknisi', [TechnicianController::class, 'index'])->name('jasa.teknisi.index');
+        Route::post('/jasa/teknisi', [TechnicianController::class, 'store'])->name('jasa.teknisi.store');
+        Route::put('/jasa/teknisi/{technician}', [TechnicianController::class, 'update'])->name('jasa.teknisi.update');
+        Route::post('/jasa/teknisi/{technician}/availability', [TechnicianController::class, 'storeAvailability'])->name('jasa.teknisi.availability');
+
+        Route::get('/jasa/instalasi', fn (Request $request) => app(ServiceOperationsController::class)->index($request, 'installation'))->name('jasa.instalasi.index');
+        Route::post('/jasa/instalasi', fn (Request $request) => app(ServiceOperationsController::class)->store($request, 'installation'))->name('jasa.instalasi.store');
+        Route::get('/jasa/maintenance', fn (Request $request) => app(ServiceOperationsController::class)->index($request, 'maintenance'))->name('jasa.maintenance.index');
+        Route::post('/jasa/maintenance', fn (Request $request) => app(ServiceOperationsController::class)->store($request, 'maintenance'))->name('jasa.maintenance.store');
+        Route::post('/jasa/operasional/{serviceJob}/assign', [ServiceOperationsController::class, 'assign'])->name('jasa.operasional.assign');
+        Route::post('/jasa/operasional/{serviceJob}/progress', [ServiceOperationsController::class, 'updateProgress'])->name('jasa.operasional.progress');
+        Route::post('/jasa/operasional/{serviceJob}/materials', [ServiceOperationsController::class, 'requestMaterial'])->name('jasa.operasional.materials');
     });
 
     // Quotation & Customer Order (Admin input, Manager approve, Owner monitoring)

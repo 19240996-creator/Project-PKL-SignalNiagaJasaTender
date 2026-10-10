@@ -13,11 +13,23 @@ class ServiceJob extends Model
 
     protected $fillable = [
         'contract_id',
+        'tender_id',
         'client_id',
         'klien',
+        'location',
+        'work_type',
         'job_number',
         'name',
+        'service_type',
         'biaya',
+        'estimated_labor_cost',
+        'actual_cost',
+        'estimated_labor_hours',
+        'required_competency',
+        'diagnosis',
+        'parts_needed',
+        'result_notes',
+        'material_request_status',
         'start_date',
         'end_date',
         'status',
@@ -35,6 +47,9 @@ class ServiceJob extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'biaya' => 'decimal:2',
+        'estimated_labor_cost' => 'decimal:2',
+        'actual_cost' => 'decimal:2',
+        'estimated_labor_hours' => 'decimal:2',
         'progress' => 'integer',
     ];
 
@@ -83,6 +98,21 @@ class ServiceJob extends Model
         }
 
         return (int) ($this->progress ?? 0);
+    }
+
+    public function tender(): BelongsTo
+    {
+        return $this->belongsTo(Tender::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ServiceAssignment::class);
+    }
+
+    public function materialRequests(): HasMany
+    {
+        return $this->hasMany(ServiceMaterialRequest::class);
     }
 
     public function syncProgress(): void

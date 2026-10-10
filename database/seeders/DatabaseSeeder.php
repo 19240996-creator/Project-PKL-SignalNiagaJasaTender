@@ -26,11 +26,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Seed Roles (Hanya 3 role: Owner, Manager, Admin)
+        // 1. Seed Roles
         $rolesData = [
             'owner' => 'Owner - Monitoring dan melihat laporan seluruh domain.',
             'manager' => 'Manager - Pemeriksaan, persetujuan, dan pengendalian eksekusi.',
             'admin' => 'Admin - Menerima dan menginput data operasional.',
+            'technician' => 'Teknisi - Melihat pekerjaan yang ditugaskan dan memperbarui progres.',
         ];
 
         $rolesMap = [];

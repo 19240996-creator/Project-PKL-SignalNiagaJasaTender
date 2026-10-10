@@ -150,6 +150,11 @@ class Tender extends Model
         return $this->hasMany(Procurement::class);
     }
 
+    public function serviceJobs(): HasMany
+    {
+        return $this->hasMany(ServiceJob::class);
+    }
+
     public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
@@ -208,7 +213,8 @@ class Tender extends Model
     public function getExecutionRecommendationAttribute(): array
     {
         $hasDeficit = $this->deficit_items_count > 0;
-        $hasTechs = $this->assignments->count() > 0;
+        $serviceAssignments = $this->serviceJobs->sum(fn ($job) => $job->assignments->count());
+        $hasTechs = $this->assignments->count() > 0 || $serviceAssignments > 0;
 
         if (!$hasDeficit && ($hasTechs || $this->metode_penanganan === 'internal')) {
             return [

@@ -73,4 +73,9 @@ class User extends Authenticatable
     {
         return strtolower($this->role?->name ?? '') === 'admin';
     }
+
+    public function isTechnician(): bool
+    {
+        return strtolower($this->role?->name ?? '') === 'technician';
+    }
 }
