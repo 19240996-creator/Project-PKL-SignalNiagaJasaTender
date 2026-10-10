@@ -8,9 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
+    private const ALLOWED_ROLE_NAMES = ['admin', 'owner', 'manager'];
+
     public function index(Request $request): View
     {
         $users = User::with('role')
@@ -25,7 +28,9 @@ class UserManagementController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::whereIn('name', self::ALLOWED_ROLE_NAMES)
+            ->orderBy('name')
+            ->get();
 
         return view('users.index', compact('users', 'roles'));
     }
@@ -35,7 +40,10 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],
-            'role_id' => ['required', 'exists:roles,id'],
+            'role_id' => [
+                'required',
+                Rule::exists('roles', 'id')->where(fn ($query) => $query->whereIn('name', self::ALLOWED_ROLE_NAMES)),
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -51,7 +59,10 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:150', 'unique:users,email,' . $user->id],
-            'role_id' => ['required', 'exists:roles,id'],
+            'role_id' => [
+                'required',
+                Rule::exists('roles', 'id')->where(fn ($query) => $query->whereIn('name', self::ALLOWED_ROLE_NAMES)),
+            ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 

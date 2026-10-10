@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
             'owner' => 'Owner - Monitoring dan melihat laporan seluruh domain.',
             'manager' => 'Manager - Pemeriksaan, persetujuan, dan pengendalian eksekusi.',
             'admin' => 'Admin - Menerima dan menginput data operasional.',
-            'technician' => 'Teknisi - Melihat pekerjaan yang ditugaskan dan memperbarui progres.',
         ];
 
         $rolesMap = [];
