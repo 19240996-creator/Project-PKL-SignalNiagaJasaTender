@@ -37,6 +37,11 @@ class SupplierController extends Controller
         ]);
 
         Supplier::create($validated);
+
+        if ($request->input('return_to') === 'purchasing') {
+            return redirect()->route('purchasing.index')->with('success', 'Supplier berhasil ditambahkan. Supplier baru tersedia pada form Purchasing.');
+        }
+
         return redirect()->route('suppliers.index')->with('success', 'Data supplier berhasil ditambahkan.');
     }
 

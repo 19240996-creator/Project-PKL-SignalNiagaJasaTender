@@ -4,7 +4,7 @@
 @section('header-title', 'Manajemen Procurement & Pembelian Supplier')
 
 @section('content')
-<div class="space-y-6" x-data="{ createModal: false }">
+<div class="space-y-6" x-data="{ createModal: false, supplierModal: false }">
 
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
         <h3 class="font-bold text-slate-800 text-base">Riwayat Transaksi Pengadaan</h3>
@@ -83,10 +83,16 @@
                 @csrf
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Supplier</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-slate-700 uppercase">Supplier</label>
+                            <button type="button" @click="supplierModal = true" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                                <i class="fa-solid fa-plus mr-1"></i> Tambah supplier
+                            </button>
+                        </div>
                         <select name="supplier_id" required class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Pilih supplier --</option>
                             @foreach($suppliers as $sup)
-                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                                <option value="{{ $sup->id }}">{{ $sup->code }} - {{ $sup->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -143,6 +149,55 @@
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" @click="createModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow">Proses Pengadaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Create Supplier -->
+    <div x-show="supplierModal" class="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
+        <div @click.outside="supplierModal = false" class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-800">Tambah Supplier</h3>
+                    <p class="text-xs text-slate-500 mt-1">Supplier baru akan langsung tersedia di form Purchasing.</p>
+                </div>
+                <button type="button" @click="supplierModal = false" class="text-slate-400 hover:text-slate-600" aria-label="Tutup">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="create-supplier-form" action="{{ route('suppliers.store') }}" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="return_to" value="purchasing">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Kode supplier</label>
+                        <input type="text" name="code" required value="SUP-{{ rand(1000, 9999) }}" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama supplier</label>
+                        <input type="text" name="name" required placeholder="PT Nama Supplier" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Telepon</label>
+                        <input type="text" name="phone" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email</label>
+                        <input type="email" name="email" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Alamat</label>
+                    <textarea name="address" rows="2" class="w-full px-3 py-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <input type="hidden" name="status" value="active">
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" @click="supplierModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
+                    <button type="submit" form="create-supplier-form" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow">Simpan supplier</button>
                 </div>
             </form>
         </div>
