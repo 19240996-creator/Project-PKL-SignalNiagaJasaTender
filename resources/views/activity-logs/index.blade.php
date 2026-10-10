@@ -4,7 +4,7 @@
 @section('header-title', 'Log Aktivitas Sistem')
 
 @section('content')
-<div class="space-y-5" x-data="activityLog(@js($logs), @js($checkedAt))" x-init="startPolling()" x-cloak>
+<div class="space-y-5" x-data="activityLog(@js($logs), @js($pagination), @js($checkedAt))" x-init="startPolling()" x-cloak>
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
             <h2 class="text-base font-bold text-slate-900 tracking-tight">Audit Log Aktivitas Sistem</h2>
@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <select x-model="filter" class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
+            <select x-model="filter" @change="goToPage(1)" class="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="all">Semua Aktivitas</option>
                 <option value="create">Penambahan</option>
                 <option value="update">Perubahan</option>
@@ -39,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <template x-for="log in filteredLogs" :key="log.id">
+                    <template x-for="log in logs" :key="log.id">
                         <tr class="transition hover:bg-slate-50/70">
                             <td class="whitespace-nowrap p-3.5 align-top">
                                 <div class="font-medium text-slate-900 font-mono" x-text="log.time"></div>
@@ -84,42 +84,51 @@
                             </td>
                         </tr>
                     </template>
-                    <tr x-show="filteredLogs.length === 0">
+                    <tr x-show="logs.length === 0">
                         <td colspan="5" class="p-8 text-center text-slate-400 text-xs">Belum ada aktivitas yang sesuai.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div class="border-t border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500">
-            Menampilkan maksimal 50 aktivitas terbaru. Data diperiksa otomatis setiap 5 detik.
+        <div class="flex flex-col gap-2 border-t border-slate-100 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <span x-text="`Menampilkan ${logs.length ? ((pagination.current_page - 1) * pagination.per_page) + 1 : 0}-${Math.min(pagination.current_page * pagination.per_page, pagination.total)} dari ${pagination.total} aktivitas. Data diperiksa otomatis setiap 5 detik.`"></span>
+            <div class="flex items-center gap-1" x-show="pagination.last_page > 1">
+                <button type="button" @click="goToPage(pagination.current_page - 1)" :disabled="pagination.current_page === 1" class="rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Halaman sebelumnya">&laquo;</button>
+                <span class="px-2" x-text="`${pagination.current_page} / ${pagination.last_page}`"></span>
+                <button type="button" @click="goToPage(pagination.current_page + 1)" :disabled="pagination.current_page === pagination.last_page" class="rounded border border-slate-200 bg-white px-2 py-1 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40" aria-label="Halaman berikutnya">&raquo;</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    function activityLog(initialLogs, initialCheckedAt) {
+    function activityLog(initialLogs, initialPagination, initialCheckedAt) {
         return {
             logs: initialLogs,
+            pagination: initialPagination,
             filter: 'all',
             loading: false,
             lastChecked: initialCheckedAt,
             timer: null,
-            get filteredLogs() {
-                return this.filter === 'all' ? this.logs : this.logs.filter((log) => log.action === this.filter);
-            },
             startPolling() {
                 this.timer = setInterval(() => this.refresh(), 5000);
             },
-            async refresh() {
+            goToPage(page) {
+                if (page < 1 || page > this.pagination.last_page) return;
+                this.refresh(page);
+            },
+            async refresh(page = this.pagination.current_page) {
                 if (this.loading) return;
                 this.loading = true;
                 try {
-                    const response = await fetch('{{ route('activity-logs.data') }}', {
+                    const params = new URLSearchParams({ page, action: this.filter });
+                    const response = await fetch('{{ route('activity-logs.data') }}?' + params, {
                         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     });
                     if (!response.ok) throw new Error('Gagal mengambil log aktivitas.');
                     const data = await response.json();
                     this.logs = data.logs;
+                    this.pagination = data.pagination;
                     this.lastChecked = data.checked_at;
                 } finally {
                     this.loading = false;
