@@ -163,11 +163,23 @@
         </a>
     </div>
 
-    <!-- Banner Notifikasi Permohonan Hapus Data untuk Manajemen -->
+    <!-- Banner Notifikasi Permohonan Hapus Data Tender -->
     @if(($statusCounts['pending_deletion'] ?? 0) > 0)
-        <div class="border border-rose-200 bg-rose-50/70 rounded-lg p-3.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+        <div x-data="{
+                dismissed: sessionStorage.getItem('dismiss_tender_delete_reminder') === 'true',
+                closeReminder() {
+                    this.dismissed = true;
+                    sessionStorage.setItem('dismiss_tender_delete_reminder', 'true');
+                }
+            }"
+            x-show="!dismissed"
+            x-cloak
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform scale-100"
+            x-transition:leave-end="opacity-0 transform scale-95"
+            class="border border-rose-200 bg-rose-50/70 rounded-lg p-3.5 flex items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-start sm:items-center gap-2.5">
+                <div class="w-8 h-8 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                     <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                 </div>
                 <div>
@@ -179,16 +191,13 @@
                     </p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <a href="{{ route('tender.index', ['deletion_status' => 'pending_deletion']) }}" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-xs font-semibold transition shadow-xs whitespace-nowrap flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-halved text-[11px]"></i> Tinjau Permohonan Hapus
-                </a>
-                @if(request('deletion_status') === 'pending_deletion')
-                    <a href="{{ route('tender.index') }}" class="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-md text-xs font-medium transition">
-                        Lihat Semua
-                    </a>
-                @endif
-            </div>
+            <button type="button" 
+                    @click="closeReminder()" 
+                    class="p-1.5 rounded-md text-rose-400 hover:text-rose-700 hover:bg-rose-100/80 transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-rose-400/50" 
+                    title="Tutup pengingat"
+                    aria-label="Tutup pengingat">
+                <i class="fa-solid fa-xmark text-sm w-4 h-4 flex items-center justify-center"></i>
+            </button>
         </div>
     @endif
 

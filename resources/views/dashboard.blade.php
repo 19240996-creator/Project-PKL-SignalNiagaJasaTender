@@ -159,20 +159,21 @@
     <!-- 3. MIDDLE SECTION (2 COLUMNS: PROYEK TERBARU & AKTIVITAS TERBARU) -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <!-- Kolom Kiri: Proyek Terbaru (Persis Layout Kiri Tengah di Gambar) -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col">
+            <div class="px-5 py-3.5 bg-blue-600 flex items-center justify-between border-b border-blue-700/40">
                 <div class="flex items-center gap-2.5">
-                    <i class="fa-regular fa-folder text-blue-600 text-sm"></i>
-                    <h2 class="text-sm font-bold text-slate-900">Proyek & Tender Terbaru</h2>
+                    <i class="fa-regular fa-folder text-white text-sm"></i>
+                    <h2 class="text-sm font-bold text-white">Proyek & Tender Terbaru</h2>
                 </div>
-                <a href="{{ route('tender.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition">
+                <a href="{{ route('tender.index') }}" class="text-xs font-semibold text-blue-100 hover:text-white flex items-center gap-1 transition focus:outline-none focus:ring-1 focus:ring-white/60 rounded">
                     <span>Lihat Semua</span>
                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
 
             <!-- List Proyek -->
-            <div class="divide-y divide-slate-100 mt-1">
+            <div class="p-5 flex-1">
+                <div class="divide-y divide-slate-100">
                 @forelse($recentTenders as $index => $tdr)
                     @php
                         $icons = ['fa-code', 'fa-mobile-screen', 'fa-globe', 'fa-network-wired', 'fa-layer-group'];
@@ -199,15 +200,15 @@
                         <div class="flex items-center gap-3 shrink-0">
                             @if($isActive)
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Active
+                                    Aktif
                                 </span>
                             @elseif($isFinished)
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                                    Archive
+                                    Arsip
                                 </span>
                             @else
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    Recent
+                                    Terbaru
                                 </span>
                             @endif
 
@@ -225,24 +226,26 @@
                         Belum ada proyek tender tercatat.
                     </div>
                 @endforelse
+                </div>
             </div>
         </div>
 
         <!-- Kolom Kanan: Aktivitas Terbaru (Persis Layout Kanan Tengah di Gambar) -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col">
+            <div class="px-5 py-3.5 bg-blue-600 flex items-center justify-between border-b border-blue-700/40">
                 <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-bolt text-blue-600 text-sm"></i>
-                    <h2 class="text-sm font-bold text-slate-900">Aktivitas Terbaru</h2>
+                    <i class="fa-solid fa-bolt text-white text-sm"></i>
+                    <h2 class="text-sm font-bold text-white">Aktivitas Terbaru</h2>
                 </div>
-                <a href="{{ route('activity-logs.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition">
+                <a href="{{ route('activity-logs.index') }}" class="text-xs font-semibold text-blue-100 hover:text-white flex items-center gap-1 transition focus:outline-none focus:ring-1 focus:ring-white/60 rounded">
                     <span>Lihat Semua</span>
                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
 
             <!-- List Aktivitas -->
-            <div class="divide-y divide-slate-100 mt-1">
+            <div class="p-5 flex-1">
+                <div class="divide-y divide-slate-100">
                 @php
                     $activities = [
                         [
@@ -305,86 +308,94 @@
                         </span>
                     </div>
                 @endforeach
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 4. BOTTOM SECTION (2 COLUMNS: STATISTIK PROYEK AREA CHART & STATUS DONUT CHART) -->
+    <!-- 4. BOTTOM SECTION (2 COLUMNS: STATISTIK TRANSAKSI COLUMN CHART & STATUS DONUT CHART) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Kolom Kiri: Statistik Proyek Line/Area Chart (2 Cols) -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <!-- Kolom Kiri: Statistik Transaksi Column Chart (2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col justify-between">
+            <div class="px-5 py-3.5 bg-blue-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-700/40">
                 <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-chart-line text-blue-600 text-sm"></i>
-                    <h2 class="text-sm font-bold text-slate-900">Statistik Transaksi & Pendapatan Bisnis</h2>
+                    <i class="fa-solid fa-chart-column text-white text-sm"></i>
+                    <h2 class="text-sm font-bold text-white">Statistik Transaksi & Pendapatan Bisnis</h2>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-400 font-medium">Rentang:</span>
-                    <span class="text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
+                    <span class="text-xs text-blue-100 font-medium">Rentang:</span>
+                    <span class="text-xs font-bold text-white bg-blue-700/80 border border-blue-400/40 px-2.5 py-1 rounded-lg">
                         6 Bulan Terakhir
                     </span>
                 </div>
             </div>
 
-            <!-- Canvas Grafik Area Chart -->
-            <div class="h-64 mt-4 w-full relative">
-                <canvas id="projectStatsChart"></canvas>
+            <!-- Canvas Grafik Column Chart -->
+            <div class="p-5 flex-1 flex flex-col justify-center">
+                <div class="h-64 w-full relative">
+                    <canvas id="projectStatsChart"></canvas>
+                </div>
             </div>
         </div>
 
         <!-- Kolom Kanan: Proyek Berdasarkan Status Donut Chart (1 Col) -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 class="text-sm font-bold text-slate-900">Proyek Berdasarkan Status</h2>
-            </div>
-
-            <!-- Donut Chart Canvas with Center Number -->
-            <div class="relative flex items-center justify-center my-4">
-                <div class="w-44 h-44">
-                    <canvas id="statusDonutChart"></canvas>
-                </div>
-                <!-- Absolute Center Text -->
-                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-2xl font-extrabold text-slate-900 font-numeric leading-none">{{ $totalTenders ?? 13 }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">Total Proyek</span>
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col justify-between">
+            <div class="px-5 py-3.5 bg-blue-600 flex items-center justify-between border-b border-blue-700/40">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-chart-pie text-white text-sm"></i>
+                    <h2 class="text-sm font-bold text-white">Proyek Berdasarkan Status</h2>
                 </div>
             </div>
 
-            <!-- Clean Status Legend Table (Sesuai Persis Gambar di Kanan Bawah) -->
-            <div class="space-y-2.5 pt-3 border-t border-slate-100 text-xs">
-                <!-- 1. Active -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        <span class="font-medium text-slate-700">Active</span>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+                <!-- Donut Chart Canvas with Center Number -->
+                <div class="relative flex items-center justify-center my-4">
+                    <div class="w-44 h-44">
+                        <canvas id="statusDonutChart"></canvas>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="font-bold text-slate-900 font-numeric">{{ $activeCount }}</span>
-                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $activePct }}%</span>
-                    </div>
-                </div>
-
-                <!-- 2. Recent -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                        <span class="font-medium text-slate-700">Recent</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="font-bold text-slate-900 font-numeric">{{ $completedCount }}</span>
-                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $completedPct }}%</span>
+                    <!-- Absolute Center Text -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-2xl font-extrabold text-slate-900 font-numeric leading-none">{{ $totalTenders ?? 13 }}</span>
+                        <span class="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-wider">Total Proyek</span>
                     </div>
                 </div>
 
-                <!-- 3. Archive -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
-                        <span class="font-medium text-slate-700">Archive</span>
+                <!-- Clean Status Legend Table -->
+                <div class="space-y-2.5 pt-3 border-t border-slate-100 text-xs">
+                    <!-- 1. Aktif -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="font-medium text-slate-700">Aktif</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-bold text-slate-900 font-numeric">{{ $activeCount }}</span>
+                            <span class="text-slate-400 font-numeric w-8 text-right">{{ $activePct }}%</span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="font-bold text-slate-900 font-numeric">{{ $otherCount }}</span>
-                        <span class="text-slate-400 font-numeric w-8 text-right">{{ $otherPct }}%</span>
+
+                    <!-- 2. Terbaru -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                            <span class="font-medium text-slate-700">Terbaru</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-bold text-slate-900 font-numeric">{{ $completedCount }}</span>
+                            <span class="text-slate-400 font-numeric w-8 text-right">{{ $completedPct }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Arsip -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                            <span class="font-medium text-slate-700">Arsip</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-bold text-slate-900 font-numeric">{{ $otherCount }}</span>
+                            <span class="text-slate-400 font-numeric w-8 text-right">{{ $otherPct }}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -408,35 +419,34 @@
             }
         }, 1000);
 
-        // 1. Line/Area Chart Statistik Transaksi (Smooth Curve Sesuai Gambar)
-        const ctxLine = document.getElementById('projectStatsChart');
-        if (ctxLine) {
+        // 1. Column Chart Statistik Transaksi & Pendapatan Bisnis
+        const ctxBar = document.getElementById('projectStatsChart');
+        if (ctxBar) {
             const months = {{ Js::from($chartMonths ?? ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt']) }};
             const values = {{ Js::from($chartTransactionValues ?? [10, 25, 18, 32, 28, 42]) }};
 
-            // Buat soft gradient biru
-            const chartContext = ctxLine.getContext('2d');
+            const chartContext = ctxBar.getContext('2d');
             const gradient = chartContext.createLinearGradient(0, 0, 0, 240);
-            gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
-            gradient.addColorStop(1, 'rgba(37, 99, 235, 0.00)');
+            gradient.addColorStop(0, '#2563EB');
+            gradient.addColorStop(1, '#3B82F6');
 
-            new Chart(ctxLine, {
-                type: 'line',
+            new Chart(ctxBar, {
+                type: 'bar',
                 data: {
                     labels: months,
                     datasets: [{
                         label: 'Nilai Transaksi (Rp)',
                         data: values,
-                        borderColor: '#2563EB',
-                        borderWidth: 2.5,
                         backgroundColor: gradient,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#2563EB',
-                        pointBorderColor: '#FFFFFF',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
+                        hoverBackgroundColor: '#1D4ED8',
+                        borderRadius: {
+                            topLeft: 6,
+                            topRight: 6,
+                            bottomLeft: 0,
+                            bottomRight: 0
+                        },
+                        borderSkipped: false,
+                        maxBarThickness: 38,
                     }]
                 },
                 options: {
@@ -479,19 +489,19 @@
             });
         }
 
-        // 2. Donut Chart Status Proyek (Sesuai Gambar)
+        // 2. Donut Chart Status Proyek
         const ctxDonut = document.getElementById('statusDonutChart');
         if (ctxDonut) {
             new Chart(ctxDonut, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Active', 'Recent', 'Archive'],
+                    labels: ['Aktif', 'Terbaru', 'Arsip'],
                     datasets: [{
                         data: [{{ $activeCount }}, {{ $completedCount }}, {{ $otherCount }}],
                         backgroundColor: [
-                            '#10B981', // Emerald green untuk Active
-                            '#2563EB', // Blue untuk Recent
-                            '#94A3B8'  // Slate gray untuk Archive
+                            '#10B981', // Emerald green untuk Aktif
+                            '#2563EB', // Blue untuk Terbaru
+                            '#94A3B8'  // Slate gray untuk Arsip
                         ],
                         borderWidth: 0,
                         hoverOffset: 4

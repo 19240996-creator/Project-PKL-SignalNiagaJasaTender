@@ -131,6 +131,7 @@
                     this.registerPasswordVisible = false;
                 },
                 submitForm() {
+                    sessionStorage.removeItem('dismiss_tender_delete_reminder');
                     this.loading = true;
                 }
             };

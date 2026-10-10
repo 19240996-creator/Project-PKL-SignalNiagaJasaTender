@@ -359,7 +359,7 @@
                     @endif
 
                     <!-- Logout Button (Sesuai Referensi Gambar) -->
-                    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="pt-3">
+                    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="pt-3" onsubmit="sessionStorage.removeItem('dismiss_tender_delete_reminder')">
                         @csrf
                         <button type="button" 
                                 @click="logoutModal = true"
@@ -522,7 +522,7 @@
                     Batal
                 </button>
                 <button type="button" 
-                        onclick="document.getElementById('logoutForm').submit()" 
+                        onclick="sessionStorage.removeItem('dismiss_tender_delete_reminder'); document.getElementById('logoutForm').submit()" 
                         class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
                     <span>Ya, Keluar</span>
