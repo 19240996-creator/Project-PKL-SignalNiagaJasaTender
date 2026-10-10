@@ -42,7 +42,9 @@ class SalesController extends Controller
         $products = Product::where('is_active', true)->get();
         $tenders = Tender::with('client')->get();
 
-        return view('sales.index', compact('sales', 'products', 'tenders', 'pendingCount'));
+        $distributionMode = $request->routeIs('distribusi.*');
+
+        return view('sales.index', compact('sales', 'products', 'tenders', 'pendingCount', 'distributionMode'));
     }
 
     public function store(Request $request, SalesService $service): RedirectResponse

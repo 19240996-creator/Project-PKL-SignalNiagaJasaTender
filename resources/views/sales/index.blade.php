@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Penjualan Barang')
-@section('header-title', 'Manajemen Penjualan Barang & Verifikasi')
+@section('title', $distributionMode ? 'Distribusi Barang' : 'Penjualan Barang')
+@section('header-title', $distributionMode ? 'Distribusi Barang ke Proyek & Pelanggan' : 'Manajemen Penjualan Barang & Verifikasi')
 
 @section('content')
 <div class="space-y-5" x-data="{
@@ -53,6 +53,13 @@
             <a href="{{ route('sales.index', ['approval_status' => 'pending']) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-xs font-medium transition inline-flex items-center gap-1.5 self-start sm:self-auto">
                 Tampilkan Hanya Pending
             </a>
+        </div>
+    @endif
+
+    @if($distributionMode)
+        <div class="rounded-lg border border-blue-100 bg-blue-50/70 px-4 py-3 text-xs text-blue-800 flex items-start gap-2">
+            <i class="fa-solid fa-truck-fast mt-0.5 text-blue-600"></i>
+            <span>Gunakan transaksi ini untuk mencatat daftar barang, tujuan pengiriman, catatan pengiriman, dan status penerimaan. Setiap barang keluar tetap tercatat sebagai mutasi stok.</span>
         </div>
     @endif
 

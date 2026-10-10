@@ -290,16 +290,54 @@
                         </a>
 
                         <!-- 4. Domain Dagang -->
-                        <a href="{{ route('sales.index') }}" 
-                           class="group flex items-center justify-between px-3.5 py-2.5 text-xs font-medium rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all {{ request()->routeIs('sales.*') || request()->routeIs('perdagangan.*') ? 'sidebar-item-active' : '' }}">
-                            <div class="flex items-center space-x-2.5 truncate">
-                                <i class="fa-solid fa-boxes-stacked w-5 text-center text-slate-400 group-hover:text-white"></i>
-                                <span class="ml-1 truncate">Dagang & Produk</span>
+                        @php
+                            $isDagangActive = request()->routeIs('purchasing.*')
+                                || request()->routeIs('procurements.*')
+                                || request()->routeIs('gudang.*')
+                                || request()->routeIs('products.*')
+                                || request()->routeIs('distribusi.*')
+                                || request()->routeIs('sales.*')
+                                || request()->routeIs('perdagangan.*')
+                                || request()->routeIs('suppliers.*');
+                        @endphp
+                        <div x-data="{ dagangOpen: {{ $isDagangActive ? 'true' : 'false' }} }" class="space-y-1">
+                            <button type="button"
+                                    @click="dagangOpen = !dagangOpen"
+                                    class="w-full group flex items-center justify-between px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all {{ $isDagangActive ? 'text-white bg-white/10' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}"
+                                    :aria-expanded="dagangOpen.toString()">
+                                <div class="flex items-center space-x-2.5 truncate">
+                                    <i class="fa-solid fa-boxes-stacked w-5 text-center {{ $isDagangActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-white' }}"></i>
+                                    <span class="ml-1 truncate">Dagang</span>
+                                </div>
+                                <i class="fa-solid text-[10px] text-slate-400 transition-transform duration-200"
+                                   :class="dagangOpen ? 'fa-chevron-up text-blue-400' : 'fa-chevron-down'"></i>
+                            </button>
+
+                            <div x-show="dagangOpen"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="pl-4 pr-1 py-1 space-y-1"
+                                 x-cloak>
+                                <a href="{{ route('purchasing.index') }}"
+                                   class="group flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('purchasing.*') || request()->routeIs('procurements.*') || request()->routeIs('suppliers.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                                    <span class="flex items-center gap-2.5 truncate">
+                                        <i class="fa-solid fa-cart-shopping w-4 text-center"></i>
+                                        <span class="truncate">Purchasing</span>
+                                    </span>
+                                </a>
+                                <a href="{{ route('gudang.index') }}"
+                                   class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('gudang.*') || request()->routeIs('products.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                                    <i class="fa-solid fa-warehouse w-4 text-center mr-2.5"></i>
+                                    <span class="truncate">Gudang</span>
+                                </a>
+                                <a href="{{ route('distribusi.index') }}"
+                                   class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('distribusi.*') || request()->routeIs('sales.*') || request()->routeIs('perdagangan.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                                    <i class="fa-solid fa-truck-fast w-4 text-center mr-2.5"></i>
+                                    <span class="truncate">Distribusi</span>
+                                </a>
                             </div>
-                            @if($pendingSales > 0)
-                                <span class="px-2 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded-full">{{ $pendingSales }}</span>
-                            @endif
-                        </a>
+                        </div>
 
                         <!-- 5. Laporan Bisnis -->
                         <a href="{{ route('laporan.index') }}" 

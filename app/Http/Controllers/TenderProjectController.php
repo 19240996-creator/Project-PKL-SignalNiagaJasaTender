@@ -12,6 +12,7 @@ use App\Models\TenderRabItem;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -117,20 +118,37 @@ class TenderProjectController extends Controller
             return redirect()->route('tender.proyek.show', $tender)->with('error', 'Item ini tidak terhubung ke master produk modul Dagang.');
         }
 
-        $currentStock = (float) $item->product->stock;
         $allocateQty = (float) $validated['quantity'];
+        $remainingRequirement = max(0, (float) $item->quantity - (float) $item->allocated_quantity);
 
-        if ($allocateQty > $currentStock) {
-            return redirect()->route('tender.proyek.show', $tender)->with('error', "Stok gudang tidak mencukupi. Tersedia: {$currentStock} {$item->unit}, diminta alokasi: {$allocateQty} {$item->unit}.");
+        if ($allocateQty > $remainingRequirement) {
+            return redirect()->route('tender.proyek.show', $tender)->with('error', "Alokasi melebihi kebutuhan RAB. Sisa kebutuhan: {$remainingRequirement} {$item->unit}.");
         }
 
         DB::transaction(function () use ($item, $allocateQty, $tender) {
+            $lockedItem = TenderRabItem::whereKey($item->id)->lockForUpdate()->firstOrFail();
+            $product = Product::whereKey($lockedItem->product_id)->lockForUpdate()->firstOrFail();
+            $currentStock = (float) $product->stock;
+            $remainingRequirement = max(0, (float) $lockedItem->quantity - (float) $lockedItem->allocated_quantity);
+
+            if ($allocateQty > $currentStock) {
+                throw ValidationException::withMessages([
+                    'quantity' => "Stok gudang tidak mencukupi. Tersedia: {$currentStock} {$lockedItem->unit}, diminta alokasi: {$allocateQty} {$lockedItem->unit}.",
+                ]);
+            }
+
+            if ($allocateQty > $remainingRequirement) {
+                throw ValidationException::withMessages([
+                    'quantity' => "Alokasi melebihi kebutuhan RAB. Sisa kebutuhan: {$remainingRequirement} {$lockedItem->unit}.",
+                ]);
+            }
+
             // Update jumlah alokasi pada item RAB proyek
-            $item->increment('allocated_quantity', $allocateQty);
+            $lockedItem->increment('allocated_quantity', $allocateQty);
 
             // Kurangi stok di gudang melalui StockMovement (Modul Dagang)
             StockMovement::create([
-                'product_id' => $item->product_id,
+                'product_id' => $lockedItem->product_id,
                 'movement_type' => 'OUT',
                 'quantity' => $allocateQty,
                 'reference_type' => 'Proyek Lapangan Tender',

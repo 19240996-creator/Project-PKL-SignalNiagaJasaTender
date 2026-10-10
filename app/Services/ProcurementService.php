@@ -23,7 +23,7 @@ class ProcurementService
                 'tender_id' => $data['tender_id'] ?? null,
                 'procurement_date' => $data['procurement_date'] ?? now()->toDateString(),
                 'total_amount' => $totalAmount,
-                'status' => $data['status'] ?? 'Received',
+                'status' => $data['status'] ?? 'Processing',
                 'notes' => $data['notes'] ?? null,
                 'created_by' => $userId,
             ]);
@@ -38,7 +38,7 @@ class ProcurementService
                     'subtotal' => $subtotal,
                 ]);
 
-                if (($data['status'] ?? 'Received') === 'Received') {
+                if (($data['status'] ?? 'Processing') === 'Received') {
                     StockMovement::create([
                         'product_id' => $item['product_id'],
                         'movement_type' => 'IN',

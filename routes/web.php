@@ -141,6 +141,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
         Route::get('/procurements', [ProcurementController::class, 'index'])->name('procurements.index');
+        Route::get('/purchasing', [ProcurementController::class, 'index'])->name('purchasing.index');
         Route::post('/procurements', [ProcurementController::class, 'store'])->name('procurements.store');
         Route::post('/procurements/{procurement}/receive', [ProcurementController::class, 'receive'])->name('procurements.receive');
     });
@@ -148,6 +149,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
     // Modul Produk & Warehouse (Admin input, Manager approve, Owner monitoring)
     Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+        Route::get('/gudang', [ProductController::class, 'index'])->name('gudang.index');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
@@ -157,6 +159,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
     // Modul Penjualan / Trade / Barang (Admin input, Manager approve, Owner monitoring)
     Route::middleware(['role:owner,manager,admin'])->group(function () {
         Route::get('/perdagangan', [SalesController::class, 'index'])->name('perdagangan.index');
+        Route::get('/distribusi', [SalesController::class, 'index'])->name('distribusi.index');
         Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
         Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
         Route::post('/sales/{sale}/approve', [SalesController::class, 'approve'])->name('sales.approve');
