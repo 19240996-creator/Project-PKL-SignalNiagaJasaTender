@@ -40,7 +40,8 @@ Route::get('/', function () {
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login/captcha', [AuthController::class, 'refreshLoginCaptcha'])->middleware(['guest', 'throttle:30,1'])->name('login.captcha');
+Route::post('/login', [AuthController::class, 'login'])->middleware(['guest', 'throttle:5,1']);
 Route::get('/auth/{provider}/redirect', [AuthController::class, 'redirectToProvider'])->name('oauth.redirect');
 Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])->name('oauth.callback');
 Route::post('/register', [AuthController::class, 'register'])->middleware('guest')->name('register');

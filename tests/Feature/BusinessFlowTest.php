@@ -178,18 +178,56 @@ class BusinessFlowTest extends TestCase
             'is_active' => false,
         ]);
 
+        $this->get(route('login'));
         $this->post(route('login'), [
             'email' => 'new.employee@example.com',
             'password' => 'password-123',
+            'captcha' => session('login_captcha'),
         ])->assertSessionHasErrors('email');
 
         $user = User::where('email', 'new.employee@example.com')->firstOrFail();
         $user->update(['is_active' => true]);
 
+        $this->get(route('login'));
         $this->post(route('login'), [
             'email' => 'new.employee@example.com',
             'password' => 'password-123',
+            'captcha' => session('login_captcha'),
         ])->assertRedirect(route('dashboard'));
+    }
+
+    public function test_login_requires_a_valid_server_side_captcha(): void
+    {
+        [$user] = $this->foundation();
+
+        $this->get(route('login'));
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+            'captcha' => '00000',
+        ])->assertSessionHasErrors([
+            'captcha' => 'Kode CAPTCHA tidak sesuai. Silakan coba lagi.',
+        ]);
+
+        $this->get(route('login'));
+        $captcha = session('login_captcha');
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+            'captcha' => strtolower($captcha),
+        ])->assertRedirect(route('dashboard'));
+    }
+
+    public function test_login_captcha_can_be_refreshed(): void
+    {
+        $this->get(route('login'));
+
+        $response = $this->postJson(route('login.captcha'));
+
+        $response->assertOk()->assertJson([
+            'code' => session('login_captcha'),
+        ]);
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{5}$/', $response->json('code'));
     }
 
     public function test_user_delete_requires_matching_email_confirmation(): void

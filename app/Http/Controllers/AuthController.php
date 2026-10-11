@@ -18,7 +18,12 @@ class AuthController extends Controller
 {
     public function showLoginForm(): View
     {
-        return view('auth.login');
+        return view('auth.login', ['captchaCode' => $this->createLoginCaptcha()]);
+    }
+
+    public function refreshLoginCaptcha(Request $request): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['code' => $this->createLoginCaptcha()]);
     }
 
     public function register(Request $request): RedirectResponse
@@ -51,7 +56,16 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'captcha' => ['required', 'string'],
         ]);
+
+        $captchaCode = $request->session()->pull('login_captcha');
+
+        if (!$captchaCode || strlen($credentials['captcha']) !== 5 || !hash_equals($captchaCode, strtoupper($credentials['captcha']))) {
+            return back()->withErrors(['captcha' => 'Kode CAPTCHA tidak sesuai. Silakan coba lagi.'])->withInput();
+        }
+
+        unset($credentials['captcha']);
 
         $user = User::where('email', $credentials['email'])->first();
 
@@ -211,6 +225,31 @@ class AuthController extends Controller
     private function ensureSupportedProvider(string $provider): void
     {
         abort_unless(in_array($provider, ['google', 'linkedin'], true), 404);
+    }
+
+    private function createLoginCaptcha(): string
+    {
+        $letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $digits = '23456789';
+        $characters = $letters . $digits;
+        $code = [
+            $letters[random_int(0, strlen($letters) - 1)],
+            $digits[random_int(0, strlen($digits) - 1)],
+        ];
+
+        for ($index = count($code); $index < 5; $index++) {
+            $code[] = $characters[random_int(0, strlen($characters) - 1)];
+        }
+
+        for ($index = count($code) - 1; $index > 0; $index--) {
+            $swapIndex = random_int(0, $index);
+            [$code[$index], $code[$swapIndex]] = [$code[$swapIndex], $code[$index]];
+        }
+
+        $captcha = implode('', $code);
+        request()->session()->put('login_captcha', $captcha);
+
+        return $captcha;
     }
 
     public function showResetPasswordForm(string $token): View

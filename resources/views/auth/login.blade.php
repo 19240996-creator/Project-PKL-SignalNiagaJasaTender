@@ -38,6 +38,14 @@
         .outline-button { border: 1px solid rgba(255,255,255,.9); }
         .social-button { border: 1px solid var(--line); box-shadow: 0 2px 5px rgba(44, 73, 107, .08); }
         .social-button:disabled { cursor: not-allowed; opacity: .72; }
+        .captcha-visual { isolation: isolate; overflow: hidden; position: relative; background-color: #fff; background-image: radial-gradient(circle at 12% 28%, rgba(26,109,227,.16) 0 1px, transparent 1.5px), radial-gradient(circle at 82% 68%, rgba(20,87,184,.13) 0 1px, transparent 1.5px), repeating-linear-gradient(105deg, rgba(26,109,227,.025) 0 1px, transparent 1px 5px); background-size: 19px 17px, 23px 19px, auto; }
+        .captcha-visual::before, .captcha-visual::after { border-top: 1px solid rgba(26,109,227,.2); border-radius: 50%; content: ''; height: 150%; left: -8%; pointer-events: none; position: absolute; top: -25%; transform: rotate(-7deg); width: 116%; z-index: -1; }
+        .captcha-visual::after { border-top-color: rgba(20,87,184,.13); top: -8%; transform: rotate(8deg); }
+        .captcha-character { display: inline-block; filter: blur(.35px); text-shadow: 0 1px 0 rgba(20,87,184,.08); }
+        .captcha-character:nth-child(1) { margin-right: .08em; }
+        .captcha-character:nth-child(2) { margin-right: .02em; }
+        .captcha-character:nth-child(3) { margin-right: .1em; }
+        .captcha-character:nth-child(4) { margin-right: .03em; }
         .auth-form-pane.is-compact .register-form > :not([hidden]) ~ :not([hidden]) { margin-top: .5rem; }
         .auth-form-pane.is-compact .register-form .field { height: 2.5rem; }
         .auth-form-pane.is-compact .register-form .primary-button { height: 2.5rem; }
@@ -94,6 +102,7 @@
                     <input type="hidden" name="_form" value="login">
                     <div class="relative"><label class="sr-only" for="email">Email</label><i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="email" type="email" name="email" x-model="loginEmail" autocomplete="email" required autofocus placeholder="Email" class="field h-12 w-full rounded-xl pl-12 pr-4 text-sm text-slate-700 placeholder:text-slate-400"></div>
                     <div class="relative"><label class="sr-only" for="password">Kata sandi</label><i class="fa-solid fa-lock pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input id="password" :type="showPassword ? 'text' : 'password'" name="password" x-model="loginPassword" autocomplete="current-password" required placeholder="Kata sandi" class="field h-12 w-full rounded-xl pl-12 pr-12 text-sm text-slate-700 placeholder:text-slate-400"><button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700" :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"><i class="fa-solid" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i></button></div>
+                    <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-3"><div class="flex items-center gap-2"><div class="captcha-visual flex h-12 flex-1 items-center justify-center rounded-lg border border-blue-100 text-lg font-extrabold text-[var(--blue-deep)]" aria-label="Kode CAPTCHA"><template x-for="(character, index) in captchaCharacters" :key="index"><span class="captcha-character" :style="captchaStyles[index]" x-text="character"></span></template></div><button type="button" @click="refreshCaptcha" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-blue-500 transition hover:bg-white hover:text-blue-700" aria-label="Muat ulang kode CAPTCHA" title="Muat ulang kode CAPTCHA"><i class="fa-solid fa-rotate"></i></button></div><label class="sr-only" for="captcha">Kode CAPTCHA</label><input id="captcha" type="text" name="captcha" x-model="captchaInput" autocomplete="off" autocapitalize="characters" maxlength="5" required placeholder="Masukkan kode CAPTCHA" class="field mt-2 h-11 w-full rounded-lg px-3 text-sm uppercase tracking-[.15em] text-slate-700 placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-400"></div>
                     <div class="flex items-center justify-between pt-1"><label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-400"> Ingat saya</label><a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-500 hover:text-blue-700">Lupa kata sandi?</a></div>
                     <button type="submit" :disabled="loading" class="primary-button flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white disabled:cursor-wait disabled:opacity-70"><i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i><span x-text="loading ? 'Memverifikasi...' : 'Masuk'">Masuk</span></button>
                 </form>
@@ -125,6 +134,16 @@
                 registerLoading: false,
                 loginEmail: '{{ old('email') }}',
                 loginPassword: '',
+                captchaCode: @json($captchaCode),
+                captchaCharacters: @json(str_split($captchaCode)),
+                captchaStyles: [
+                    'transform: rotate(-5deg) translateY(1px);',
+                    'transform: rotate(3deg) translateY(-1px);',
+                    'transform: rotate(-2deg) translateY(1px);',
+                    'transform: rotate(5deg) translateY(-1px);',
+                    'transform: rotate(-4deg) translateY(0);',
+                ],
+                captchaInput: '',
                 toggleMode() {
                     this.mode = this.mode === 'login' ? 'register' : 'login';
                     this.showPassword = false;
@@ -133,6 +152,21 @@
                 submitForm() {
                     sessionStorage.removeItem('dismiss_tender_delete_reminder');
                     this.loading = true;
+                },
+                async refreshCaptcha() {
+                    const response = await fetch('{{ route('login.captcha') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                        },
+                    });
+
+                    if (response.ok) {
+                        this.captchaCode = (await response.json()).code;
+                        this.captchaCharacters = this.captchaCode.split('');
+                        this.captchaInput = '';
+                    }
                 }
             };
         }
