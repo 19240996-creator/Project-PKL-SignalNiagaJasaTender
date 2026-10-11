@@ -88,7 +88,7 @@
                                         <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
                                     </button>
                                     
-                                    <form action="{{ route('partner-logos.destroy', $pl->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus logo ini?');" class="inline">
+                                    <form action="{{ route('partner-logos.destroy', $pl->id) }}" method="POST" data-confirm="Apakah Anda yakin ingin menghapus logo ini?" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium text-xs rounded-md border border-rose-200 transition inline-flex items-center gap-1" title="Hapus Logo">

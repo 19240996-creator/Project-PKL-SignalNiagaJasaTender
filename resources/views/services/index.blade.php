@@ -8,22 +8,36 @@
     createModal: false,
     billModal: false,
     editModal: false,
+    approveModal: false,
     rejectModal: false,
     selectedJob: null,
+    approveActionUrl: '',
     rejectActionUrl: '',
     billAmount: '',
+    openApproveModal(id, number, name, cost) {
+        if (typeof id === 'object' && id !== null) {
+            this.selectedJob = id;
+            this.approveActionUrl = '/jasa/' + id.id + '/approve';
+        } else {
+            this.selectedJob = { id: id, job_number: number, name: name, cost: cost };
+            this.approveActionUrl = '/jasa/' + id + '/approve';
+        }
+        this.approveModal = true;
+    },
+    openRejectModal(id, number, name, cost) {
+        if (typeof id === 'object' && id !== null) {
+            this.selectedJob = id;
+            this.rejectActionUrl = '/jasa/' + (id.id || id) + '/reject';
+        } else {
+            this.selectedJob = { id: id, job_number: number, name: name, cost: cost };
+            this.rejectActionUrl = '/jasa/' + id + '/reject';
+        }
+        this.rejectModal = true;
+    },
     openBillModal(job) {
         this.selectedJob = job;
         this.billAmount = '';
         this.billModal = true;
-    },
-    openEditModal(job) {
-        this.selectedJob = job;
-        this.editModal = true;
-    },
-    openRejectModal(jobId) {
-        this.rejectActionUrl = '/jasa/' + jobId + '/reject';
-        this.rejectModal = true;
     },
     setBillPercent(percent) {
         if (this.selectedJob) {
@@ -32,6 +46,19 @@
                 this.billAmount = Math.round(baseVal * (percent / 100));
             }
         }
+    },
+    openEditModal(job) {
+        this.selectedJob = job;
+        this.editModal = true;
+    },
+    deleteModal: false,
+    deletionReason: '',
+    deleteActionUrl: '',
+    openDeleteJobModal(job) {
+        this.selectedJob = job;
+        this.deleteActionUrl = '/jasa/' + job.id;
+        this.deletionReason = '';
+        this.deleteModal = true;
     }
 }">
 
@@ -202,16 +229,19 @@
                             <td class="p-3.5 text-center whitespace-nowrap">
                                 <div class="inline-flex items-center justify-center gap-1.5">
                                     @if(auth()->user()->isManager() && $job->approval_status === 'pending')
+                                        @php
+                                            $jId = $job->id;
+                                            $jNumber = $job->job_number;
+                                            $jName = addslashes($job->name);
+                                            $jCost = 'Rp ' . number_format($job->biaya, 0, ',', '.');
+                                        @endphp
                                         <!-- Quick Approve Button -->
-                                        <form action="{{ route('jasa.approve', $job->id) }}" method="POST" class="inline" onsubmit="return confirm('Setujui pekerjaan jasa ini?')">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition" title="Setujui">
-                                                <i class="fa-solid fa-check text-[10px]"></i> Setujui
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="openApproveModal({{ $jId }}, '{{ $jNumber }}', '{{ $jName }}', '{{ $jCost }}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition inline-flex items-center gap-1 shadow-xs" title="Setujui">
+                                            <i class="fa-solid fa-check text-[10px]"></i> Setujui
+                                        </button>
 
                                         <!-- Quick Reject Button -->
-                                        <button type="button" @click="openRejectModal({{ $job->id }})" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-medium transition" title="Tolak">
+                                        <button type="button" @click="openRejectModal({{ $jId }}, '{{ $jNumber }}', '{{ $jName }}', '{{ $jCost }}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-medium transition inline-flex items-center gap-1 shadow-xs" title="Tolak">
                                             <i class="fa-solid fa-xmark text-[10px]"></i> Tolak
                                         </button>
                                     @endif
@@ -227,13 +257,11 @@
                                             <i class="fa-solid fa-pen-to-square text-[11px]"></i>
                                         </button>
 
-                                        <form action="{{ route('jasa.destroy', $job->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pekerjaan jasa ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 text-xs rounded transition" title="Hapus Data">
+                                        @if(auth()->user()->isManager() || auth()->user()->isOwner())
+                                            <button type="button" @click="openDeleteJobModal({{ $job }})" class="w-6 h-6 flex items-center justify-center bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 text-xs rounded transition cursor-pointer" title="Hapus Data (Manager / Owner)">
                                                 <i class="fa-solid fa-trash-can text-[11px]"></i>
                                             </button>
-                                        </form>
+                                        @endif
                                     @else
                                         <span class="text-xs text-slate-400">Read-only</span>
                                     @endif
@@ -428,27 +456,192 @@
         </div>
     </div>
 
-    <!-- Modal Rejection Notes -->
-    <div x-show="rejectModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4" x-cloak>
-        <div class="bg-white rounded-lg border border-slate-200 max-w-md w-full p-5 shadow-xl space-y-4">
+    <!-- Modal Persetujuan Layanan Jasa (Manager / Owner) -->
+    <div x-show="approveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="approveModal = false">
             <div class="flex items-start justify-between border-b border-slate-200 pb-3">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-900">Tolak Pekerjaan Jasa</h3>
-                    <p class="text-xs text-slate-500">Berikan catatan alasan penolakan</p>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-check text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Persetujuan Layanan Jasa</h3>
+                        <p class="text-[11px] text-emerald-700 font-medium mt-0.5">Wewenang Manajemen</p>
+                    </div>
                 </div>
-                <button @click="rejectModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                <button type="button" @click="approveModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Pekerjaan Jasa -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5" x-show="selectedJob">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Order Jasa:</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedJob ? selectedJob.job_number : ''"></span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Nama Layanan:</span>
+                    <span class="font-semibold text-slate-800 text-right" x-text="selectedJob ? selectedJob.name : ''"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Nilai Jasa:</span>
+                    <span class="font-mono font-bold text-emerald-700" x-text="selectedJob ? selectedJob.cost : ''"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Apakah Anda yakin ingin menyetujui pekerjaan jasa ini? Status pekerjaan akan diperbarui menjadi <strong>Disetujui</strong>.
+            </p>
+
+            <form :action="approveActionUrl" method="POST" class="space-y-3.5">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Persetujuan (Opsional)
+                    </label>
+                    <textarea name="notes" rows="2" placeholder="Tuliskan catatan persetujuan jika ada..." class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="approveModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-check text-[11px]"></i> Ya, Setujui Jasa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Rejection Notes -->
+    <div x-show="rejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="rejectModal = false">
+            <div class="flex items-start justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-ban text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Penolakan Pekerjaan Jasa</h3>
+                        <p class="text-[11px] text-rose-600 font-medium mt-0.5">Wewenang Manajemen</p>
+                    </div>
+                </div>
+                <button type="button" @click="rejectModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Pekerjaan Jasa -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5" x-show="selectedJob">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Order Jasa:</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedJob ? selectedJob.job_number : ''"></span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Nama Layanan:</span>
+                    <span class="font-semibold text-slate-800 text-right" x-text="selectedJob ? selectedJob.name : ''"></span>
+                </div>
             </div>
 
             <form :action="rejectActionUrl" method="POST" class="space-y-3.5">
                 @csrf
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alasan Penolakan</label>
-                    <textarea name="notes" rows="3" required placeholder="Contoh: Dokumen spesifikasi teknis belum lengkap..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Alasan Penolakan <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="notes" rows="3" required placeholder="Contoh: Dokumen spesifikasi teknis belum lengkap..." class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                    <button type="button" @click="rejectModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">Batal</button>
-                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs rounded-md transition">Tolak Jasa</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="rejectModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-ban text-[11px]"></i> Ya, Tolak Jasa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Verifikasi Hapus Pekerjaan Jasa (Manager & Owner) -->
+    <div x-show="deleteModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" 
+         @keydown.escape.window="deleteModal = false">
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4"
+             @click.away="deleteModal = false">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Verifikasi Hapus Pekerjaan Jasa</h3>
+                        <p class="text-[11px] text-slate-500">Tercatat di Log Aktivitas Owner</p>
+                    </div>
+                </div>
+                <button type="button" @click="deleteModal = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Ringkasan Jasa -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1.5" x-show="selectedJob">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">No. Order Jasa:</span>
+                    <span class="font-mono font-bold text-slate-800" x-text="selectedJob ? selectedJob.job_number : ''"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nama Layanan:</span>
+                    <span class="font-semibold text-slate-800" x-text="selectedJob ? selectedJob.name : ''"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status Pekerjaan:</span>
+                    <span class="font-semibold text-slate-700" x-text="selectedJob ? selectedJob.status : ''"></span>
+                </div>
+            </div>
+
+            <!-- Peringatan Audit SOP -->
+            <div class="bg-rose-50/70 border border-rose-200 rounded-lg p-3 text-xs text-rose-900 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-rose-600 text-xs mt-0.5 shrink-0"></i>
+                    <div class="text-[11px]">
+                        <span class="font-bold">Apakah Anda yakin ingin menghapus pekerjaan jasa ini?</span>
+                        <p class="mt-0.5 text-rose-800/90">
+                            Penghapusan oleh Manager dicatat permanen di <strong>Log Aktivitas Owner</strong> bersama catatan alasan Anda.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form :action="deleteActionUrl" method="POST" class="space-y-3.5">
+                @csrf
+                @method('DELETE')
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Alasan Penghapusan <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="deletion_reason" 
+                              x-model="deletionReason" 
+                              required 
+                              minlength="5" 
+                              maxlength="1000" 
+                              rows="3" 
+                              placeholder="Tuliskan catatan alasan jelas kenapa pekerjaan jasa ini dihapus..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500 text-slate-800"></textarea>
+                    <p class="text-[11px] text-slate-400 mt-1">Minimal 5 karakter. Wajib diisi sebagai rekaman audit manajerial.</p>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="deleteModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-trash-can text-[11px]"></i> Ya, Hapus Jasa
+                    </button>
                 </div>
             </form>
         </div>

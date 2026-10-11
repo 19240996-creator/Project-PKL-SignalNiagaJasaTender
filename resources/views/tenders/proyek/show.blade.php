@@ -292,7 +292,7 @@
                             <div class="flex items-center gap-2 text-xs text-slate-400">
                                 <span>Dicatat oleh: <strong class="text-slate-600">{{ $log->logger->name ?? 'User Sistem' }}</strong></span>
                                 @if(!auth()->user()->isOwner())
-                                    <form method="POST" action="{{ route('tender.proyek.logs.destroy', [$tender, $log]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan log ini?');" class="inline">
+                                    <form method="POST" action="{{ route('tender.proyek.logs.destroy', [$tender, $log]) }}" data-confirm="Apakah Anda yakin ingin menghapus catatan log ini?" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-rose-500 hover:text-rose-700 ml-2" title="Hapus Log">
@@ -558,7 +558,7 @@
                                         <i class="fa-solid fa-pen text-[10px]"></i> Edit Status
                                     </button>
 
-                                    <form method="POST" action="{{ route('tender.proyek.assignments.destroy', [$tender, $assign]) }}" onsubmit="return confirm('Hapus penugasan teknisi ini?');">
+                                    <form method="POST" action="{{ route('tender.proyek.assignments.destroy', [$tender, $assign]) }}" data-confirm="Apakah Anda yakin ingin menghapus penugasan teknisi ini?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs text-rose-500 hover:text-rose-700">

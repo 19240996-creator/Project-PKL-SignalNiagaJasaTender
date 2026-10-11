@@ -1,18 +1,34 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Invoice — ' . $invoice->invoice_number)
+@section('title', 'Detail Invoice: ' . $invoice->invoice_number)
 @section('header-title', 'Rincian Invoice & Bukti Tagihan')
 
 @section('content')
-<div class="space-y-6 max-w-4xl mx-auto">
+<div class="space-y-6 max-w-4xl mx-auto" x-data="{ payModal: false, deleteModal: false, deletionReason: '' }">
 
-    <div class="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <a href="{{ route('invoices.index') }}" class="text-sm font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+        <a href="{{ route('invoices.index') }}" class="text-xs font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-2">
             <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Invoice
         </a>
-        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-sm rounded-xl transition flex items-center gap-2">
-            <i class="fa-solid fa-print"></i> Cetak Invoice
-        </button>
+        <div class="flex items-center gap-2.5">
+            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center gap-1.5 border border-slate-200">
+                <i class="fa-solid fa-print"></i> Cetak Invoice
+            </button>
+            @if($invoice->status !== 'Paid' && $invoice->remaining_balance > 0)
+                <button type="button" @click="payModal = true" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-hand-holding-dollar text-sm"></i> Catat Pembayaran / Pelunasan
+                </button>
+            @else
+                <span class="px-3.5 py-2 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> Tagihan Lunas (Paid)
+                </span>
+            @endif
+            @if(auth()->user()->isManager() || auth()->user()->isOwner())
+                <button type="button" @click="deleteModal = true" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1.5" title="Hapus Invoice (Manager / Owner)">
+                    <i class="fa-solid fa-trash-can text-xs"></i> Hapus Invoice
+                </button>
+            @endif
+        </div>
     </div>
 
     <!-- Printable Invoice Sheet -->
@@ -139,7 +155,14 @@
 
         <!-- Payment History Table -->
         <div class="pt-6 border-t border-slate-200">
-            <h4 class="font-bold text-slate-800 text-xs uppercase mb-3">Riwayat Pembayaran Diterima</h4>
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Riwayat Pembayaran Diterima</h4>
+                @if($invoice->status !== 'Paid' && $invoice->remaining_balance > 0)
+                    <button type="button" @click="payModal = true" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 print:hidden">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Tambah Pembayaran
+                    </button>
+                @endif
+            </div>
             @if($invoice->payments->count() > 0)
                 <table class="w-full text-left text-xs bg-slate-50 rounded-xl overflow-hidden">
                     <thead>
@@ -166,6 +189,203 @@
             @endif
         </div>
 
+    </div>
+
+    <!-- Modal Catat Pembayaran Invoice -->
+    <div x-show="payModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="payModal = false">
+            <div class="flex items-start justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-money-bill-transfer text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Catat Pembayaran Invoice</h3>
+                        <p class="text-[11px] text-emerald-700 font-medium mt-0.5">Penerimaan & Pelunasan Piutang</p>
+                    </div>
+                </div>
+                <button type="button" @click="payModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Invoice -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Invoice:</span>
+                    <span class="font-mono font-bold text-slate-900">{{ $invoice->invoice_number }}</span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Ditagihkan ke:</span>
+                    <span class="font-semibold text-slate-800 text-right">
+                        @if($invoice->serviceJob)
+                            {{ $invoice->serviceJob->contract->client->name ?? 'Klien Jasa' }}
+                        @elseif($invoice->sale)
+                            {{ $invoice->sale->customer_name }}
+                        @else
+                            Klien Umum
+                        @endif
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Total Tagihan:</span>
+                    <span class="font-mono font-semibold text-slate-900">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                    <span class="text-slate-600 font-semibold">Sisa Piutang:</span>
+                    <span class="font-mono font-bold text-rose-600">Rp {{ number_format($invoice->remaining_balance, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <form action="{{ route('payments.store') }}" method="POST" class="space-y-3.5" x-data="{
+                payAmount: {{ (float) $invoice->remaining_balance }},
+                maxAmount: {{ (float) $invoice->remaining_balance }},
+                setFullPay() {
+                    this.payAmount = this.maxAmount;
+                }
+            }">
+                @csrf
+                <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Tanggal Pembayaran <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}" class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                            Jumlah Pembayaran (Rp) <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" @click="setFullPay()" class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 underline">
+                            Lunasi Penuh
+                        </button>
+                    </div>
+                    <input type="number" name="amount" x-model="payAmount" required min="1" max="{{ (float) $invoice->remaining_balance }}" step="1" class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500 font-mono font-bold">
+                    <p class="text-[10px] text-slate-400 mt-0.5">Maksimal Rp {{ number_format($invoice->remaining_balance, 0, ',', '.') }}</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Metode Pembayaran <span class="text-rose-500">*</span>
+                    </label>
+                    <select name="payment_method" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <option value="Transfer Bank BCA">Transfer Bank BCA</option>
+                        <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
+                        <option value="Transfer Bank BRI">Transfer Bank BRI</option>
+                        <option value="Transfer Bank BNI">Transfer Bank BNI</option>
+                        <option value="Tunai / Kas Langsung">Tunai / Kas Langsung</option>
+                        <option value="Cek / Bilyet Giro">Cek / Bilyet Giro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Nomor Referensi Transaksi
+                    </label>
+                    <input type="text" name="reference_number" placeholder="Contoh: TRX-BCA-20261011-001..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Pembayaran (Opsional)
+                    </label>
+                    <textarea name="notes" rows="2" placeholder="Catatan tambahan pembayaran jika ada..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="payModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-check text-[11px]"></i> Simpan Pembayaran
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Verifikasi Hapus Invoice (Manager & Owner) -->
+    <div x-show="deleteModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs print:hidden" 
+         @keydown.escape.window="deleteModal = false">
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4"
+             @click.away="deleteModal = false">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Verifikasi Hapus Invoice</h3>
+                        <p class="text-[11px] text-slate-500">Tercatat di Log Aktivitas Owner</p>
+                    </div>
+                </div>
+                <button type="button" @click="deleteModal = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Ringkasan Invoice -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nomor Invoice:</span>
+                    <span class="font-mono font-bold text-slate-800">{{ $invoice->invoice_number }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Total Tagihan:</span>
+                    <span class="font-bold text-slate-800">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status Pembayaran:</span>
+                    <span class="font-semibold text-slate-700">{{ $invoice->status }}</span>
+                </div>
+            </div>
+
+            <!-- Peringatan Audit SOP -->
+            <div class="bg-rose-50/70 border border-rose-200 rounded-lg p-3 text-xs text-rose-900 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-rose-600 text-xs mt-0.5 shrink-0"></i>
+                    <div class="text-[11px]">
+                        <span class="font-bold">Apakah Anda yakin ingin menghapus invoice ini?</span>
+                        <p class="mt-0.5 text-rose-800/90">
+                            Penghapusan oleh Manager akan dicatat secara permanen di <strong>Log Aktivitas Owner</strong> bersama identitas dan catatan alasan penghapusan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST" class="space-y-3.5">
+                @csrf
+                @method('DELETE')
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Alasan Penghapusan <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="deletion_reason" 
+                              x-model="deletionReason" 
+                              required 
+                              minlength="5" 
+                              maxlength="1000" 
+                              rows="3" 
+                              placeholder="Tuliskan catatan alasan jelas kenapa invoice ini dihapus..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500 text-slate-800"></textarea>
+                    <p class="text-[11px] text-slate-400 mt-1">Minimal 5 karakter. Wajib diisi sebagai rekaman audit.</p>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="deleteModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-trash-can text-[11px]"></i> Ya, Hapus Invoice
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
 </div>

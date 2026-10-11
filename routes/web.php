@@ -195,6 +195,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
         Route::post('/sales/{sale}/approve', [SalesController::class, 'approve'])->name('sales.approve');
         Route::post('/sales/{sale}/reject', [SalesController::class, 'reject'])->name('sales.reject');
+        Route::delete('/sales/{sale}', [SalesController::class, 'destroy'])->name('sales.destroy');
     });
 
     // Modul Keuangan / Finance (Admin input, Manager approve, Owner monitoring)
@@ -202,6 +203,7 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::get('/finance', [InvoiceController::class, 'index'])->name('finance.index');
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');

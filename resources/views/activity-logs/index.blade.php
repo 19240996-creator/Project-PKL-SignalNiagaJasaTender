@@ -61,8 +61,14 @@
                             </td>
                             <td class="max-w-sm p-3.5 align-top">
                                 <template x-if="log.action === 'delete' && log.old_values">
-                                    <div>
-                                        <div class="font-medium text-slate-800" x-text="log.old_values.name || log.old_values.sku || 'Data dihapus'"></div>
+                                    <div class="space-y-1">
+                                        <div class="font-medium text-slate-800" x-text="log.old_values.name || log.old_values.invoice_number || log.old_values.sale_number || log.old_values.job_number || log.old_values.tender || log.old_values.sku || 'Data dihapus'"></div>
+                                        <template x-if="log.old_values.alasan_penghapusan || log.old_values.deletion_reason || log.old_values.reason">
+                                            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-[11px]">
+                                                <i class="fa-solid fa-circle-exclamation text-[10px] text-rose-500"></i>
+                                                <span>Alasan: <strong class="font-semibold text-rose-900" x-text="log.old_values.alasan_penghapusan || log.old_values.deletion_reason || log.old_values.reason"></strong></span>
+                                            </div>
+                                        </template>
                                         <div class="truncate text-[11px] text-slate-500" x-text="summary(log.old_values)"></div>
                                     </div>
                                 </template>
@@ -156,15 +162,28 @@
             },
             formatKey(key) {
                 const map = {
-                    name: 'Nama Produk',
+                    name: 'Nama',
                     purchase_price: 'Harga Beli',
                     selling_price: 'Harga Jual',
+                    invoice_number: 'No. Invoice',
+                    sale_number: 'No. Penjualan',
+                    job_number: 'No. Jasa',
+                    total_amount: 'Total Tagihan',
+                    paid_amount: 'Telah Dibayar',
+                    customer_name: 'Pelanggan',
+                    rincian_barang: 'Barang',
+                    alasan_penghapusan: 'Alasan Dihapus',
+                    deletion_reason: 'Alasan Dihapus',
+                    reason: 'Alasan',
+                    dihapus_oleh: 'Dihapus Oleh',
+                    status: 'Status',
+                    sumber: 'Sumber Transaksi',
                 };
                 return map[key] || key.replaceAll('_', ' ');
             },
             formatValue(key, val) {
                 if (val === null || val === undefined) return '-';
-                if (key.includes('price') || key.includes('amount') || key.includes('nominal')) {
+                if (key.includes('price') || key.includes('amount') || key.includes('nominal') || key === 'biaya') {
                     const num = Number(val);
                     if (!isNaN(num)) {
                         return 'Rp ' + num.toLocaleString('id-ID');
@@ -173,7 +192,10 @@
                 return val;
             },
             summary(values) {
-                return Object.entries(values).filter(([key]) => !['created_at', 'updated_at'].includes(key)).map(([key, value]) => `${key}: ${value ?? '-'}`).join(' · ');
+                return Object.entries(values)
+                    .filter(([key]) => !['created_at', 'updated_at', 'name'].includes(key))
+                    .map(([key, value]) => `${this.formatKey(key)}: ${this.formatValue(key, value)}`)
+                    .join(' · ');
             },
         };
     }

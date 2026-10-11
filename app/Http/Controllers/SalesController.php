@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\StockMovement;
 use App\Models\Tender;
 use App\Services\SalesService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Exception;
 
@@ -163,5 +166,72 @@ class SalesController extends Controller
         ]);
 
         return redirect()->route('sales.index')->with('success', "Penjualan Barang {$sale->sale_number} telah ditolak (Rejected).");
+    }
+
+    public function destroy(Request $request, Sale $sale): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if (!$user || (!$user->isManager() && !$user->isOwner())) {
+            return redirect()->route('sales.index')->with('error', 'Hanya Manajemen (Manager atau Owner) yang berhak menghapus data transaksi barang.');
+        }
+
+        $validated = $request->validate([
+            'deletion_reason' => 'required|string|min:5|max:1000',
+        ], [
+            'deletion_reason.required' => 'Catatan alasan penghapusan transaksi wajib diisi.',
+            'deletion_reason.min' => 'Catatan alasan penghapusan minimal 5 karakter.',
+            'deletion_reason.max' => 'Catatan alasan penghapusan maksimal 1000 karakter.',
+        ]);
+
+        $saleNumber = $sale->sale_number;
+        $customerName = $sale->customer_name;
+        $itemSummary = $sale->nama_barang ?: ($sale->items->first()?->product?->name ?? 'Barang Dagang');
+
+        $request->attributes->set('audit_logged', true);
+
+        DB::transaction(function () use ($sale, $user, $validated, $itemSummary, $request) {
+            // Catat log audit sebelum dihapus
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'delete',
+                'table_name' => 'sales',
+                'record_id' => $sale->id,
+                'old_values' => [
+                    'name' => 'Penjualan ' . $sale->sale_number,
+                    'sale_number' => $sale->sale_number,
+                    'customer_name' => $sale->customer_name,
+                    'rincian_barang' => $itemSummary,
+                    'total_amount' => (float) $sale->total_amount,
+                    'status' => $sale->status,
+                    'approval_status' => $sale->approval_status,
+                    'alasan_penghapusan' => $validated['deletion_reason'],
+                    'reason' => $validated['deletion_reason'],
+                    'dihapus_oleh' => $user->name . ' (' . ucfirst($user->role?->name ?? 'manager') . ')',
+                ],
+                'new_values' => [
+                    'status' => 'permanently_deleted',
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
+            ]);
+
+            // Kembalikan pergerakan stok jika transaksi sudah approved (stok terpotong)
+            StockMovement::where('reference_type', 'Sale')->where('reference_id', $sale->id)->delete();
+
+            // Hapus invoice turunan jika ada
+            foreach ($sale->invoices as $inv) {
+                $inv->payments()->delete();
+                $inv->items()->delete();
+                $inv->delete();
+            }
+
+            // Hapus rincian item penjualan dan data penjualan
+            $sale->items()->delete();
+            $sale->delete();
+        });
+
+        return redirect()->route('sales.index')->with('success', "Transaksi penjualan \"{$saleNumber}\" ({$customerName}) berhasil dihapus dan tercatat pada log aktivitas Owner.");
     }
 }

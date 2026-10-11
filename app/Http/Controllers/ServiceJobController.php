@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Contract;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -168,10 +169,59 @@ class ServiceJobController extends Controller
         return redirect()->route('jasa.index')->with('success', "Pekerjaan Jasa {$serviceJob->job_number} telah ditolak (Rejected).");
     }
 
-    public function destroy(ServiceJob $serviceJob): RedirectResponse
+    public function destroy(Request $request, ServiceJob $serviceJob): RedirectResponse
     {
-        $serviceJob->delete();
-        return redirect()->route('jasa.index')->with('success', 'Pekerjaan Jasa berhasil dihapus.');
+        $user = Auth::user();
+
+        if (!$user || (!$user->isManager() && !$user->isOwner())) {
+            return redirect()->route('jasa.index')->with('error', 'Hanya Manajemen (Manager atau Owner) yang berhak menghapus pekerjaan jasa.');
+        }
+
+        $validated = $request->validate([
+            'deletion_reason' => 'required|string|min:5|max:1000',
+        ], [
+            'deletion_reason.required' => 'Catatan alasan penghapusan pekerjaan jasa wajib diisi.',
+            'deletion_reason.min' => 'Catatan alasan penghapusan minimal 5 karakter.',
+            'deletion_reason.max' => 'Catatan alasan penghapusan maksimal 1000 karakter.',
+        ]);
+
+        $jobNumber = $serviceJob->job_number;
+        $jobName = $serviceJob->name;
+        $klienName = $serviceJob->klien ?: ($serviceJob->client?->name ?? 'Klien Umum');
+
+        $request->attributes->set('audit_logged', true);
+
+        DB::transaction(function () use ($serviceJob, $user, $validated, $jobNumber, $jobName, $klienName, $request) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'delete',
+                'table_name' => 'service_jobs',
+                'record_id' => $serviceJob->id,
+                'old_values' => [
+                    'name' => 'Pekerjaan Jasa ' . $jobNumber,
+                    'job_number' => $jobNumber,
+                    'job_name' => $jobName,
+                    'klien' => $klienName,
+                    'biaya' => (float) $serviceJob->biaya,
+                    'status' => $serviceJob->status,
+                    'approval_status' => $serviceJob->approval_status,
+                    'alasan_penghapusan' => $validated['deletion_reason'],
+                    'reason' => $validated['deletion_reason'],
+                    'dihapus_oleh' => $user->name . ' (' . ucfirst($user->role?->name ?? 'manager') . ')',
+                ],
+                'new_values' => [
+                    'status' => 'permanently_deleted',
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
+            ]);
+
+            $serviceJob->assignments()->delete();
+            $serviceJob->delete();
+        });
+
+        return redirect()->route('jasa.index')->with('success', "Pekerjaan Jasa \"{$jobNumber}\" ({$jobName}) berhasil dihapus dan tercatat pada log aktivitas Owner.");
     }
 
     public function generateBill(Request $request, ServiceJob $serviceJob): RedirectResponse

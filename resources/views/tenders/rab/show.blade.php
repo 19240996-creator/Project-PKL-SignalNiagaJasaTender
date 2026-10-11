@@ -394,7 +394,7 @@
                                         <button type="button" @click="openEditItem({{ $item }})" class="w-7 h-7 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition" title="Edit Item">
                                             <i class="fa-solid fa-pen text-[10px]"></i>
                                         </button>
-                                        <form action="{{ route('tender.rab.items.destroy', [$tender, $item]) }}" method="POST" onsubmit="return confirm('Hapus item biaya ini dari RAB?');" class="inline">
+                                        <form action="{{ route('tender.rab.items.destroy', [$tender, $item]) }}" method="POST" data-confirm="Hapus item biaya ini dari RAB?" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="w-7 h-7 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 rounded transition" title="Hapus Item">

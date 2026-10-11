@@ -349,6 +349,46 @@
                             </div>
                         </div>
 
+                        <!-- 5. Domain Keuangan (Invoice & Pembayaran) -->
+                        @php
+                            $isFinanceActive = request()->routeIs('finance.*')
+                                || request()->routeIs('invoices.*')
+                                || request()->routeIs('payments.*');
+                        @endphp
+                        <div x-data="{ financeOpen: {{ $isFinanceActive ? 'true' : 'false' }} }" class="space-y-1">
+                            <button type="button"
+                                    @click="financeOpen = !financeOpen"
+                                    class="w-full group flex items-center justify-between px-3.5 py-2.5 text-xs font-medium rounded-xl transition-all {{ $isFinanceActive ? 'text-white bg-white/10' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}"
+                                    :aria-expanded="financeOpen.toString()">
+                                <div class="flex items-center space-x-2.5 truncate">
+                                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center {{ $isFinanceActive ? 'text-blue-400' : 'text-slate-400 group-hover:text-white' }}"></i>
+                                    <span class="ml-1 truncate">Keuangan</span>
+                                </div>
+                                <i class="fa-solid text-[10px] text-slate-400 transition-transform duration-200"
+                                   :class="financeOpen ? 'fa-chevron-up text-blue-400' : 'fa-chevron-down'"></i>
+                            </button>
+
+                            <div x-show="financeOpen"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="pl-4 pr-1 py-1 space-y-1"
+                                 x-cloak>
+                                <a href="{{ route('invoices.index') }}"
+                                   class="group flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('invoices.*') || request()->routeIs('finance.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                                    <span class="flex items-center gap-2.5 truncate">
+                                        <i class="fa-solid fa-file-invoice w-4 text-center"></i>
+                                        <span class="truncate">Invoice & Tagihan</span>
+                                    </span>
+                                </a>
+                                <a href="{{ route('payments.index') }}"
+                                   class="group flex items-center px-3 py-2 text-xs font-medium rounded-lg transition-all {{ request()->routeIs('payments.*') ? 'sidebar-subitem-active' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                                    <i class="fa-solid fa-money-bill-transfer w-4 text-center mr-2.5"></i>
+                                    <span class="truncate">Riwayat Pembayaran</span>
+                                </a>
+                            </div>
+                        </div>
+
                         <!-- 5. Laporan Bisnis -->
                         <a href="{{ route('laporan.index') }}" 
                            class="group flex items-center px-3.5 py-2.5 text-xs font-medium rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all {{ request()->routeIs('laporan.*') ? 'sidebar-item-active' : '' }}">
@@ -582,19 +622,20 @@
                 return;
             }
 
-            // Periksa apakah form ini adalah aksi HTTP DELETE
+            // Periksa apakah form ini adalah aksi HTTP DELETE atau memiliki atribut data-confirm
             const methodInput = form.querySelector('input[name="_method"]');
             const isDeleteMethod = methodInput && methodInput.value.toUpperCase() === 'DELETE';
             const actionUrl = form.action || '';
             const isSpecificDeleteAction = actionUrl.endsWith('/destroy') || actionUrl.endsWith('/delete') || actionUrl.includes('/destroy/');
             const hasDeleteClass = form.classList.contains('form-delete') || form.classList.contains('delete-form');
+            const hasDataConfirm = form.hasAttribute('data-confirm');
 
             // Jangan intersepsi form pengajuan izin hapus atau persetujuan izin hapus
             if (actionUrl.includes('-deletion')) {
                 return;
             }
 
-            if (isDeleteMethod || isSpecificDeleteAction || hasDeleteClass) {
+            if (isDeleteMethod || isSpecificDeleteAction || hasDeleteClass || hasDataConfirm) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
 
@@ -615,7 +656,7 @@
                     detail: {
                         form: form,
                         message: customMessage,
-                        title: 'Konfirmasi Hapus Data'
+                        title: isDeleteMethod || isSpecificDeleteAction || hasDeleteClass ? 'Konfirmasi Hapus Data' : 'Konfirmasi Tindakan'
                     }
                 }));
             }

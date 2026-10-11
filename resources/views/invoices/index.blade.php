@@ -4,7 +4,17 @@
 @section('header-title', 'Manajemen Invoice & Piutang Perusahaan')
 
 @section('content')
-<div class="space-y-6" x-data="{ payModal: false, selectedInvoice: null }">
+<div class="space-y-6" x-data="{ 
+    payModal: false, 
+    deleteModal: false, 
+    selectedInvoice: null, 
+    deletionReason: '', 
+    openDeleteModal(inv) { 
+        this.selectedInvoice = inv; 
+        this.deletionReason = ''; 
+        this.deleteModal = true; 
+    } 
+}">
 
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
         <form method="GET" action="{{ route('invoices.index') }}" class="flex items-center gap-3 w-full md:w-auto">
@@ -83,17 +93,20 @@
                                 </span>
                             </td>
                             <td class="p-4 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center justify-center gap-2">
-                                    <div class="w-20 flex justify-center">
-                                        @if($inv->status !== 'Paid')
-                                            <button @click="selectedInvoice = {{ $inv }}; payModal = true" class="w-full px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition inline-flex items-center justify-center gap-1.5" title="Catat Pembayaran">
-                                                <i class="fa-solid fa-hand-holding-dollar text-[11px]"></i> Bayar
-                                            </button>
-                                        @endif
-                                    </div>
-                                    <a href="{{ route('invoices.show', $inv->id) }}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 transition inline-flex items-center gap-1.5" title="Lihat Detail Invoice">
+                                <div class="inline-flex items-center justify-center gap-1.5">
+                                    @if($inv->status !== 'Paid')
+                                        <button @click="selectedInvoice = {{ $inv }}; payModal = true" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg shadow-xs transition inline-flex items-center justify-center gap-1.5" title="Catat Pembayaran">
+                                            <i class="fa-solid fa-hand-holding-dollar text-[11px]"></i> Bayar
+                                        </button>
+                                    @endif
+                                    <a href="{{ route('invoices.show', $inv->id) }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg border border-slate-200 transition inline-flex items-center gap-1.5" title="Lihat Detail Invoice">
                                         <i class="fa-solid fa-file-invoice text-[11px]"></i> Detail
                                     </a>
+                                    @if(auth()->user()->isManager() || auth()->user()->isOwner())
+                                        <button type="button" @click="openDeleteModal({{ $inv }})" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-lg border border-rose-200 transition inline-flex items-center gap-1" title="Hapus Invoice (Manager / Owner)">
+                                            <i class="fa-solid fa-trash-can text-[11px]"></i> Hapus
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -124,7 +137,7 @@
 
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
                     <div class="text-slate-500">Invoice: <span class="font-bold text-slate-800" x-text="selectedInvoice ? selectedInvoice.invoice_number : ''"></span></div>
-                    <div class="text-slate-500">Total Tagihan: <span class="font-bold text-slate-800" x-text="selectedInvoice ? 'Rp ' + selectedInvoice.total_amount.toLocaleString('id-ID') : ''"></span></div>
+                    <div class="text-slate-500">Total Tagihan: <span class="font-bold text-slate-800" x-text="selectedInvoice ? 'Rp ' + Number(selectedInvoice.total_amount).toLocaleString('id-ID') : ''"></span></div>
                     <div class="text-rose-600 font-bold">Sisa Piutang: <span x-text="selectedInvoice ? 'Rp ' + (selectedInvoice.total_amount - selectedInvoice.paid_amount).toLocaleString('id-ID') : ''"></span></div>
                 </div>
 
@@ -156,6 +169,87 @@
                 <div class="flex justify-end gap-2 pt-3 border-t">
                     <button type="button" @click="payModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl">Batal</button>
                     <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow">Simpan Pembayaran</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Verifikasi Hapus Invoice (Manager & Owner) -->
+    <div x-show="deleteModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" 
+         @keydown.escape.window="deleteModal = false">
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4"
+             @click.away="deleteModal = false">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Verifikasi Hapus Invoice</h3>
+                        <p class="text-[11px] text-slate-500">Tercatat di Log Aktivitas Owner</p>
+                    </div>
+                </div>
+                <button type="button" @click="deleteModal = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Ringkasan Invoice -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Nomor Invoice:</span>
+                    <span class="font-mono font-bold text-slate-800" x-text="selectedInvoice ? selectedInvoice.invoice_number : ''"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Total Tagihan:</span>
+                    <span class="font-bold text-slate-800" x-text="selectedInvoice ? 'Rp ' + Number(selectedInvoice.total_amount).toLocaleString('id-ID') : ''"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status Pembayaran:</span>
+                    <span class="font-semibold text-slate-700" x-text="selectedInvoice ? selectedInvoice.status : ''"></span>
+                </div>
+            </div>
+
+            <!-- Peringatan Audit SOP -->
+            <div class="bg-rose-50/70 border border-rose-200 rounded-lg p-3 text-xs text-rose-900 leading-relaxed">
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-rose-600 text-xs mt-0.5 shrink-0"></i>
+                    <div class="text-[11px]">
+                        <span class="font-bold">Apakah Anda yakin ingin menghapus invoice ini?</span>
+                        <p class="mt-0.5 text-rose-800/90">
+                            Penghapusan oleh Manager akan dicatat secara permanen di <strong>Log Aktivitas Owner</strong> bersama identitas dan catatan alasan penghapusan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form x-bind:action="selectedInvoice ? ('/invoices/' + selectedInvoice.id) : '#'" method="POST" class="space-y-3.5">
+                @csrf
+                @method('DELETE')
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Alasan Penghapusan <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="deletion_reason" 
+                              x-model="deletionReason" 
+                              required 
+                              minlength="5" 
+                              maxlength="1000" 
+                              rows="3" 
+                              placeholder="Tuliskan catatan alasan jelas kenapa invoice ini dihapus..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500 text-slate-800"></textarea>
+                    <p class="text-[11px] text-slate-400 mt-1">Minimal 5 karakter. Wajib diisi sebagai rekaman audit.</p>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="deleteModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-trash-can text-[11px]"></i> Ya, Hapus Invoice
+                    </button>
                 </div>
             </form>
         </div>
