@@ -53,6 +53,11 @@ class ServiceJob extends Model
         'progress' => 'integer',
     ];
 
+    public function setActualCostAttribute($value): void
+    {
+        $this->attributes['actual_cost'] = ($value === null || $value === '') ? 0 : (float) $value;
+    }
+
     public function contract(): BelongsTo
     {
         return $this->belongsTo(Contract::class);

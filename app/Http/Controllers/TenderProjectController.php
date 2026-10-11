@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Product;
+use App\Models\ServiceJob;
 use App\Models\StockMovement;
 use App\Models\Tender;
 use App\Models\TenderAssignment;
@@ -23,7 +24,7 @@ class TenderProjectController extends Controller
     public function index(Request $request): View
     {
         $user = Auth::user();
-        $query = Tender::with(['client', 'rabItems', 'assignments', 'projectLogs', 'creator']);
+        $query = Tender::with(['client', 'rabItems', 'assignments', 'projectLogs', 'creator', 'serviceJobs.assignments.technician']);
 
         if ($user && $user->role && $user->role->name === 'admin') {
             $query->where('created_by', $user->id);
@@ -73,6 +74,7 @@ class TenderProjectController extends Controller
             'client',
             'rabItems.product',
             'assignments.user',
+            'serviceJobs.assignments.technician',
             'projectLogs.logger',
             'creator',
             'approver',
@@ -96,13 +98,17 @@ class TenderProjectController extends Controller
         ]);
 
         // Jika progres 100%, otomatis set status proyek ke Selesai
-        if ((int) $validated['project_progress'] >= 100 && $validated['project_status'] !== 'Dibatalkan') {
+        $newProgress = (int) $validated['project_progress'];
+        if ($newProgress >= 100 && $validated['project_status'] !== 'Dibatalkan') {
             $validated['project_status'] = 'Selesai';
         }
 
         $tender->update($validated);
 
-        return redirect()->route('tender.proyek.show', $tender)->with('success', 'Informasi dan status operasional proyek berhasil diperbarui.');
+        // Sinkronkan ke modul Jasa yang terhubung ke tender ini
+        $this->syncConnectedServiceJobs($tender, $newProgress, $validated['project_status']);
+
+        return redirect()->route('tender.proyek.show', $tender)->with('success', 'Informasi dan status operasional proyek berhasil diperbarui dan disinkronkan ke Modul Jasa.');
     }
 
     public function allocateMaterial(Request $request, Tender $tender): RedirectResponse
@@ -259,21 +265,25 @@ class TenderProjectController extends Controller
         ]);
 
         // Perbarui progres proyek dan akumulasi biaya aktual tender
+        $newProgress = max($tender->project_progress, (int) $validated['progress_percentage']);
         $updates = [
-            'project_progress' => max($tender->project_progress, (int) $validated['progress_percentage']),
+            'project_progress' => $newProgress,
             'actual_cost' => (float) $tender->actual_cost + $costSpent,
         ];
 
         // Jika terdapat kendala, otomatis set status proyek ke Kendala jika belum Selesai
         if (!empty($validated['obstacles']) && $tender->project_status !== 'Selesai') {
             $updates['project_status'] = 'Kendala';
-        } elseif ((int) $validated['progress_percentage'] >= 100) {
+        } elseif ($newProgress >= 100) {
             $updates['project_status'] = 'Selesai';
         } elseif ($tender->project_status === 'Persiapan') {
             $updates['project_status'] = 'Dalam Pengerjaan';
         }
 
         $tender->update($updates);
+
+        // Sinkronkan ke modul Jasa yang terhubung ke tender ini
+        $this->syncConnectedServiceJobs($tender, $newProgress, $updates['project_status'], $costSpent);
 
         return redirect()->route('tender.proyek.show', $tender)->with('success', 'Catatan log harian lapangan dan dokumentasi berhasil disimpan.');
     }
@@ -293,6 +303,15 @@ class TenderProjectController extends Controller
             $tender->decrement('actual_cost', min((float) $tender->actual_cost, $cost));
         }
 
+        $highestLog = $tender->projectLogs()->max('progress_percentage');
+        $newProgress = $highestLog !== null ? (int) $highestLog : 0;
+        $status = $newProgress >= 100 ? 'Selesai' : ($newProgress > 0 ? 'Dalam Pengerjaan' : 'Persiapan');
+        $tender->update([
+            'project_progress' => $newProgress,
+            'project_status' => $status,
+        ]);
+        $this->syncConnectedServiceJobs($tender, $newProgress, $status);
+
         return redirect()->route('tender.proyek.show', $tender)->with('success', 'Catatan log progres lapangan berhasil dihapus.');
     }
 
@@ -305,6 +324,42 @@ class TenderProjectController extends Controller
 
         $tender->update($validated);
 
+        if ((int) $validated['vendor_progress'] >= 100 && $tender->project_status === 'Selesai') {
+            $this->syncConnectedServiceJobs($tender, 100, 'Selesai');
+        }
+
         return redirect()->route('tender.proyek.show', $tender)->with('success', 'Progres pengerjaan vendor relasi berhasil diperbarui.');
+    }
+
+    private function syncConnectedServiceJobs(Tender $tender, int $progress, string $projectStatus, float $costSpent = 0): void
+    {
+        $connectedJobs = ServiceJob::where('tender_id', $tender->id)->get();
+        foreach ($connectedJobs as $job) {
+            $jobUpdates = [
+                'progress' => $progress,
+            ];
+
+            if ($projectStatus === 'Selesai' || $progress >= 100) {
+                $jobUpdates['status'] = 'Selesai';
+                $jobUpdates['approval_status'] = 'approved';
+                // Bebaskan semua penugasan teknisi di pekerjaan ini (tugas aktif kembali 0)
+                $job->assignments()->update(['status' => 'completed']);
+            } elseif ($projectStatus === 'Dalam Pengerjaan') {
+                $jobUpdates['status'] = 'Dalam Pelaksanaan';
+                $job->assignments()->where('status', 'completed')->update(['status' => 'in_progress']);
+            } elseif ($projectStatus === 'Kendala') {
+                $jobUpdates['status'] = 'Tertunda';
+            }
+
+            if ($costSpent > 0 && ((float) ($job->actual_cost ?? 0)) == 0) {
+                $jobUpdates['actual_cost'] = $costSpent;
+            }
+
+            $job->update($jobUpdates);
+        }
+
+        if ($projectStatus === 'Selesai' || $progress >= 100) {
+            $tender->assignments()->update(['status' => 'Selesai']);
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -21,6 +22,10 @@ class Product extends Model
         'selling_price',
         'minimum_stock',
         'is_active',
+        'deletion_status',
+        'deletion_reason',
+        'deletion_requested_by',
+        'deletion_requested_at',
     ];
 
     protected $casts = [
@@ -28,6 +33,11 @@ class Product extends Model
         'selling_price' => 'decimal:2',
         'minimum_stock' => 'decimal:2',
         'is_active' => 'boolean',
+        'deletion_requested_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'stock',
     ];
 
     public function stockMovements(): HasMany
@@ -52,14 +62,45 @@ class Product extends Model
 
     public function getStockAttribute(): float
     {
-        $in = $this->stockMovements()->where('movement_type', 'IN')->sum('quantity');
-        $out = $this->stockMovements()->where('movement_type', 'OUT')->sum('quantity');
-        $adj = $this->stockMovements()->where('movement_type', 'ADJUSTMENT')->sum('quantity');
+        if ($this->relationLoaded('stockMovements')) {
+            $in = (float) $this->stockMovements->where('movement_type', 'IN')->sum('quantity');
+            $out = (float) $this->stockMovements->where('movement_type', 'OUT')->sum('quantity');
+            $adj = (float) $this->stockMovements->where('movement_type', 'ADJUSTMENT')->sum('quantity');
+            return (float) ($in - $out + $adj);
+        }
+
+        $in = (float) $this->stockMovements()->where('movement_type', 'IN')->sum('quantity');
+        $out = (float) $this->stockMovements()->where('movement_type', 'OUT')->sum('quantity');
+        $adj = (float) $this->stockMovements()->where('movement_type', 'ADJUSTMENT')->sum('quantity');
         return (float) ($in - $out + $adj);
     }
 
     public function isLowStock(): bool
     {
         return $this->stock <= $this->minimum_stock;
+    }
+
+    public function deletionRequester(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deletion_requested_by');
+    }
+
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(ProductChangeRequest::class);
+    }
+
+    public function pendingAdjustment(): HasOne
+    {
+        return $this->hasOne(ProductChangeRequest::class)
+            ->where('request_type', 'stock_adjustment')
+            ->where('status', 'pending');
+    }
+
+    public function pendingEdit(): HasOne
+    {
+        return $this->hasOne(ProductChangeRequest::class)
+            ->where('request_type', 'price_edit')
+            ->where('status', 'pending');
     }
 }

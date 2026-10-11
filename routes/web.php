@@ -132,6 +132,10 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::get('/jasa/teknisi', [TechnicianController::class, 'index'])->name('jasa.teknisi.index');
         Route::post('/jasa/teknisi', [TechnicianController::class, 'store'])->name('jasa.teknisi.store');
         Route::put('/jasa/teknisi/{technician}', [TechnicianController::class, 'update'])->name('jasa.teknisi.update');
+        Route::delete('/jasa/teknisi/{technician}', [TechnicianController::class, 'destroy'])->name('jasa.teknisi.destroy');
+        Route::post('/jasa/teknisi/{technician}/request-deletion', [TechnicianController::class, 'requestDeletion'])->name('jasa.teknisi.request-deletion');
+        Route::post('/jasa/teknisi/{technician}/approve-deletion', [TechnicianController::class, 'approveDeletion'])->name('jasa.teknisi.approve-deletion');
+        Route::post('/jasa/teknisi/{technician}/reject-deletion', [TechnicianController::class, 'rejectDeletion'])->name('jasa.teknisi.reject-deletion');
         Route::post('/jasa/teknisi/{technician}/availability', [TechnicianController::class, 'storeAvailability'])->name('jasa.teknisi.availability');
 
         Route::get('/jasa/instalasi', fn (Request $request) => app(ServiceOperationsController::class)->index($request, 'installation'))->name('jasa.instalasi.index');
@@ -174,6 +178,13 @@ Route::middleware(['auth', 'audit'])->group(function () {
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::post('/products/{product}/adjust', [ProductController::class, 'adjustStock'])->name('products.adjust');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+        Route::post('/products/{product}/request-deletion', [ProductController::class, 'requestDeletion'])->name('products.request-deletion');
+        Route::post('/products/{product}/approve-deletion', [ProductController::class, 'approveDeletion'])->name('products.approve-deletion');
+        Route::post('/products/{product}/reject-deletion', [ProductController::class, 'rejectDeletion'])->name('products.reject-deletion');
+        Route::post('/products/{product}/request-adjustment', [ProductController::class, 'requestAdjustment'])->name('products.request-adjustment');
+        Route::post('/products/{product}/request-edit', [ProductController::class, 'requestEdit'])->name('products.request-edit');
+        Route::post('/products/change-requests/{changeRequest}/approve', [ProductController::class, 'approveChangeRequest'])->name('products.change-requests.approve');
+        Route::post('/products/change-requests/{changeRequest}/reject', [ProductController::class, 'rejectChangeRequest'])->name('products.change-requests.reject');
     });
 
     // Modul Penjualan / Trade / Barang (Admin input, Manager approve, Owner monitoring)

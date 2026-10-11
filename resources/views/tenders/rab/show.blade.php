@@ -8,6 +8,12 @@
     addItemModal: false,
     editItemModal: false,
     reviseModal: false,
+    submitRabModal: false,
+    approveRabModal: false,
+    rejectRabModal: false,
+    submitNotes: '',
+    approveNotes: '',
+    rejectNotes: '',
     selectedItem: null,
     activeTab: 'all',
     products: {{ Js::from($products) }},
@@ -187,50 +193,58 @@
     </div>
 
     <!-- Action & Approval Bar Manajemen -->
-    <div class="bg-white rounded-lg p-3.5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div class="flex items-center gap-2 text-xs">
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3 text-xs flex-wrap">
             <span class="text-slate-500 font-medium">Status Pengajuan RAB:</span>
-            <span class="font-semibold text-slate-800 uppercase tracking-wide">{{ $tender->rab_status ?: 'draft' }}</span>
+            @php
+                $statusClass = match($tender->rab_status) {
+                    'diajukan' => 'bg-amber-50 text-amber-800 border-amber-200',
+                    'disetujui' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                    'perlu_revisi' => 'bg-amber-100 text-amber-900 border-amber-300',
+                    'ditolak' => 'bg-rose-50 text-rose-800 border-rose-200',
+                    default => 'bg-slate-100 text-slate-700 border-slate-200',
+                };
+            @endphp
+            <span class="px-3 py-1 rounded-full font-bold uppercase tracking-wider text-[11px] border {{ $statusClass }}">
+                {{ $tender->rab_status ?: 'DRAFT' }}
+            </span>
             @if($tender->rab_notes)
-                <span class="text-slate-400">|</span>
+                <span class="text-slate-300">|</span>
                 <span class="text-slate-600 italic">"{{ $tender->rab_notes }}"</span>
             @endif
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <!-- Admin: Ajukan RAB ke Manajemen -->
-            @if(auth()->user()->role?->name === 'admin' && in_array($tender->rab_status, ['draft', 'perlu_revisi', null], true))
-                <form action="{{ route('tender.rab.submit', $tender) }}" method="POST" onsubmit="return confirm('Ajukan estimasi RAB ini kepada Manajemen untuk persetujuan?');">
-                    @csrf
-                    <button type="submit" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-md shadow-xs transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-paper-plane text-[10px]"></i> Ajukan RAB ke Manajemen
+            @if(auth()->user()->role?->name === 'admin')
+                @if(in_array($tender->rab_status, ['draft', 'perlu_revisi', null], true))
+                    <button type="button" @click="submitRabModal = true" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-[11px]"></i> Ajukan RAB ke Manajemen
                     </button>
-                </form>
+                @elseif(in_array($tender->rab_status, ['diajukan', 'pending'], true))
+                    <span class="px-3.5 py-2 bg-amber-50 text-amber-800 border border-amber-200 font-semibold text-xs rounded-xl flex items-center gap-1.5" title="Estimasi RAB sedang menunggu persetujuan Manager">
+                        <i class="fa-solid fa-hourglass-half text-[11px] animate-pulse"></i> Menunggu Persetujuan Manajemen
+                    </span>
+                @endif
             @endif
 
             <!-- Manajemen: Setujui / Minta Revisi / Tolak RAB -->
-            @if(auth()->user()->role?->name === 'manager' && in_array($tender->rab_status, ['diajukan', 'pending'], true))
-                <form action="{{ route('tender.rab.approve', $tender) }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-md shadow-xs transition flex items-center gap-1">
-                        <i class="fa-solid fa-check text-[10px]"></i> Setujui RAB
-                    </button>
-                </form>
-                <button type="button" @click="reviseModal = true" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-md shadow-xs transition flex items-center gap-1">
-                    <i class="fa-solid fa-rotate-left text-[10px]"></i> Minta Revisi
+            @if(in_array(auth()->user()->role?->name, ['manager', 'owner'], true) && in_array($tender->rab_status, ['diajukan', 'pending'], true))
+                <button type="button" @click="approveRabModal = true" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check text-[11px]"></i> Setujui RAB
                 </button>
-                <form action="{{ route('tender.rab.reject', $tender) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menolak RAB ini?');">
-                    @csrf
-                    <button type="submit" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-md shadow-xs transition flex items-center gap-1">
-                        <i class="fa-solid fa-xmark text-[10px]"></i> Tolak RAB
-                    </button>
-                </form>
+                <button type="button" @click="reviseModal = true" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left text-[11px]"></i> Minta Revisi
+                </button>
+                <button type="button" @click="rejectRabModal = true" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-xmark text-[11px]"></i> Tolak RAB
+                </button>
             @endif
 
             <!-- Tombol Tambah Item Komponen Biaya -->
             @if(auth()->user()->role?->name !== 'owner')
-                <button @click="addItemModal = true" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md shadow-xs transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus text-[10px]"></i> Tambah Komponen Biaya
+                <button @click="addItemModal = true" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus text-[11px]"></i> Tambah Komponen Biaya
                 </button>
             @endif
         </div>
@@ -424,21 +438,26 @@
     </div>
 
     <!-- Modal Tambah Komponen Biaya RAB -->
-    <div x-show="addItemModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4" x-cloak>
-        <div class="bg-white rounded-lg border border-slate-200 max-w-lg w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-900">Tambah Komponen Biaya RAB</h3>
-                    <p class="text-xs text-slate-500">Pilih kategori dan input estimasi modal serta penawaran</p>
+    <div x-show="addItemModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-cloak @keydown.escape.window="addItemModal = false">
+        <div @click.outside="addItemModal = false" class="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-plus text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-900">Tambah Komponen Biaya RAB</h3>
+                        <p class="text-xs text-slate-500">Pilih kategori dan input estimasi modal serta penawaran</p>
+                    </div>
                 </div>
-                <button @click="addItemModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                <button type="button" @click="addItemModal = false" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <form action="{{ route('tender.rab.items.store', $tender) }}" method="POST" class="space-y-3.5">
+            <form action="{{ route('tender.rab.items.store', $tender) }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Kategori Biaya <span class="text-rose-500">*</span></label>
-                    <select name="category" x-model="formItem.category" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Kategori Biaya <span class="text-rose-500">*</span></label>
+                    <select name="category" x-model="formItem.category" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
                         <option value="barang">1. Barang / Material (Modul Dagang / Gudang)</option>
                         <option value="tenaga_kerja">2. Tenaga Kerja / SDM Teknisi (Modul Jasa)</option>
                         <option value="transportasi">3. Transportasi & Logistik Lapangan</option>
@@ -448,9 +467,9 @@
                 </div>
 
                 <!-- Jika Kategori Barang, dropdown master produk Modul Dagang -->
-                <div x-show="formItem.category === 'barang'" class="space-y-1 bg-purple-50/50 p-3 rounded-md border border-purple-200">
-                    <label class="block text-xs font-semibold text-purple-900 uppercase tracking-wider">Pilih Barang dari Modul Dagang (Gudang)</label>
-                    <select name="product_id" x-model="formItem.product_id" @change="onProductChange($event.target.value)" class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <div x-show="formItem.category === 'barang'" class="space-y-1 bg-purple-50/60 p-3.5 rounded-xl border border-purple-200">
+                    <label class="block text-xs font-semibold text-purple-900 uppercase">Pilih Barang dari Modul Dagang (Gudang)</label>
+                    <select name="product_id" x-model="formItem.product_id" @change="onProductChange($event.target.value)" class="w-full px-3 py-2 border border-purple-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
                         <option value="">-- Pilih Barang Master / Manual --</option>
                         @foreach($products as $prod)
                             <option value="{{ $prod->id }}">
@@ -458,38 +477,38 @@
                             </option>
                         @endforeach
                     </select>
-                    <p class="text-[10px] text-purple-700">Memilih produk akan otomatis memeriksa ketersediaan stok gudang dan mengisi harga modal HPP.</p>
+                    <p class="text-[10px] text-purple-700 mt-1">Memilih produk akan otomatis memeriksa ketersediaan stok gudang dan mengisi harga modal HPP.</p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama / Uraian Komponen Biaya <span class="text-rose-500">*</span></label>
-                    <input type="text" name="item_name" x-model="formItem.item_name" required placeholder="Contoh: Router Wireless AC1200 / Teknisi Instalasi Kabel..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama / Uraian Komponen Biaya <span class="text-rose-500">*</span></label>
+                    <input type="text" name="item_name" x-model="formItem.item_name" required placeholder="Contoh: Router Wireless AC1200 / Teknisi Instalasi Kabel..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Volume / Kuantitas <span class="text-rose-500">*</span></label>
-                        <input type="number" name="quantity" x-model="formItem.quantity" step="0.01" min="0.01" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Volume / Kuantitas <span class="text-rose-500">*</span></label>
+                        <input type="number" name="quantity" x-model="formItem.quantity" step="0.01" min="0.01" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Satuan</label>
-                        <input type="text" name="unit" x-model="formItem.unit" required placeholder="Unit, Roll, Orang/Hari..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Satuan</label>
+                        <input type="text" name="unit" x-model="formItem.unit" required placeholder="Unit, Roll, Orang/Hari..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">HPP Biaya Modal Satuan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="unit_cost" x-model="formItem.unit_cost" min="0" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">HPP Biaya Modal Satuan (Rp) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="unit_cost" x-model="formItem.unit_cost" min="0" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Harga Penawaran Satuan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="unit_price" x-model="formItem.unit_price" min="0" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Harga Penawaran Satuan (Rp) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="unit_price" x-model="formItem.unit_price" min="0" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                 </div>
 
                 <!-- Preview Kalkulasi Realtime -->
-                <div class="bg-slate-50 p-2.5 rounded-md border border-slate-200 grid grid-cols-3 gap-2 text-xs font-numeric">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 grid grid-cols-3 gap-2 text-xs font-numeric">
                     <div>
                         <span class="text-[10px] text-slate-500 block">Subtotal Modal:</span>
                         <span class="font-bold text-slate-900" x-text="'Rp ' + ((formItem.quantity * formItem.unit_cost) || 0).toLocaleString('id-ID')"></span>
@@ -505,35 +524,40 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Catatan Tambahan</label>
-                    <textarea name="notes" x-model="formItem.notes" rows="2" placeholder="Spesifikasi teknis, merk, atau ketentuan instalasi..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan Tambahan</label>
+                    <textarea name="notes" x-model="formItem.notes" rows="2" placeholder="Spesifikasi teknis, merk, atau ketentuan instalasi..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                    <button type="button" @click="addItemModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">Batal</button>
-                    <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md transition shadow-xs">Simpan ke RAB</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="addItemModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl transition shadow">Simpan ke RAB</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal Edit Komponen Biaya RAB -->
-    <div x-show="editItemModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4" x-cloak>
-        <div class="bg-white rounded-lg border border-slate-200 max-w-lg w-full p-5 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-900">Edit Komponen Biaya RAB</h3>
-                    <p class="text-xs text-slate-500" x-text="selectedItem ? selectedItem.item_name : ''"></p>
+    <div x-show="editItemModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" x-cloak @keydown.escape.window="editItemModal = false">
+        <div @click.outside="editItemModal = false" class="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="fa-solid fa-pen-to-square text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-900">Edit Komponen Biaya RAB</h3>
+                        <p class="text-xs text-slate-500" x-text="selectedItem ? selectedItem.item_name : ''"></p>
+                    </div>
                 </div>
-                <button @click="editItemModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                <button type="button" @click="editItemModal = false" class="text-slate-400 hover:text-slate-600 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <form x-bind:action="selectedItem ? '/tender/' + {{ $tender->id }} + '/rab/items/' + selectedItem.id : '#'" method="POST" class="space-y-3.5">
+            <form x-bind:action="selectedItem ? '/tender/' + {{ $tender->id }} + '/rab/items/' + selectedItem.id : '#'" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Kategori Biaya</label>
-                    <select name="category" x-model="formItem.category" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Kategori Biaya</label>
+                    <select name="category" x-model="formItem.category" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
                         <option value="barang">1. Barang / Material</option>
                         <option value="tenaga_kerja">2. Tenaga Kerja / SDM Teknisi</option>
                         <option value="transportasi">3. Transportasi & Logistik</option>
@@ -542,9 +566,9 @@
                     </select>
                 </div>
 
-                <div x-show="formItem.category === 'barang'" class="space-y-1">
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Produk Terhubung (Modul Dagang)</label>
-                    <select name="product_id" x-model="formItem.product_id" @change="onProductChange($event.target.value)" class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <div x-show="formItem.category === 'barang'" class="space-y-1 bg-purple-50/60 p-3.5 rounded-xl border border-purple-200">
+                    <label class="block text-xs font-semibold text-purple-900 uppercase">Produk Terhubung (Modul Dagang)</label>
+                    <select name="product_id" x-model="formItem.product_id" @change="onProductChange($event.target.value)" class="w-full px-3 py-2 border border-purple-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 bg-white text-slate-800">
                         <option value="">-- Pilih Barang Master / Manual --</option>
                         @foreach($products as $prod)
                             <option value="{{ $prod->id }}">
@@ -555,64 +579,332 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama / Uraian Item</label>
-                    <input type="text" name="item_name" x-model="formItem.item_name" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama / Uraian Item</label>
+                    <input type="text" name="item_name" x-model="formItem.item_name" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Volume / Kuantitas</label>
-                        <input type="number" name="quantity" x-model="formItem.quantity" step="0.01" min="0.01" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Volume / Kuantitas</label>
+                        <input type="number" name="quantity" x-model="formItem.quantity" step="0.01" min="0.01" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Satuan</label>
-                        <input type="text" name="unit" x-model="formItem.unit" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Satuan</label>
+                        <input type="text" name="unit" x-model="formItem.unit" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">HPP Biaya Modal Satuan (Rp)</label>
-                        <input type="number" name="unit_cost" x-model="formItem.unit_cost" min="0" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">HPP Biaya Modal Satuan (Rp)</label>
+                        <input type="number" name="unit_cost" x-model="formItem.unit_cost" min="0" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Harga Penawaran Satuan (Rp)</label>
-                        <input type="number" name="unit_price" x-model="formItem.unit_price" min="0" required class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Harga Penawaran Satuan (Rp)</label>
+                        <input type="number" name="unit_price" x-model="formItem.unit_price" min="0" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Catatan</label>
-                    <textarea name="notes" x-model="formItem.notes" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan</label>
+                    <textarea name="notes" x-model="formItem.notes" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-500 text-slate-800"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                    <button type="button" @click="editItemModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">Batal</button>
-                    <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-md transition shadow-xs">Simpan Perubahan</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="editItemModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl transition shadow">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Minta Revisi RAB (Manajemen) -->
-    <div x-show="reviseModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4" x-cloak>
-        <div class="bg-white rounded-lg border border-slate-200 max-w-md w-full p-5 shadow-xl space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
-                <h3 class="font-bold text-sm text-slate-900">Minta Revisi Estimasi RAB</h3>
-                <button @click="reviseModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+    <!-- Modal 1: Validasi Pengajuan Estimasi RAB (Admin ke Manajemen) -->
+    <div x-show="submitRabModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="submitRabModal = false">
+        <div @click.outside="submitRabModal = false" class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="fa-solid fa-paper-plane text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Pengajuan Estimasi RAB Tender</h3>
+                        <p class="text-xs font-medium text-slate-500">Verifikasi & Penguncian Estimasi Sebelum Ditinjau Manajemen</p>
+                    </div>
+                </div>
+                <button type="button" @click="submitRabModal = false" class="text-slate-400 transition hover:text-slate-700" aria-label="Tutup form pengajuan RAB">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
-            <form action="{{ route('tender.rab.revise', $tender) }}" method="POST" class="space-y-3.5">
-                @csrf
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Catatan Revisi Manajemen <span class="text-rose-500">*</span></label>
-                    <textarea name="rab_notes" required rows="4" placeholder="Uraikan item yang perlu disesuaikan (misal: margin terlalu rendah, biaya transport terlalu tinggi, dsb)..." class="w-full px-3 py-1.5 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            <div class="space-y-4 px-6 py-5 max-h-[75vh] overflow-y-auto">
+                <!-- Ringkasan Identitas Tender -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Nomor Tender:</span>
+                        <span class="font-mono font-bold text-blue-700">{{ $tender->tender_number }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Nama Proyek:</span>
+                        <span class="font-bold text-slate-800 text-right max-w-[280px] truncate">{{ $tender->name }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Klien / Instansi:</span>
+                        <span class="text-slate-700 font-medium">{{ $tender->client->name ?? 'N/A' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Total Komponen Biaya:</span>
+                        <span class="font-semibold text-slate-800">{{ $tender->rabItems->count() }} Item Komponen</span>
+                    </div>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-                    <button type="button" @click="reviseModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">Batal</button>
-                    <button type="submit" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-md transition shadow-xs flex items-center gap-1">
-                        <i class="fa-solid fa-rotate-left text-[10px]"></i> Kirim Revisi RAB
+                <!-- Ringkasan Kalkulasi Finansial RAB -->
+                <div class="rounded-xl border border-slate-200 bg-white p-3.5 text-xs">
+                    <span class="text-slate-500 uppercase tracking-wider font-semibold text-[10px] block mb-2">Ringkasan Finansial RAB</span>
+                    <div class="grid grid-cols-2 gap-3 font-numeric">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="text-slate-500 text-[10px] block">Total HPP Modal:</span>
+                            <span class="font-bold text-slate-900 text-sm">Rp {{ number_format($tender->total_rab_cost, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="bg-blue-50/70 p-2.5 rounded-xl border border-blue-100">
+                            <span class="text-blue-600 text-[10px] block">Nilai Penawaran (Bid):</span>
+                            <span class="font-bold text-blue-700 text-sm">Rp {{ number_format($tender->bid_value > 0 ? $tender->bid_value : $tender->total_rab_price, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100">
+                            <span class="text-emerald-700 text-[10px] block">Estimasi Laba Kotor:</span>
+                            <span class="font-bold {{ $tender->estimated_profit >= 0 ? 'text-emerald-800' : 'text-rose-700' }} text-sm">
+                                Rp {{ number_format($tender->estimated_profit, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        <div class="p-2.5 rounded-xl border {{ $tender->profit_margin_percentage >= 20 ? 'bg-emerald-50/70 border-emerald-100 text-emerald-800' : ($tender->profit_margin_percentage > 0 ? 'bg-amber-50/70 border-amber-100 text-amber-800' : 'bg-rose-50/70 border-rose-100 text-rose-800') }}">
+                            <span class="text-[10px] block opacity-80">Margin Keuntungan:</span>
+                            <span class="font-bold text-sm">{{ $tender->profit_margin_percentage }}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Kesiapan Material Gudang -->
+                @if($deficitItems->isNotEmpty())
+                    <div class="flex gap-2.5 rounded-xl border border-amber-200 bg-amber-50/90 p-3 text-amber-900 text-xs">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-600 shrink-0"></i>
+                        <div class="leading-relaxed">
+                            <span class="font-bold">Peringatan Ketersediaan Material:</span>
+                            <p class="mt-0.5 text-[11px] text-amber-800">
+                                Terdapat {{ $deficitItems->count() }} item material dengan stok defisit di gudang. Pengadaan tambahan melalui modul Purchasing akan diperlukan jika tender dimenangkan.
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    <div class="flex gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3 text-emerald-900 text-xs">
+                        <i class="fa-solid fa-circle-check mt-0.5 text-emerald-600 shrink-0"></i>
+                        <p class="leading-relaxed text-[11px]">
+                            <strong class="font-bold">Material Aman:</strong> Seluruh item material yang terhubung dengan modul dagang tercukupi di inventaris gudang saat ini.
+                        </p>
+                    </div>
+                @endif
+
+                <!-- Kebijakan SOP Notifikasi -->
+                <div class="flex gap-2.5 rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-blue-900 text-xs">
+                    <i class="fa-solid fa-shield-halved mt-0.5 text-blue-600 shrink-0"></i>
+                    <p class="leading-relaxed text-[11px] text-blue-800">
+                        <strong class="font-bold">Kebijakan SOP PT Signal Panca Utama:</strong> Pengajuan ini akan mengubah status RAB menjadi <strong>DIAJUKAN</strong> dan mengunci perubahan komponen biaya oleh Admin hingga diverifikasi oleh Manager atau Owner.
+                    </p>
+                </div>
+
+                <!-- Form Pengajuan -->
+                <form action="{{ route('tender.rab.submit', $tender) }}" method="POST" id="submitRabForm" class="space-y-3">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                            Catatan / Keterangan Pengajuan (Opsional)
+                        </label>
+                        <textarea name="notes" 
+                                  x-model="submitNotes"
+                                  rows="2" 
+                                  placeholder="Tuliskan catatan khusus untuk Manajemen (misal: estimasi harga material berdasarkan penawaran supplier X, diskon khusus proyek)..." 
+                                  class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+                <button type="button" @click="submitRabModal = false" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                    Batal
+                </button>
+                <button type="submit" form="submitRabForm" class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> Ajukan RAB ke Manajemen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Validasi Persetujuan Estimasi RAB (Khusus Manajemen) -->
+    <div x-show="approveRabModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="approveRabModal = false">
+        <div @click.outside="approveRabModal = false" class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <i class="fa-solid fa-circle-check text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Persetujuan Estimasi RAB Tender</h3>
+                        <p class="text-xs font-medium text-emerald-700">Persetujuan Manajemen untuk Nilai Penawaran & Anggaran</p>
+                    </div>
+                </div>
+                <button type="button" @click="approveRabModal = false" class="text-slate-400 transition hover:text-slate-700" aria-label="Tutup persetujuan RAB">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 px-6 py-5">
+                <!-- Detail Finansial yang Disetujui -->
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Nomor Tender:</span>
+                        <span class="font-mono font-bold text-slate-900">{{ $tender->tender_number }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Total HPP Modal:</span>
+                        <span class="font-bold text-slate-900 font-numeric">Rp {{ number_format($tender->total_rab_cost, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Nilai Penawaran (Bid):</span>
+                        <span class="font-bold text-blue-700 font-numeric">Rp {{ number_format($tender->bid_value > 0 ? $tender->bid_value : $tender->total_rab_price, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                        <span class="text-slate-500">Estimasi Margin Laba:</span>
+                        <span class="font-bold text-emerald-700 font-numeric">
+                            {{ $tender->profit_margin_percentage }}% (Rp {{ number_format($tender->estimated_profit, 0, ',', '.') }})
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5 text-emerald-950 text-xs">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-emerald-600 shrink-0"></i>
+                    <p class="leading-relaxed">
+                        Dengan menyetujui, estimasi RAB ini resmi disahkan sebagai acuan anggaran biaya tender dan dasar perhitungan operasional proyek.
+                    </p>
+                </div>
+
+                <form action="{{ route('tender.rab.approve', $tender) }}" method="POST" id="approveRabForm" class="space-y-2">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                            Catatan Persetujuan (Opsional)
+                        </label>
+                        <textarea name="notes" 
+                                  x-model="approveNotes" 
+                                  rows="2" 
+                                  placeholder="Tuliskan catatan persetujuan manajemen..." 
+                                  class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+                <button type="button" @click="approveRabModal = false" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                    Batal
+                </button>
+                <button type="submit" form="approveRabForm" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-check text-xs"></i> Setujui & Sahkan RAB
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Validasi Penolakan Estimasi RAB (Khusus Manajemen) -->
+    <div x-show="rejectRabModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="rejectRabModal = false">
+        <div @click.outside="rejectRabModal = false" class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                        <i class="fa-solid fa-ban text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Tolak Pengajuan RAB</h3>
+                        <p class="text-xs font-medium text-rose-600">Pembatalan Pengajuan Estimasi Tender</p>
+                    </div>
+                </div>
+                <button type="button" @click="rejectRabModal = false" class="text-slate-400 transition hover:text-slate-700" aria-label="Tutup form tolak RAB">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 px-6 py-5">
+                <div class="flex gap-2.5 rounded-xl border border-rose-200 bg-rose-50/80 p-3.5 text-rose-950 text-xs">
+                    <i class="fa-solid fa-triangle-exclamation mt-0.5 text-rose-600 shrink-0"></i>
+                    <p class="leading-relaxed">
+                        Estimasi RAB untuk tender <strong class="text-slate-900">{{ $tender->tender_number }}</strong> akan ditolak dan dikembalikan ke status DITOLAK.
+                    </p>
+                </div>
+
+                <form action="{{ route('tender.rab.reject', $tender) }}" method="POST" id="rejectRabForm" class="space-y-3">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                            Alasan Penolakan Manajemen <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea name="notes" 
+                                  x-model="rejectNotes" 
+                                  required 
+                                  minlength="5" 
+                                  rows="3" 
+                                  placeholder="Tuliskan alasan mengapa estimasi RAB ini ditolak (misal: margin laba terlalu tipis, HPP biaya material terlalu tinggi)..." 
+                                  class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500 text-slate-800"></textarea>
+                        <p class="text-[11px] text-slate-400 mt-1">Minimal 5 karakter. Catatan ini akan tersimpan pada riwayat audit tender.</p>
+                    </div>
+                </form>
+            </div>
+
+            <div class="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+                <button type="button" @click="rejectRabModal = false" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                    Batal
+                </button>
+                <button type="submit" form="rejectRabForm" class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-xmark text-xs"></i> Tolak Estimasi RAB
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Minta Revisi Estimasi RAB (Khusus Manajemen) -->
+    <div x-show="reviseModal" x-cloak style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @keydown.escape.window="reviseModal = false">
+        <div @click.outside="reviseModal = false" class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="fa-solid fa-rotate-left text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Minta Revisi Estimasi RAB</h3>
+                        <p class="text-xs font-medium text-amber-700">Instruksi Penyesuaian Anggaran ke Admin</p>
+                    </div>
+                </div>
+                <button type="button" @click="reviseModal = false" class="text-slate-400 transition hover:text-slate-700" aria-label="Tutup form revisi RAB">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('tender.rab.revise', $tender) }}" method="POST" class="space-y-4 px-6 py-5">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                        Catatan Revisi Manajemen <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea name="rab_notes" 
+                              required 
+                              minlength="5" 
+                              rows="4" 
+                              placeholder="Uraikan item yang perlu disesuaikan (misal: kurangi margin biaya transport, negosiasikan ulang harga material router ke vendor X)..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"></textarea>
+                    <p class="text-[11px] text-slate-400 mt-1">Admin akan menerima catatan ini dan dapat mengedit kembali rincian RAB.</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" @click="reviseModal = false" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                        Batal
+                    </button>
+                    <button type="submit" class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left text-xs"></i> Kirim Catatan Revisi
                     </button>
                 </div>
             </form>

@@ -15,6 +15,12 @@
     requestDeleteModal: false,
     approveDeleteModal: false,
     rejectDeleteModal: false,
+    submitModal: false,
+    approveModal: false,
+    rejectModal: false,
+    submitNotes: '',
+    approveNotes: '',
+    rejectNotes: '',
     createClientMode: 'select',
     editClientMode: 'select',
     selectedClientId: '',
@@ -108,6 +114,21 @@
         this.selectedTender = tender;
         this.rejectReason = '';
         this.rejectDeleteModal = true;
+    },
+    openSubmitModal(tender) {
+        this.selectedTender = tender;
+        this.submitNotes = '';
+        this.submitModal = true;
+    },
+    openApproveModal(tender) {
+        this.selectedTender = tender;
+        this.approveNotes = '';
+        this.approveModal = true;
+    },
+    openRejectModal(tender) {
+        this.selectedTender = tender;
+        this.rejectNotes = '';
+        this.rejectModal = true;
     }
 }">
 
@@ -424,31 +445,22 @@
 
                                     <!-- Ajukan ke Manajemen (Admin action jika draft atau perlu revisi) -->
                                     @if(auth()->user()->role?->name === 'admin' && in_array($tender->submission_status, ['draft', 'perlu_revisi', null], true) && $tender->deletion_status !== 'pending_deletion')
-                                        <form action="{{ route('tender.submit', $tender) }}" method="POST" class="inline" onsubmit="return confirm('Ajukan tender ini ke Manajemen untuk mendapatkan persetujuan?');">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-md shadow-xs transition inline-flex items-center gap-1" title="Ajukan ke Manajemen">
-                                                <i class="fa-solid fa-paper-plane text-[10px]"></i> Ajukan
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="openSubmitModal({{ $tender }})" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-md shadow-xs transition inline-flex items-center gap-1" title="Ajukan ke Manajemen">
+                                            <i class="fa-solid fa-paper-plane text-[10px]"></i> Ajukan
+                                        </button>
                                     @endif
 
                                     <!-- Keputusan Manajemen: Setujui, Tolak, Perlu Revisi (jika diajukan) -->
                                     @if(auth()->user()->role?->name === 'manager' && in_array($tender->submission_status, ['diajukan', 'pending'], true) && $tender->deletion_status !== 'pending_deletion')
-                                        <form action="{{ route('tender.approve', $tender) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-md transition shadow-xs flex items-center gap-1" title="Setujui Tender">
-                                                <i class="fa-solid fa-check text-[10px]"></i> Setujui
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="openApproveModal({{ $tender }})" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-md transition shadow-xs flex items-center gap-1" title="Setujui Tender">
+                                            <i class="fa-solid fa-check text-[10px]"></i> Setujui
+                                        </button>
                                         <button type="button" @click="openReviseModal({{ $tender }})" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-md transition shadow-xs flex items-center gap-1" title="Minta Revisi Tender">
                                             <i class="fa-solid fa-rotate-left text-[10px]"></i> Revisi
                                         </button>
-                                        <form action="{{ route('tender.reject', $tender) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menolak tender ini?');">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-md transition shadow-xs flex items-center gap-1" title="Tolak Tender">
-                                                <i class="fa-solid fa-xmark text-[10px]"></i> Tolak
-                                            </button>
-                                        </form>
+                                        <button type="button" @click="openRejectModal({{ $tender }})" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-md transition shadow-xs flex items-center gap-1" title="Tolak Tender">
+                                            <i class="fa-solid fa-xmark text-[10px]"></i> Tolak
+                                        </button>
                                     @endif
 
                                     <!-- Edit Tender -->
@@ -1213,6 +1225,183 @@
                     </button>
                     <button type="submit" class="px-4 py-1.5 bg-slate-700 hover:bg-slate-800 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
                         <i class="fa-solid fa-ban text-[11px]"></i> Tolak Permohonan Hapus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 10: Konfirmasi Pengajuan Tender ke Manajemen (Admin) -->
+    <div x-show="submitModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="submitModal = false">
+            <div class="flex items-start justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Pengajuan Tender ke Manajemen</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Memerlukan persetujuan Manajemen</p>
+                    </div>
+                </div>
+                <button type="button" @click="submitModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Tender -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Tender:</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedTender ? selectedTender.tender_number : ''"></span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Nama Pekerjaan:</span>
+                    <span class="font-semibold text-slate-800 text-right" x-text="selectedTender ? selectedTender.name : ''"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Apakah Anda yakin ingin mengajukan tender ini ke Manajemen untuk mendapatkan persetujuan peninjauan?
+            </p>
+
+            <form x-bind:action="selectedTender ? '/tender/' + selectedTender.id + '/submit' : '#'" method="POST" class="space-y-3.5">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Pengajuan (Opsional)
+                    </label>
+                    <textarea name="notes" 
+                              x-model="submitNotes" 
+                              rows="2" 
+                              placeholder="Tuliskan catatan tambahan untuk Manajemen jika ada..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="submitModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-paper-plane text-[11px]"></i> Ya, Ajukan ke Manajemen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 11: Konfirmasi Persetujuan Tender (Manager / Owner) -->
+    <div x-show="approveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="approveModal = false">
+            <div class="flex items-start justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-check text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Persetujuan Tender</h3>
+                        <p class="text-[11px] text-emerald-700 font-medium mt-0.5">Wewenang Manajemen</p>
+                    </div>
+                </div>
+                <button type="button" @click="approveModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Tender -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Tender:</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedTender ? selectedTender.tender_number : ''"></span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Nama Pekerjaan:</span>
+                    <span class="font-semibold text-slate-800 text-right" x-text="selectedTender ? selectedTender.name : ''"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Apakah Anda yakin ingin menyetujui tender ini? Status tender akan diperbarui menjadi <strong>Disetujui</strong>.
+            </p>
+
+            <form x-bind:action="selectedTender ? '/tender/' + selectedTender.id + '/approve' : '#'" method="POST" class="space-y-3.5">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Persetujuan (Opsional)
+                    </label>
+                    <textarea name="notes" 
+                              x-model="approveNotes" 
+                              rows="2" 
+                              placeholder="Tuliskan catatan persetujuan jika ada..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="approveModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-check text-[11px]"></i> Ya, Setujui Tender
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 12: Konfirmasi Penolakan Tender (Manager / Owner) -->
+    <div x-show="rejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" x-cloak>
+        <div class="w-full max-w-md overflow-hidden rounded-lg bg-white border border-slate-200 shadow-xl p-5 space-y-4" @click.away="rejectModal = false">
+            <div class="flex items-start justify-between border-b border-slate-200 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-ban text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Penolakan Tender</h3>
+                        <p class="text-[11px] text-rose-600 font-medium mt-0.5">Wewenang Manajemen</p>
+                    </div>
+                </div>
+                <button type="button" @click="rejectModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Detail Tender -->
+            <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">No. Tender:</span>
+                    <span class="font-mono font-bold text-slate-900" x-text="selectedTender ? selectedTender.tender_number : ''"></span>
+                </div>
+                <div class="flex items-start justify-between gap-2">
+                    <span class="text-slate-500 shrink-0">Nama Pekerjaan:</span>
+                    <span class="font-semibold text-slate-800 text-right" x-text="selectedTender ? selectedTender.name : ''"></span>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Apakah Anda yakin ingin menolak pengajuan tender ini? Status tender akan diperbarui menjadi <strong>Ditolak</strong>.
+            </p>
+
+            <form x-bind:action="selectedTender ? '/tender/' + selectedTender.id + '/reject' : '#'" method="POST" class="space-y-3.5">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Catatan Alasan Penolakan (Opsional)
+                    </label>
+                    <textarea name="notes" 
+                              x-model="rejectNotes" 
+                              rows="2" 
+                              placeholder="Tuliskan catatan alasan penolakan jika ada..." 
+                              class="w-full px-3 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button type="button" @click="rejectModal = false" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-md transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-md transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-ban text-[11px]"></i> Ya, Tolak Tender
                     </button>
                 </div>
             </form>

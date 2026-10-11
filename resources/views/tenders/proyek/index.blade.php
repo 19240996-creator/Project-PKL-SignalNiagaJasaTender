@@ -129,7 +129,12 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
                                         <i class="fa-solid fa-building-user text-[10px]"></i> Internal PT SPU
                                     </span>
-                                    <div class="text-[10px] text-slate-500 mt-1">{{ $tender->assignments->count() }} Teknisi ditugaskan</div>
+                                    @php
+                                        $directCount = $tender->assignments->count();
+                                        $jasaCount = $tender->serviceJobs ? $tender->serviceJobs->flatMap->assignments->count() : 0;
+                                        $totalTech = $directCount + $jasaCount;
+                                    @endphp
+                                    <div class="text-[10px] text-slate-500 mt-1">{{ $totalTech }} Teknisi ditugaskan</div>
                                 @endif
                             </td>
 

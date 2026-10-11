@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ServiceAssignment;
 use App\Models\ServiceJob;
 use App\Models\ServiceMaterialRequest;
+use App\Models\StockMovement;
 use App\Models\Technician;
 use App\Models\Tender;
 use Illuminate\Http\RedirectResponse;
@@ -71,7 +72,16 @@ class ServiceOperationsController extends Controller
         $validated['service_type'] = $serviceType;
         $validated['job_number'] = 'JOB-' . strtoupper($serviceType) . '-' . now()->format('YmdHis');
         $validated['status'] = 'Pending';
-        $validated['approval_status'] = Auth::user()?->isAdmin() ? 'pending' : 'approved';
+        if (!empty($validated['tender_id'])) {
+            $tender = Tender::find($validated['tender_id']);
+            if ($tender && ($tender->approval_status === 'approved' || in_array($tender->status, ['Menang', 'Kontrak', 'Pelaksanaan', 'Selesai'], true))) {
+                $validated['approval_status'] = 'approved';
+            } else {
+                $validated['approval_status'] = Auth::user()?->isAdmin() ? 'pending' : 'approved';
+            }
+        } else {
+            $validated['approval_status'] = Auth::user()?->isAdmin() ? 'pending' : 'approved';
+        }
         $validated['created_by'] = Auth::id();
         $validated['biaya'] = $validated['estimated_labor_cost'] ?? 0;
         $validated['progress'] = 0;
@@ -123,7 +133,25 @@ class ServiceOperationsController extends Controller
         $validated['requested_by'] = Auth::id();
         $serviceJob->materialRequests()->create($validated);
         $serviceJob->update(['material_request_status' => 'requested']);
-        return back()->with('success', 'Permintaan material dikirim ke modul Dagang.');
+
+        // Jika barang dipilih dari Dagang (product_id), kurangi stok di Dagang via StockMovement OUT
+        if (!empty($validated['product_id'])) {
+            $product = Product::find($validated['product_id']);
+            if ($product) {
+                StockMovement::create([
+                    'product_id' => $product->id,
+                    'movement_type' => 'OUT',
+                    'quantity' => (float) $validated['quantity'],
+                    'reference_type' => 'Operasional Jasa',
+                    'reference_id' => $serviceJob->id,
+                    'movement_date' => now(),
+                    'notes' => "Penggunaan material jasa: {$serviceJob->job_number} ({$serviceJob->name})",
+                    'created_by' => Auth::id() ?? 1,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Permintaan material berhasil dicatat dan stok gudang Dagang disinkronkan.');
     }
 
     public function updateProgress(Request $request, ServiceJob $serviceJob): RedirectResponse
@@ -138,8 +166,78 @@ class ServiceOperationsController extends Controller
             'result_notes' => 'nullable|string',
             'actual_cost' => 'nullable|numeric|min:0',
         ]);
-        $serviceJob->update($validated + ['status' => $validated['progress'] === 100 ? 'Selesai' : $validated['status']]);
-        return back()->with('success', 'Progres pekerjaan berhasil diperbarui.');
+
+        $progress = (int) $validated['progress'];
+        $status = $progress === 100 ? 'Selesai' : $validated['status'];
+
+        $updateData = [
+            'progress' => $progress,
+            'status' => $status,
+        ];
+
+        if ($status === 'Selesai' || $progress === 100) {
+            $updateData['approval_status'] = 'approved';
+        }
+
+        if ($request->filled('actual_cost')) {
+            $updateData['actual_cost'] = (float) $validated['actual_cost'];
+        } elseif ($request->has('actual_cost') && $request->input('actual_cost') === '0') {
+            $updateData['actual_cost'] = 0;
+        } else {
+            $updateData['actual_cost'] = $serviceJob->actual_cost ?? 0;
+        }
+
+        if (array_key_exists('diagnosis', $validated)) {
+            $updateData['diagnosis'] = $validated['diagnosis'];
+        }
+        if (array_key_exists('result_notes', $validated)) {
+            $updateData['result_notes'] = $validated['result_notes'];
+        }
+
+        $serviceJob->update($updateData);
+
+        // Jika pekerjaan Selesai, bebaskan penugasan teknisi (tugas aktif kembali 0)
+        if ($status === 'Selesai' || $progress === 100) {
+            $serviceJob->assignments()->update(['status' => 'completed']);
+        } else {
+            $serviceJob->assignments()->where('status', 'completed')->update(['status' => 'in_progress']);
+        }
+
+        // Sinkronkan ke Modul Tender jika serviceJob terhubung ke Tender
+        if ($serviceJob->tender_id) {
+            $tender = $serviceJob->tender;
+            if ($tender) {
+                $tenderUpdates = [
+                    'project_progress' => $progress,
+                ];
+
+                if ($status === 'Selesai' || $progress === 100) {
+                    $tenderUpdates['project_status'] = 'Selesai';
+                    $tenderUpdates['status'] = 'Selesai';
+                    $tender->assignments()->update(['status' => 'Selesai']);
+
+                    // Sinkronkan juga service jobs lain yang terhubung ke tender ini jika ada
+                    ServiceJob::where('tender_id', $tender->id)
+                        ->where('id', '!=', $serviceJob->id)
+                        ->get()
+                        ->each(function ($siblingJob) {
+                            $siblingJob->update(['progress' => 100, 'status' => 'Selesai']);
+                            $siblingJob->assignments()->update(['status' => 'completed']);
+                        });
+                } elseif ($status === 'Dalam Pelaksanaan') {
+                    $tenderUpdates['project_status'] = 'Dalam Pengerjaan';
+                    if ($tender->status === 'Selesai') {
+                        $tenderUpdates['status'] = 'Pelaksanaan';
+                    }
+                } elseif ($status === 'Tertunda') {
+                    $tenderUpdates['project_status'] = 'Kendala';
+                }
+
+                $tender->update($tenderUpdates);
+            }
+        }
+
+        return back()->with('success', 'Progres pekerjaan berhasil diperbarui dan disinkronkan ke Modul Tender.');
     }
 
     private function resolveType(string $type): string

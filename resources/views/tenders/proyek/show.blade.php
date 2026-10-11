@@ -486,7 +486,11 @@
             </div>
         </div>
 
-        @if($tender->assignments->isEmpty())
+        @php
+            $hasServiceAssignments = $tender->serviceJobs && $tender->serviceJobs->flatMap->assignments->isNotEmpty();
+        @endphp
+
+        @if($tender->assignments->isEmpty() && !$hasServiceAssignments)
             <div class="bg-white rounded-lg border border-slate-200 p-8 text-center shadow-xs">
                 <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                     <i class="fa-solid fa-users-slash text-lg"></i>
@@ -502,69 +506,124 @@
                 @endif
             </div>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                @foreach($tender->assignments as $assign)
-                    <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
-                        <div>
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">
-                                        {{ substr($assign->technician_name, 0, 2) }}
+            @if($tender->assignments->isNotEmpty())
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    @foreach($tender->assignments as $assign)
+                        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
+                            <div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">
+                                            {{ substr($assign->technician_name, 0, 2) }}
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ $assign->technician_name }}</h4>
+                                            <div class="text-[11px] text-blue-600 font-medium mt-0.5">
+                                                {{ $assign->role_or_competency }}
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    @if($assign->status === 'Selesai')
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>
+                                    @elseif($assign->status === 'Sedang Bekerja')
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Sedang Bekerja</span>
+                                    @elseif($assign->status === 'Digantikan')
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">Digantikan</span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Ditugaskan</span>
+                                    @endif
+                                </div>
+
+                                <div class="mt-3 space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-phone text-[10px] text-slate-400 w-4"></i>
+                                        <span>{{ $assign->contact_phone ?: 'Kontak belum diisi' }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-regular fa-calendar text-[10px] text-slate-400 w-4"></i>
+                                        <span>Periode: {{ $assign->start_date ? \Carbon\Carbon::parse($assign->start_date)->format('d/m/Y') : '-' }} s/d {{ $assign->end_date ? \Carbon\Carbon::parse($assign->end_date)->format('d/m/Y') : '-' }}</span>
+                                    </div>
+                                    @if($assign->notes)
+                                        <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded mt-2">
+                                            {{ $assign->notes }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if(!auth()->user()->isOwner())
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <button type="button" @click="openEditAssignment({{ Js::from($assign) }})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                                        <i class="fa-solid fa-pen text-[10px]"></i> Edit Status
+                                    </button>
+
+                                    <form method="POST" action="{{ route('tender.proyek.assignments.destroy', [$tender, $assign]) }}" onsubmit="return confirm('Hapus penugasan teknisi ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-rose-500 hover:text-rose-700">
+                                            <i class="fa-solid fa-trash-can text-[11px]"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            @if($hasServiceAssignments)
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wrench text-blue-600 text-[11px]"></i>
+                        Teknisi Terhubung dari Modul Jasa (Instalasi / Maintenance)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        @foreach($tender->serviceJobs as $sJob)
+                            @foreach($sJob->assignments as $sAssign)
+                                <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
                                     <div>
-                                        <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ $assign->technician_name }}</h4>
-                                        <div class="text-[11px] text-blue-600 font-medium mt-0.5">
-                                            {{ $assign->role_or_competency }}
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs uppercase">
+                                                    {{ substr($sAssign->technician?->name ?? 'TK', 0, 2) }}
+                                                </div>
+                                                <div>
+                                                    <h4 class="text-xs font-bold text-slate-900 leading-tight">{{ $sAssign->technician?->name }}</h4>
+                                                    <div class="text-[11px] text-emerald-600 font-medium mt-0.5">
+                                                        {{ $sAssign->technician?->competencies ?: 'Teknisi Jasa' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @if($sAssign->status === 'completed' || $sJob->status === 'Selesai')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>
+                                            @elseif($sAssign->status === 'in_progress')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Sedang Bekerja</span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Ditugaskan</span>
+                                            @endif
+                                        </div>
+
+                                        <div class="mt-3 space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
+                                            <div class="text-[11px] text-slate-500 font-medium">
+                                                Pekerjaan: <span class="text-blue-700 font-bold font-mono">{{ $sJob->job_number }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-solid fa-phone text-[10px] text-slate-400 w-4"></i>
+                                                <span>{{ $sAssign->technician?->phone ?: 'Kontak belum diisi' }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-regular fa-calendar text-[10px] text-slate-400 w-4"></i>
+                                                <span>Periode: {{ $sAssign->start_date ? $sAssign->start_date->format('d/m/Y') : '-' }} s/d {{ $sAssign->end_date ? $sAssign->end_date->format('d/m/Y') : '-' }}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                @if($assign->status === 'Selesai')
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>
-                                @elseif($assign->status === 'Sedang Bekerja')
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Sedang Bekerja</span>
-                                @elseif($assign->status === 'Digantikan')
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">Digantikan</span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Ditugaskan</span>
-                                @endif
-                            </div>
-
-                            <div class="mt-3 space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-phone text-[10px] text-slate-400 w-4"></i>
-                                    <span>{{ $assign->contact_phone ?: 'Kontak belum diisi' }}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-regular fa-calendar text-[10px] text-slate-400 w-4"></i>
-                                    <span>Periode: {{ $assign->start_date ? \Carbon\Carbon::parse($assign->start_date)->format('d/m/Y') : '-' }} s/d {{ $assign->end_date ? \Carbon\Carbon::parse($assign->end_date)->format('d/m/Y') : '-' }}</span>
-                                </div>
-                                @if($assign->notes)
-                                    <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded mt-2">
-                                        {{ $assign->notes }}
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        @if(!auth()->user()->isOwner())
-                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                <button type="button" @click="openEditAssignment({{ Js::from($assign) }})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
-                                    <i class="fa-solid fa-pen text-[10px]"></i> Edit Status
-                                </button>
-
-                                <form method="POST" action="{{ route('tender.proyek.assignments.destroy', [$tender, $assign]) }}" onsubmit="return confirm('Hapus penugasan teknisi ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-xs text-rose-500 hover:text-rose-700">
-                                        <i class="fa-solid fa-trash-can text-[11px]"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        @endif
+                            @endforeach
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endif
         @endif
     </div>
 
