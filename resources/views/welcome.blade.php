@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT Signal Panca Utama — Tender, Jasa & Perdagangan</title>
-    <meta name="description" content="PT Signal Panca Utama — Perusahaan perdagangan, jasa, dan pengadaan tender terpercaya di Karawang, Jawa Barat. Mitra bisnis BUMN dan instansi pemerintah.">
+    <title>PT Signal Panca Utama: Tender, Jasa & Perdagangan</title>
+    <meta name="description" content="PT Signal Panca Utama: Perusahaan perdagangan, jasa, dan pengadaan tender terpercaya di Karawang, Jawa Barat. Mitra bisnis BUMN dan instansi pemerintah.">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1093,6 +1093,352 @@
         .feature-block:hover .feature-image img {
             transform: scale(1.03);
         }
+
+        /* ─── WHATSAPP FLOATING WIDGET ───────────────────── */
+        .wa-floating-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        .wa-trigger-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #25D366;
+            color: #FFFFFF;
+            border: none;
+            box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease;
+            outline: none;
+        }
+        .wa-trigger-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 26px rgba(37, 211, 102, 0.55);
+        }
+        .wa-trigger-btn:active {
+            transform: scale(0.96);
+        }
+        .wa-trigger-btn:focus-visible {
+            box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 5px #25D366;
+        }
+        .wa-trigger-icon {
+            font-size: 30px;
+            line-height: 1;
+        }
+        .wa-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 22px;
+            height: 22px;
+            background: #EF4444;
+            color: #FFFFFF;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            animation: pulseBadge 2.4s infinite ease-in-out;
+        }
+        .wa-badge.is-hidden {
+            display: none !important;
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Popup Card */
+        .wa-popup-card {
+            position: absolute;
+            bottom: 74px;
+            right: 0;
+            width: 370px;
+            max-width: calc(100vw - 32px);
+            background: #FFFFFF;
+            border-radius: 18px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 20px 48px -10px rgba(15, 23, 42, 0.22), 0 4px 16px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(16px) scale(0.95);
+            transform-origin: bottom right;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.25s;
+            z-index: 10000;
+        }
+        .wa-popup-card.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Header */
+        .wa-popup-header {
+            background: linear-gradient(135deg, #075E54 0%, #0F766E 50%, #059669 100%);
+            padding: 16px 18px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .wa-agent-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .wa-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            padding: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+        .wa-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .wa-agent-text h4 {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.2;
+            margin: 0;
+        }
+        .wa-agent-text p {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .wa-online-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #25D366;
+            display: inline-block;
+        }
+        .wa-close-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 17px;
+            cursor: pointer;
+            padding: 6px;
+            line-height: 1;
+            border-radius: 8px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .wa-close-btn:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Body */
+        .wa-popup-body {
+            padding: 16px;
+            background: #FFFFFF;
+            max-height: 440px;
+            overflow-y: auto;
+        }
+        .wa-greeting {
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .wa-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .wa-option-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            background: #FFFFFF;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.18s ease;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .wa-option-card:hover {
+            border-color: #25D366;
+            background: #F0FDF4;
+            transform: translateY(-1px);
+        }
+        .wa-option-card.is-selected {
+            border-color: #25D366;
+            background: #ECFDF5;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.16);
+        }
+        .wa-option-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            background: #F1F5F9;
+            transition: background 0.15s, color 0.15s;
+        }
+        .wa-option-card.is-selected .wa-option-icon {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+        .wa-option-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .wa-option-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #0F172A;
+            line-height: 1.3;
+        }
+        .wa-option-desc {
+            font-size: 11px;
+            color: #64748B;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
+        .wa-option-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .wa-option-check {
+            font-size: 12px;
+            color: #16A34A;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.18s ease;
+        }
+        .wa-option-card.is-selected .wa-option-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .wa-quick-send-btn {
+            background: none;
+            border: none;
+            color: #64748B;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .wa-quick-send-btn:hover {
+            color: #25D366;
+            background: #E2E8F0;
+        }
+
+        .wa-custom-note-wrap {
+            margin-bottom: 12px;
+        }
+        .wa-custom-note {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            outline: none;
+            resize: none;
+            color: #0F172A;
+            background: #FFFFFF;
+            transition: border-color 0.15s;
+            box-sizing: border-box;
+        }
+        .wa-custom-note:focus {
+            border-color: #25D366;
+            box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+        }
+
+        .wa-submit-btn {
+            width: 100%;
+            padding: 12px 18px;
+            background: #25D366;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 700;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(37, 211, 102, 0.38);
+            transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+            text-decoration: none;
+        }
+        .wa-submit-btn:hover {
+            background: #20BD5A;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.48);
+        }
+        .wa-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .wa-floating-container {
+                bottom: 16px;
+                right: 16px;
+            }
+            .wa-popup-card {
+                width: calc(100vw - 32px);
+                bottom: 68px;
+                right: 0;
+            }
+            .wa-trigger-btn {
+                width: 54px;
+                height: 54px;
+            }
+            .wa-trigger-icon {
+                font-size: 26px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1634,5 +1980,245 @@
         });
     </script>
 
+    <!-- ═══ WHATSAPP FLOATING WIDGET ═══ -->
+    <div class="wa-floating-container" id="waContainer" data-phone="6281278901234">
+        <!-- Popup Widget Card -->
+        <div class="wa-popup-card" id="waPopupCard" role="dialog" aria-modal="true" aria-labelledby="waAgentTitle">
+            <!-- Header -->
+            <div class="wa-popup-header">
+                <div class="wa-agent-info">
+                    <div class="wa-avatar">
+                        <img src="{{ asset('images/logo-icon.png') }}" alt="PT Signal Panca Utama" width="36" height="36">
+                    </div>
+                    <div class="wa-agent-text">
+                        <h4 id="waAgentTitle">SignalCare (CS PT Signal)</h4>
+                        <p>
+                            <span class="wa-online-dot"></span>
+                            <span>Customer Support · Siap Membantu Anda</span>
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="wa-close-btn" id="waCloseBtn" aria-label="Tutup menu WhatsApp">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="wa-popup-body">
+                <div class="wa-greeting">
+                    Halo! Selamat datang di <strong>PT Signal Panca Utama</strong>. Silakan pilih topik pertanyaan Anda seputar Tender, Jasa, atau Perdagangan:
+                </div>
+
+                <!-- Pilihan Topik -->
+                <div class="wa-options-list" role="radiogroup" aria-label="Topik Pertanyaan">
+                    <!-- Option 1: Tender -->
+                    <div class="wa-option-card is-selected" role="radio" aria-checked="true" tabindex="0"
+                         data-message="Halo CS PT Signal Panca Utama, saya ingin berkonsultasi mengenai pengadaan proyek tender dan portofolio pelaksanaan proyek.">
+                        <div class="wa-option-icon" style="color: #2563EB; background: #EFF6FF;">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <div class="wa-option-content">
+                            <div class="wa-option-title">Proyek & Dokumen Tender</div>
+                            <div class="wa-option-desc">Kualifikasi tender LPSE, dokumen administrasi, dan RAB proyek</div>
+                        </div>
+                        <div class="wa-option-actions">
+                            <i class="fa-solid fa-check wa-option-check"></i>
+                            <button type="button" class="wa-quick-send-btn" title="Kirim langsung ke WhatsApp" aria-label="Kirim langsung topik tender ke WhatsApp">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Option 2: Jasa -->
+                    <div class="wa-option-card" role="radio" aria-checked="false" tabindex="0"
+                         data-message="Halo CS PT Signal Panca Utama, saya ingin menanyakan penawaran layanan jasa teknik, jadwal penugasan teknisi, instalasi, dan pemeliharaan.">
+                        <div class="wa-option-icon" style="color: #059669; background: #ECFDF5;">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </div>
+                        <div class="wa-option-content">
+                            <div class="wa-option-title">Layanan Jasa & Pemeliharaan</div>
+                            <div class="wa-option-desc">Jasa teknik, penugasan teknisi, instalasi, dan jadwal maintenance</div>
+                        </div>
+                        <div class="wa-option-actions">
+                            <i class="fa-solid fa-check wa-option-check"></i>
+                            <button type="button" class="wa-quick-send-btn" title="Kirim langsung ke WhatsApp" aria-label="Kirim langsung topik jasa ke WhatsApp">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Option 3: Dagang / Barang -->
+                    <div class="wa-option-card" role="radio" aria-checked="false" tabindex="0"
+                         data-message="Halo CS PT Signal Panca Utama, saya ingin menanyakan ketersediaan stok produk dan pemesanan barang dagang untuk kebutuhan operasional kami.">
+                        <div class="wa-option-icon" style="color: #D97706; background: #FFFBEB;">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                        <div class="wa-option-content">
+                            <div class="wa-option-title">Pemesanan Barang Dagang</div>
+                            <div class="wa-option-desc">Ketersediaan stok barang dagang, pengadaan material, dan distribusi</div>
+                        </div>
+                        <div class="wa-option-actions">
+                            <i class="fa-solid fa-check wa-option-check"></i>
+                            <button type="button" class="wa-quick-send-btn" title="Kirim langsung ke WhatsApp" aria-label="Kirim langsung topik barang dagang ke WhatsApp">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Option 4: Kemitraan & Informasi Umum -->
+                    <div class="wa-option-card" role="radio" aria-checked="false" tabindex="0"
+                         data-message="Halo CS PT Signal Panca Utama, saya ingin berdiskusi mengenai peluang kemitraan vendor / supplier dan informasi umum perusahaan.">
+                        <div class="wa-option-icon" style="color: #7C3AED; background: #F5F3FF;">
+                            <i class="fa-solid fa-handshake-simple"></i>
+                        </div>
+                        <div class="wa-option-content">
+                            <div class="wa-option-title">Kemitraan Vendor & Info Umum</div>
+                            <div class="wa-option-desc">Kerja sama rekanan supplier, subkontraktor, dan profil perusahaan</div>
+                        </div>
+                        <div class="wa-option-actions">
+                            <i class="fa-solid fa-check wa-option-check"></i>
+                            <button type="button" class="wa-quick-send-btn" title="Kirim langsung ke WhatsApp" aria-label="Kirim langsung topik kemitraan ke WhatsApp">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Catatan Tambahan (Opsional) -->
+                <div class="wa-custom-note-wrap">
+                    <textarea id="waCustomNote" rows="2" placeholder="Tuliskan detail pertanyaan atau catatan Anda (opsional)..." class="wa-custom-note"></textarea>
+                </div>
+
+                <!-- Tombol CTA Utama -->
+                <button type="button" id="waSendBtn" class="wa-submit-btn">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Mulai Chat WhatsApp</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Floating Trigger Button (WhatsApp Green Circle) -->
+        <button type="button" class="wa-trigger-btn" id="waTriggerBtn" aria-label="Buka bantuan WhatsApp PT Signal Panca Utama" aria-expanded="false" title="Hubungi Kami via WhatsApp">
+            <i class="fa-brands fa-whatsapp wa-trigger-icon"></i>
+            <span class="wa-badge" id="waBadge">1</span>
+        </button>
+    </div>
+
+    <!-- WhatsApp Floating Widget Script -->
+    <script>
+        (function() {
+            function initWhatsAppWidget() {
+                const container = document.getElementById('waContainer');
+                if (!container || container.dataset.initialized) return;
+                container.dataset.initialized = 'true';
+
+                const triggerBtn = document.getElementById('waTriggerBtn');
+                const popupCard = document.getElementById('waPopupCard');
+                const closeBtn = document.getElementById('waCloseBtn');
+                const badge = document.getElementById('waBadge');
+                const optionCards = document.querySelectorAll('.wa-option-card');
+                const customNote = document.getElementById('waCustomNote');
+                const sendBtn = document.getElementById('waSendBtn');
+                const phoneNumber = container.getAttribute('data-phone') || '6281278901234';
+
+                let selectedMessage = '';
+                const initialSelected = document.querySelector('.wa-option-card.is-selected');
+                if (initialSelected) {
+                    selectedMessage = initialSelected.getAttribute('data-message') || '';
+                }
+
+                function openWidget() {
+                    popupCard.classList.add('is-open');
+                    triggerBtn.setAttribute('aria-expanded', 'true');
+                    if (badge) badge.classList.add('is-hidden');
+                }
+
+                function closeWidget() {
+                    popupCard.classList.remove('is-open');
+                    triggerBtn.setAttribute('aria-expanded', 'false');
+                }
+
+                function toggleWidget() {
+                    if (popupCard.classList.contains('is-open')) {
+                        closeWidget();
+                    } else {
+                        openWidget();
+                    }
+                }
+
+                function sendToWhatsApp(message) {
+                    const note = customNote ? customNote.value.trim() : '';
+                    let finalMsg = message || selectedMessage;
+                    if (note) {
+                        finalMsg += ' (Catatan tambahan: ' + note + ')';
+                    }
+                    const url = 'https://wa.me/' + phoneNumber + '?text=' + encodeURIComponent(finalMsg);
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
+
+                if (triggerBtn) {
+                    triggerBtn.addEventListener('click', toggleWidget);
+                }
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeWidget);
+                }
+
+                // Close on click outside
+                document.addEventListener('click', function(e) {
+                    if (!container.contains(e.target) && popupCard.classList.contains('is-open')) {
+                        closeWidget();
+                    }
+                });
+
+                // Close on Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && popupCard.classList.contains('is-open')) {
+                        closeWidget();
+                        triggerBtn.focus();
+                    }
+                });
+
+                // Handle option selection
+                optionCards.forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('.wa-quick-send-btn')) {
+                            const msg = this.getAttribute('data-message') || '';
+                            sendToWhatsApp(msg);
+                            return;
+                        }
+
+                        optionCards.forEach(c => {
+                            c.classList.remove('is-selected');
+                            c.setAttribute('aria-checked', 'false');
+                        });
+                        this.classList.add('is-selected');
+                        this.setAttribute('aria-checked', 'true');
+                        selectedMessage = this.getAttribute('data-message') || '';
+                    });
+
+                    card.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.click();
+                        }
+                    });
+                });
+
+                // Handle main submit button
+                if (sendBtn) {
+                    sendBtn.addEventListener('click', function() {
+                        sendToWhatsApp();
+                    });
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initWhatsAppWidget);
+            } else {
+                initWhatsAppWidget();
+            }
+        })();
+    </script>
 </body>
 </html>
