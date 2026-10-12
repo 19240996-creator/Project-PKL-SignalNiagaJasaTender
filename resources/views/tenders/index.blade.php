@@ -284,17 +284,17 @@
     <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
-                        <th class="p-3">No. Tender</th>
-                        <th class="p-3">Nama Tender & Klien</th>
-                        <th class="p-3">Pelaksanaan & Alasan</th>
-                        <th class="p-3">Nilai Tender (Rp)</th>
-                        <th class="p-3">Deadline</th>
-                        <th class="p-3">Status Pipeline</th>
-                        <th class="p-3">Persetujuan Manajemen</th>
-                        <th class="p-3">Submodul Terhubung</th>
-                        <th class="p-3 text-center">Aksi</th>
+                <thead class="bg-blue-600 text-white">
+                    <tr class="border-b border-blue-700 font-semibold uppercase tracking-wider text-[11px] text-white">
+                        <th class="p-3 font-semibold text-white">No. Tender</th>
+                        <th class="p-3 font-semibold text-white">Nama Tender & Klien</th>
+                        <th class="p-3 font-semibold text-white">Pelaksanaan & Alasan</th>
+                        <th class="p-3 font-semibold text-white">Nilai Tender (Rp)</th>
+                        <th class="p-3 font-semibold text-white">Deadline</th>
+                        <th class="p-3 font-semibold text-white">Status Pipeline</th>
+                        <th class="p-3 font-semibold text-white">Persetujuan Manajemen</th>
+                        <th class="p-3 font-semibold text-white">Submodul Terhubung</th>
+                        <th class="p-3 text-center font-semibold text-white">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">

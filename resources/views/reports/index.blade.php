@@ -15,67 +15,176 @@
 
     <!-- 1. Tab Seleksi Unit Bisnis (Corporate Blue & White Tabs) -->
     <div class="border-b border-slate-200 flex flex-wrap gap-6 text-xs md:text-sm font-medium print:hidden">
-        <a href="{{ route('laporan.index', ['domain' => 'tender', 'periode' => $periode, 'status' => $status]) }}"
+        <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'tender'])) }}"
            class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'tender' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
             <i class="fa-solid fa-file-contract text-xs"></i>
             <span>Bisnis Tender</span>
         </a>
 
-        <a href="{{ route('laporan.index', ['domain' => 'jasa', 'periode' => $periode, 'status' => $status]) }}"
+        <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'jasa'])) }}"
            class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'jasa' ? 'border-emerald-600 text-emerald-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
             <i class="fa-solid fa-wrench text-xs"></i>
             <span>Bisnis Jasa</span>
         </a>
 
-        <a href="{{ route('laporan.index', ['domain' => 'barang', 'periode' => $periode, 'status' => $status]) }}"
+        <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'barang'])) }}"
            class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'barang' ? 'border-purple-600 text-purple-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
             <i class="fa-solid fa-boxes-stacked text-xs"></i>
             <span>Bisnis Dagang (Barang)</span>
         </a>
 
-        <a href="{{ route('laporan.index', ['domain' => 'semua', 'periode' => $periode, 'status' => $status]) }}"
+        <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'semua'])) }}"
            class="pb-3 px-1 border-b-2 transition-colors flex items-center gap-2 {{ $domain === 'semua' ? 'border-slate-800 text-slate-900 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
             <i class="fa-solid fa-chart-pie text-xs"></i>
             <span>Ringkasan Tiga Bisnis</span>
         </a>
     </div>
 
-    <!-- 2. Filter Toolbar (1 Baris Ringkas) -->
-    <div class="bg-white rounded-lg p-3 border border-slate-200/90 shadow-xs print:hidden">
-        <form method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-center justify-between gap-3">
+    <!-- 2. Filter Toolbar (Responsif & Sesuai Token Design System) -->
+    <div class="bg-white rounded-lg p-3 border border-slate-200/90 shadow-xs print:hidden"
+         x-data="{
+             periode: '{{ $periode }}',
+             isCustom: {{ $periode === 'kustom' ? 'true' : 'false' }},
+             onPeriodeChange(val) {
+                 if (val === 'kustom') {
+                     this.isCustom = true;
+                 } else {
+                     this.isCustom = false;
+                     $nextTick(() => { $refs.filterForm.submit(); });
+                 }
+             }
+         }">
+        <form x-ref="filterForm" method="GET" action="{{ route('laporan.index') }}" class="flex flex-wrap items-center justify-between gap-3">
             <input type="hidden" name="domain" value="{{ $domain }}">
 
             <div class="flex flex-wrap items-center gap-2">
-                <!-- Periode -->
-                <select name="periode" onchange="this.form.submit()" class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="bulan_ini" {{ $periode === 'bulan_ini' ? 'selected' : '' }}>Bulan Ini</option>
-                    <option value="tahun_ini" {{ $periode === 'tahun_ini' ? 'selected' : '' }}>Tahun Ini</option>
-                    <option value="hari_ini" {{ $periode === 'hari_ini' ? 'selected' : '' }}>Hari Ini</option>
-                    <option value="semua" {{ $periode === 'semua' ? 'selected' : '' }}>Semua Periode</option>
-                </select>
+                <!-- Dropdown Periode (Per Hari, Per Minggu, Per Bulan, Per Tahun, dll) -->
+                <div class="relative">
+                    <select name="periode"
+                            x-model="periode"
+                            @change="onPeriodeChange($event.target.value)"
+                            class="h-9 px-3 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition cursor-pointer">
+                        <option value="per_hari" {{ in_array($periode, ['per_hari', 'perhari', 'hari_ini']) ? 'selected' : '' }}>Per Hari</option>
+                        <option value="per_minggu" {{ in_array($periode, ['per_minggu', 'perminggu', 'minggu_ini']) ? 'selected' : '' }}>Per Minggu</option>
+                        <option value="per_bulan" {{ in_array($periode, ['per_bulan', 'perbulan', 'bulan_ini']) ? 'selected' : '' }}>Per Bulan</option>
+                        <option value="per_tahun" {{ in_array($periode, ['per_tahun', 'pertahun', 'tahun_ini']) ? 'selected' : '' }}>Per Tahun</option>
+                        <option value="semua" {{ $periode === 'semua' ? 'selected' : '' }}>Semua Periode</option>
+                        <option value="kustom" {{ $periode === 'kustom' ? 'selected' : '' }}>Rentang Kustom</option>
+                    </select>
+                </div>
+
+                <!-- Sub-Picker: Jika Per Hari, Input Tanggal Spesifik (Default Hari Ini) -->
+                <div x-show="periode === 'per_hari'" x-cloak class="flex items-center gap-1.5">
+                    <input type="date"
+                           name="start_date"
+                           value="{{ $startDate }}"
+                           @change="$refs.filterForm.submit()"
+                           title="Pilih tanggal per hari"
+                           class="h-9 px-2.5 rounded-md border border-slate-200 text-xs text-slate-700 bg-white hover:bg-slate-50 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition cursor-pointer">
+                </div>
+
+                <!-- Sub-Picker: Jika Per Bulan, Input Bulan Spesifik (Default Bulan Ini) -->
+                <div x-show="periode === 'per_bulan'" x-cloak class="flex items-center gap-1.5">
+                    <input type="month"
+                           name="bulan"
+                           value="{{ substr($startDate, 0, 7) }}"
+                           @change="$refs.filterForm.submit()"
+                           title="Pilih bulan spesifik"
+                           class="h-9 px-2.5 rounded-md border border-slate-200 text-xs text-slate-700 bg-white hover:bg-slate-50 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition cursor-pointer">
+                </div>
+
+                <!-- Sub-Picker: Jika Per Tahun, Input Tahun Spesifik (Default Tahun Ini) -->
+                <div x-show="periode === 'per_tahun'" x-cloak class="flex items-center gap-1.5">
+                    <select name="tahun"
+                            @change="$refs.filterForm.submit()"
+                            title="Pilih tahun spesifik"
+                            class="h-9 px-2.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition cursor-pointer">
+                        @php
+                            $selectedYear = (int) substr($startDate, 0, 4);
+                            $currentYear = (int) date('Y');
+                        @endphp
+                        @for($y = $currentYear + 1; $y >= $currentYear - 4; $y--)
+                            <option value="{{ $y }}" {{ $selectedYear === $y ? 'selected' : '' }}>Tahun {{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <!-- Sub-Picker: Jika Rentang Kustom, Input Tanggal Mulai s/d Selesai -->
+                <div x-show="isCustom" x-cloak class="flex items-center gap-1.5">
+                    <input type="date"
+                           name="custom_start_date"
+                           value="{{ $startDate }}"
+                           class="h-9 px-2.5 rounded-md border border-slate-200 text-xs text-slate-700 bg-white outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                           placeholder="Mulai">
+                    <span class="text-xs text-slate-400 font-medium">s/d</span>
+                    <input type="date"
+                           name="custom_end_date"
+                           value="{{ $endDate }}"
+                           class="h-9 px-2.5 rounded-md border border-slate-200 text-xs text-slate-700 bg-white outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                           placeholder="Selesai">
+                </div>
+
+                <!-- Indikator Rentang Tanggal Aktif -->
+                <div x-show="!isCustom" class="hidden lg:inline-flex items-center gap-1.5 px-2.5 h-9 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
+                    <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
+                    @if($periode === 'semua')
+                        <span>Semua Riwayat Data</span>
+                    @elseif($startDate === $endDate)
+                        <span>{{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }}</span>
+                    @else
+                        <span>{{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d/m/Y') }}</span>
+                    @endif
+                </div>
 
                 <!-- Status Approval -->
-                <select name="status" onchange="this.form.submit()" class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="status"
+                        @change="$refs.filterForm.submit()"
+                        class="h-9 px-2.5 rounded-md border border-slate-200 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition cursor-pointer">
                     <option value="semua" {{ $status === 'semua' ? 'selected' : '' }}>Semua Status</option>
                     <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Disetujui</option>
                     <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="rejected" {{ $status === 'rejected' ? 'selected' : '' }}>Ditolak</option>
                 </select>
 
                 <!-- Pencarian Cepat -->
-                <input type="text" name="search" value="{{ $search }}" placeholder="Cari nomor / nama..." class="px-2.5 py-1.5 rounded-md border border-slate-200 text-xs w-48 outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="relative">
+                    <input type="text"
+                           name="search"
+                           value="{{ $search }}"
+                           placeholder="Cari nomor / nama..."
+                           class="h-9 pl-8 pr-3 rounded-md border border-slate-200 text-xs w-44 md:w-52 text-slate-800 placeholder:text-slate-400 bg-white outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition">
+                    <i class="fa-solid fa-magnifying-glass text-[11px] text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+                </div>
 
-                <button type="submit" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold rounded-md transition">
-                    Filter
+                <!-- Tombol Submit Filter -->
+                <button type="submit"
+                        class="h-9 px-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold rounded-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-filter text-[11px]"></i>
+                    <span>Filter</span>
                 </button>
+
+                @if(request()->hasAny(['search', 'status', 'start_date', 'custom_start_date', 'custom_end_date', 'bulan', 'tahun']) || !in_array($periode, ['per_bulan', 'bulan_ini']))
+                    <a href="{{ route('laporan.index', ['domain' => $domain]) }}"
+                       title="Reset filter"
+                       class="h-9 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-md transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                        <span class="hidden sm:inline">Reset</span>
+                    </a>
+                @endif
             </div>
 
             <!-- Tombol Cetak & Ekspor CSV -->
             <div class="flex items-center gap-2">
-                <button type="button" onclick="window.print()" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-print text-xs text-slate-500"></i> Cetak Laporan
+                <button type="button"
+                        onclick="window.print()"
+                        class="h-9 px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md text-xs font-medium transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-print text-xs text-slate-500"></i>
+                    <span>Cetak Laporan</span>
                 </button>
-                <a href="{{ route('laporan.export', request()->query()) }}" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-download text-xs"></i> Ekspor CSV
+                <a href="{{ route('laporan.export', request()->query()) }}"
+                   class="h-9 px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-download text-xs"></i>
+                    <span>Ekspor CSV</span>
                 </a>
             </div>
         </form>
@@ -170,8 +279,9 @@
                     <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</div>
                     <p class="text-xs text-slate-500 mt-2 font-medium">Lelang pengadaan resmi (Internal & Vendor Relasi).</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
-                    Rincian Laporan Tender →
+                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'tender'])) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition flex items-center justify-center gap-1.5">
+                    <span>Rincian Laporan Tender</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
 
@@ -188,8 +298,9 @@
                     <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</div>
                     <p class="text-xs text-slate-500 mt-2 font-medium">Layanan teknis, pemeliharaan, dan instalasi.</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
-                    Rincian Laporan Jasa →
+                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'jasa'])) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition flex items-center justify-center gap-1.5">
+                    <span>Rincian Laporan Jasa</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
 
@@ -206,8 +317,9 @@
                     <div class="text-sm font-bold font-number text-slate-700 mt-1.5">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</div>
                     <p class="text-xs text-slate-500 mt-2 font-medium">Perdagangan produk fisik, percetakan, dan aksesoris.</p>
                 </div>
-                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition">
-                    Rincian Laporan Dagang →
+                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'barang'])) }}" class="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl text-center transition flex items-center justify-center gap-1.5">
+                    <span>Rincian Laporan Dagang</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </a>
             </div>
         </div>
@@ -401,7 +513,7 @@
                             <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_tenders'] }} Proyek</td>
                             <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['tenders_value'], 0, ',', '.') }}</td>
                             <td class="p-3.5 text-center">
-                                <a href="{{ route('laporan.index', ['domain' => 'tender']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'tender'])) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
                                     Buka
                                 </a>
                             </td>
@@ -414,7 +526,7 @@
                             <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_services'] }} Pekerjaan</td>
                             <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['services_value'], 0, ',', '.') }}</td>
                             <td class="p-3.5 text-center">
-                                <a href="{{ route('laporan.index', ['domain' => 'jasa']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'jasa'])) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
                                     Buka
                                 </a>
                             </td>
@@ -427,7 +539,7 @@
                             <td class="p-3.5 text-center font-mono font-medium text-slate-800">{{ $kpi['total_sales'] }} Penjualan</td>
                             <td class="p-3.5 text-right font-mono font-semibold text-slate-900">Rp {{ number_format($kpi['sales_value'], 0, ',', '.') }}</td>
                             <td class="p-3.5 text-center">
-                                <a href="{{ route('laporan.index', ['domain' => 'barang']) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
+                                <a href="{{ route('laporan.index', array_merge(request()->query(), ['domain' => 'barang'])) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium transition">
                                     Buka
                                 </a>
                             </td>

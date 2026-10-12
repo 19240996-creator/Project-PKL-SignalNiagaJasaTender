@@ -93,16 +93,16 @@
     <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
-                        <th class="p-3">No. Tender & Nama Proyek</th>
-                        <th class="p-3">Pelaksanaan</th>
-                        <th class="p-3">Lokasi & PIC Lapangan</th>
-                        <th class="p-3">Jadwal Pelaksanaan</th>
-                        <th class="p-3">Progres Pekerjaan</th>
-                        <th class="p-3">Status Proyek</th>
-                        <th class="p-3">Biaya Aktual vs RAB</th>
-                        <th class="p-3 text-center">Aksi</th>
+                <thead class="bg-blue-600 text-white">
+                    <tr class="border-b border-blue-700 font-semibold uppercase tracking-wider text-[11px] text-white">
+                        <th class="p-3 font-semibold text-white">No. Tender & Nama Proyek</th>
+                        <th class="p-3 font-semibold text-white">Pelaksanaan</th>
+                        <th class="p-3 font-semibold text-white">Lokasi & PIC Lapangan</th>
+                        <th class="p-3 font-semibold text-white">Jadwal Pelaksanaan</th>
+                        <th class="p-3 font-semibold text-white">Progres Pekerjaan</th>
+                        <th class="p-3 font-semibold text-white">Status Proyek</th>
+                        <th class="p-3 font-semibold text-white">Biaya Aktual vs RAB</th>
+                        <th class="p-3 text-center font-semibold text-white">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">

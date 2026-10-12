@@ -92,17 +92,17 @@
     <div class="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
-                        <th class="p-3">No. Tender & Klien</th>
-                        <th class="p-3">Status RAB</th>
-                        <th class="p-3">Total Biaya HPP (Modal)</th>
-                        <th class="p-3">Nilai Penawaran (Bid)</th>
-                        <th class="p-3">Estimasi Laba (Profit)</th>
-                        <th class="p-3">Margin (%)</th>
-                        <th class="p-3">Kesiapan Material Dagang</th>
-                        <th class="p-3">Rekomendasi Sistem</th>
-                        <th class="p-3 text-center">Aksi</th>
+                <thead class="bg-blue-600 text-white">
+                    <tr class="border-b border-blue-700 font-semibold uppercase tracking-wider text-[11px] text-white">
+                        <th class="p-3 font-semibold text-white">No. Tender & Klien</th>
+                        <th class="p-3 font-semibold text-white">Status RAB</th>
+                        <th class="p-3 font-semibold text-white">Total Biaya HPP (Modal)</th>
+                        <th class="p-3 font-semibold text-white">Nilai Penawaran (Bid)</th>
+                        <th class="p-3 font-semibold text-white">Estimasi Laba (Profit)</th>
+                        <th class="p-3 font-semibold text-white">Margin (%)</th>
+                        <th class="p-3 font-semibold text-white">Kesiapan Material Dagang</th>
+                        <th class="p-3 font-semibold text-white">Rekomendasi Sistem</th>
+                        <th class="p-3 text-center font-semibold text-white">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">

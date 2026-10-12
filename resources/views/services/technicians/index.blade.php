@@ -124,17 +124,17 @@
 
         {{-- Daftar SDM Teknis --}}
         <section class="{{ $isTechnician ? 'xl:col-span-3' : 'xl:col-span-2' }} bg-white rounded-lg border border-slate-200 overflow-hidden shadow-xs">
-            <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div class="p-4 bg-blue-600 text-white border-b border-blue-700 flex items-center justify-between">
                 <div>
-                    <h2 class="text-sm font-bold text-slate-900">Daftar SDM Teknis</h2>
-                    <p class="text-xs text-slate-500 mt-1">Beban aktif, riwayat penugasan, dan status ketersediaan per teknisi.</p>
+                    <h2 class="text-sm font-bold text-white">Daftar SDM Teknis</h2>
+                    <p class="text-xs text-blue-100 mt-1">Beban aktif, riwayat penugasan, dan status ketersediaan per teknisi.</p>
                 </div>
-                <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                <span class="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
                     {{ $technicians->count() }} teknisi
                 </span>
             </div>
 
-            <div class="divide-y divide-slate-100">
+            <div class="p-4 sm:p-5 space-y-4 bg-slate-50/60">
                 @forelse($technicians as $technician)
                     @php
                         $isPendingDelete = $technician->isPendingDeletion();
@@ -152,7 +152,7 @@
                         ];
                     @endphp
 
-                    <div class="p-4 transition {{ $isPendingDelete ? 'bg-rose-50/20' : '' }}">
+                    <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-5 shadow-xs transition hover:border-slate-300 {{ $isPendingDelete ? 'border-rose-300 bg-rose-50/30' : '' }}">
                         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="flex flex-wrap items-center gap-2">
@@ -289,7 +289,7 @@
                         </div>
 
                         {{-- Form Catat Jadwal Ketersediaan --}}
-                        <form method="POST" action="{{ route('jasa.teknisi.availability', $technician) }}" class="mt-3 flex flex-wrap gap-2 items-end">
+                        <form method="POST" action="{{ route('jasa.teknisi.availability', $technician) }}" class="mt-3.5 pt-3.5 border-t border-slate-100 flex flex-wrap gap-2 items-end">
                             @csrf
                             <input type="date" name="available_from" required class="field" title="Tanggal mulai">
                             <input type="date" name="available_until" required class="field" title="Tanggal selesai">
@@ -304,8 +304,8 @@
                         </form>
                     </div>
                 @empty
-                    <div class="p-8 text-center text-xs text-slate-500">
-                        Belum ada data teknisi.
+                    <div class="bg-white rounded-lg border border-dashed border-slate-200 p-8 text-center text-xs text-slate-500">
+                        Belum ada data teknisi terdaftar.
                     </div>
                 @endforelse
             </div>

@@ -16,51 +16,68 @@
 
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-                        <th class="p-4">No. Pengadaan</th>
-                        <th class="p-4">Supplier & Tender</th>
-                        <th class="p-4">Tanggal Pengadaan</th>
-                        <th class="p-4">Item Barang</th>
-                        <th class="p-4">Total Biaya</th>
-                        <th class="p-4">Status Stok</th>
+            <table class="w-full min-w-[900px] text-left text-sm">
+                <thead class="bg-blue-600 text-white">
+                    <tr class="border-b border-blue-700 font-semibold uppercase tracking-wider text-xs text-white">
+                        <th class="w-[17%] px-5 py-3.5 font-semibold text-white whitespace-nowrap text-left">No. Pengadaan</th>
+                        <th class="w-[25%] px-5 py-3.5 font-semibold text-white text-left">Supplier & Tender</th>
+                        <th class="w-[15%] px-5 py-3.5 font-semibold text-white whitespace-nowrap text-left">Tanggal Pengadaan</th>
+                        <th class="w-[18%] px-5 py-3.5 font-semibold text-white text-left">Item Barang</th>
+                        <th class="w-[13%] px-5 py-3.5 font-semibold text-white whitespace-nowrap text-left">Total Biaya</th>
+                        <th class="w-[12%] px-5 py-3.5 font-semibold text-white whitespace-nowrap text-left">Status Stok</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($procurements as $prc)
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="p-4 font-mono font-bold text-blue-600">{{ $prc->procurement_number }}</td>
-                            <td class="p-4">
-                                <div class="font-bold text-slate-800">{{ $prc->supplier->name }}</div>
-                                <div class="text-xs text-slate-500">
+                            <td class="px-5 py-3.5 align-middle font-mono font-bold text-blue-600 text-xs sm:text-sm whitespace-nowrap">
+                                {{ $prc->procurement_number }}
+                            </td>
+                            <td class="px-5 py-3.5 align-middle">
+                                <div class="font-bold text-slate-900 text-xs sm:text-sm leading-snug">{{ $prc->supplier->name ?? 'Supplier N/A' }}</div>
+                                <div class="text-xs text-slate-500 mt-0.5">
                                     {{ $prc->tender ? 'Tender: ' . $prc->tender->tender_number : 'Pengadaan Rutin Stok' }}
                                 </div>
                             </td>
-                            <td class="p-4 text-slate-600">{{ \Carbon\Carbon::parse($prc->procurement_date)->format('d M Y') }}</td>
-                            <td class="p-4 text-xs text-slate-700">
-                                <ul class="list-disc list-inside space-y-0.5">
-                                    @foreach($prc->items as $item)
-                                        <li>{{ $item->product->name ?? 'Produk' }} ({{ number_format($item->quantity,0) }} {{ $item->product->unit ?? 'unit' }})</li>
-                                    @endforeach
-                                </ul>
+                            <td class="px-5 py-3.5 align-middle text-slate-600 text-xs sm:text-sm whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1.5">
+                                    <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
+                                    <span>{{ \Carbon\Carbon::parse($prc->procurement_date)->format('d M Y') }}</span>
+                                </span>
                             </td>
-                            <td class="p-4 font-bold text-slate-800">Rp {{ number_format($prc->total_amount, 0, ',', '.') }}</td>
-                            <td class="p-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $prc->status === 'Received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                            <td class="px-5 py-3.5 align-middle">
+                                <div class="space-y-1">
+                                    @forelse($prc->items as $item)
+                                        <div class="text-xs text-slate-800 flex items-center gap-1.5">
+                                            <span class="font-medium text-slate-900">{{ $item->product->name ?? 'Produk' }}</span>
+                                            <span class="text-slate-500 font-mono text-[11px]">({{ number_format($item->quantity, 0, ',', '.') }} {{ $item->product->unit ?? 'unit' }})</span>
+                                        </div>
+                                    @empty
+                                        <span class="text-xs text-slate-400">Tidak ada item</span>
+                                    @endforelse
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 align-middle whitespace-nowrap">
+                                <div class="font-mono font-bold text-slate-900 text-xs sm:text-sm">
+                                    Rp {{ number_format($prc->total_amount, 0, ',', '.') }}
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 align-middle whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold {{ $prc->status === 'Received' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $prc->status === 'Received' ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                     {{ $prc->status === 'Received' ? 'Diterima (+Stok)' : $prc->status }}
                                 </span>
                                 @if($prc->status !== 'Received')
-                                    <form action="{{ route('procurements.receive', $prc) }}" method="POST" class="mt-2">
+                                    <form action="{{ route('procurements.receive', $prc) }}" method="POST" class="mt-1.5">
                                         @csrf
-                                        <button type="submit" class="text-xs font-semibold text-blue-600 hover:text-blue-800">Konfirmasi Diterima</button>
+                                        <button type="submit" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition">Konfirmasi Diterima</button>
                                     </form>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="p-8 text-center text-slate-400">Belum ada data pengadaan barang.</td>
+                            <td colspan="6" class="px-5 py-8 text-center text-slate-400">Belum ada data pengadaan barang.</td>
                         </tr>
                     @endforelse
                 </tbody>

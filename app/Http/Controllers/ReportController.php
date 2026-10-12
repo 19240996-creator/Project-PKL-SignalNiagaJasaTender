@@ -32,12 +32,47 @@ class ReportController extends Controller
         if ($domain === 'all') { $domain = 'semua'; }
         $status = $request->get('status', 'semua'); // pending, approved, rejected, semua
         if ($status === 'all') { $status = 'semua'; }
-        $periode = $request->get('periode', 'bulan_ini');
+        // Normalisasi Periode: per_hari, per_minggu, per_bulan, per_tahun, semua, kustom
+        $periode = $request->get('periode', 'per_bulan');
+        $periodeMap = [
+            'hari_ini' => 'per_hari',
+            'perhari' => 'per_hari',
+            'minggu_ini' => 'per_minggu',
+            'perminggu' => 'per_minggu',
+            'bulan_ini' => 'per_bulan',
+            'perbulan' => 'per_bulan',
+            'tahun_ini' => 'per_tahun',
+            'pertahun' => 'per_tahun',
+        ];
+        if (isset($periodeMap[$periode])) {
+            $periode = $periodeMap[$periode];
+        }
+
         $vendorRelasiFilter = $request->get('vendor_relasi', 'semua'); // semua, internal, vendor_relasi
         $search = $request->get('search');
 
-        // Calculate Start Date and End Date based on periode preset
-        [$startDate, $endDate] = $this->resolveDates($periode, $request->get('start_date'), $request->get('end_date'));
+        // Parameter Tanggal Kustom atau Sub-Picker Spesifik
+        $startDateParam = $request->get('custom_start_date') ?: $request->get('start_date');
+        $endDateParam = $request->get('custom_end_date') ?: $request->get('end_date');
+
+        if ($request->filled('bulan')) {
+            try {
+                $monthCarbon = Carbon::createFromFormat('Y-m', $request->get('bulan'));
+                $startDateParam = $monthCarbon->copy()->startOfMonth()->toDateString();
+                $endDateParam = $monthCarbon->copy()->endOfMonth()->toDateString();
+            } catch (\Exception $e) {
+                // fallback ke default
+            }
+        } elseif ($request->filled('tahun')) {
+            $year = (int) $request->get('tahun');
+            if ($year >= 2000 && $year <= 2100) {
+                $startDateParam = Carbon::create($year, 1, 1)->toDateString();
+                $endDateParam = Carbon::create($year, 12, 31)->toDateString();
+            }
+        }
+
+        // Hitung Start Date dan End Date berdasarkan resolusi periode
+        [$startDate, $endDate] = $this->resolveDates($periode, $startDateParam, $endDateParam);
 
         $tenderQuery = Tender::with(['client', 'creator', 'approver'])
             ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
@@ -128,10 +163,22 @@ class ReportController extends Controller
     {
         $now = now();
         return match ($periode) {
-            'hari_ini' => [$now->toDateString(), $now->toDateString()],
-            'minggu_ini' => [$now->copy()->startOfWeek()->toDateString(), $now->copy()->endOfWeek()->toDateString()],
-            'bulan_ini' => [$now->copy()->startOfMonth()->toDateString(), $now->copy()->endOfMonth()->toDateString()],
-            'tahun_ini' => [$now->copy()->startOfYear()->toDateString(), $now->copy()->endOfYear()->toDateString()],
+            'per_hari', 'hari_ini', 'perhari' => [
+                $start ?: $now->toDateString(),
+                $start ?: $now->toDateString()
+            ],
+            'per_minggu', 'minggu_ini', 'perminggu' => [
+                $start ? Carbon::parse($start)->startOfWeek()->toDateString() : $now->copy()->startOfWeek()->toDateString(),
+                $start ? Carbon::parse($start)->endOfWeek()->toDateString() : $now->copy()->endOfWeek()->toDateString(),
+            ],
+            'per_bulan', 'bulan_ini', 'perbulan' => [
+                $start ? Carbon::parse($start)->startOfMonth()->toDateString() : $now->copy()->startOfMonth()->toDateString(),
+                $end ?: ($start ? Carbon::parse($start)->endOfMonth()->toDateString() : $now->copy()->endOfMonth()->toDateString()),
+            ],
+            'per_tahun', 'tahun_ini', 'pertahun' => [
+                $start ? Carbon::parse($start)->startOfYear()->toDateString() : $now->copy()->startOfYear()->toDateString(),
+                $end ?: ($start ? Carbon::parse($start)->endOfYear()->toDateString() : $now->copy()->endOfYear()->toDateString()),
+            ],
             'semua' => ['2020-01-01', $now->copy()->addYears(5)->toDateString()],
             'kustom' => [
                 $start ?: $now->copy()->startOfMonth()->toDateString(),
@@ -147,10 +194,44 @@ class ReportController extends Controller
         $isAdmin = ($user && $user->role && $user->role->name === 'admin');
         $domain = $request->get('domain', 'semua');
         $status = $request->get('status', 'semua');
-        $periode = $request->get('periode', 'bulan_ini');
+        
+        $periode = $request->get('periode', 'per_bulan');
+        $periodeMap = [
+            'hari_ini' => 'per_hari',
+            'perhari' => 'per_hari',
+            'minggu_ini' => 'per_minggu',
+            'perminggu' => 'per_minggu',
+            'bulan_ini' => 'per_bulan',
+            'perbulan' => 'per_bulan',
+            'tahun_ini' => 'per_tahun',
+            'pertahun' => 'per_tahun',
+        ];
+        if (isset($periodeMap[$periode])) {
+            $periode = $periodeMap[$periode];
+        }
+
         $vendorRelasiFilter = $request->get('vendor_relasi', 'semua');
 
-        [$startDate, $endDate] = $this->resolveDates($periode, $request->get('start_date'), $request->get('end_date'));
+        $startDateParam = $request->get('custom_start_date') ?: $request->get('start_date');
+        $endDateParam = $request->get('custom_end_date') ?: $request->get('end_date');
+
+        if ($request->filled('bulan')) {
+            try {
+                $monthCarbon = Carbon::createFromFormat('Y-m', $request->get('bulan'));
+                $startDateParam = $monthCarbon->copy()->startOfMonth()->toDateString();
+                $endDateParam = $monthCarbon->copy()->endOfMonth()->toDateString();
+            } catch (\Exception $e) {
+                // fallback
+            }
+        } elseif ($request->filled('tahun')) {
+            $year = (int) $request->get('tahun');
+            if ($year >= 2000 && $year <= 2100) {
+                $startDateParam = Carbon::create($year, 1, 1)->toDateString();
+                $endDateParam = Carbon::create($year, 12, 31)->toDateString();
+            }
+        }
+
+        [$startDate, $endDate] = $this->resolveDates($periode, $startDateParam, $endDateParam);
 
         $tenderQuery = Tender::with('client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
         $serviceQuery = ServiceJob::with('client')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
