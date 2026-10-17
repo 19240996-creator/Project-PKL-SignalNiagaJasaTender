@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAPORAN BLACKBOX TESTING - SignalNiagaJasaTender</title>
+    <style>
+        :root {
+            --primary: #1F497D;
+            --primary-light: #2C5E9E;
+            --bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E2E8F0;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --pass-bg: #DCFCE7;
+            --pass-text: #166534;
+            --fail-bg: #FEE2E2;
+            --fail-text: #991B1B;
+            --crit-bg: #FEE2E2;
+            --crit-text: #991B1B;
+            --high-bg: #FFEDD5;
+            --high-text: #9A3412;
+            --med-bg: #FEF9C3;
+            --med-text: #854D0E;
+            --low-bg: #DCFCE7;
+            --low-text: #166534;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 24px;
+        }
+        header {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 6px solid var(--primary);
+        }
+        header h1 { font-size: 20px; color: var(--primary); font-weight: 700; }
+        header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #F1F5F9; color: var(--text-main); }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 75vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        thead th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 12px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tbody tr:hover { background: #F8FAFC; }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-pass { background: var(--pass-bg); color: var(--pass-text); }
+        .badge-fail { background: var(--fail-bg); color: var(--fail-text); }
+        .badge-critical { background: var(--crit-bg); color: var(--crit-text); }
+        .badge-high { background: var(--high-bg); color: var(--high-text); }
+        .badge-medium { background: var(--med-bg); color: var(--med-text); }
+        .badge-low { background: var(--low-bg); color: var(--low-text); }
+        
+        .search-box {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            width: 240px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>LAPORAN BLACKBOX TESTING - SignalNiagaJasaTender</h1>
+            <p>File Sumber: LAPORAN-BLACKBOX.xlsx | Total Sheet: 20</p>
+        </div>
+        <div>
+            <input type="text" class="search-box" id="globalSearch" placeholder="Cari data dalam tabel..." onkeyup="filterTable()">
+        </div>
+    </header>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('0', this)">Ringkasan</button>
+        <button class="tab-btn " onclick="switchTab('1', this)">Beranda</button>
+        <button class="tab-btn " onclick="switchTab('2', this)">Login</button>
+        <button class="tab-btn " onclick="switchTab('3', this)">Dashboard</button>
+        <button class="tab-btn " onclick="switchTab('4', this)">Tender_Administrasi</button>
+        <button class="tab-btn " onclick="switchTab('5', this)">Tender_RAB</button>
+        <button class="tab-btn " onclick="switchTab('6', this)">Tender_Proyek</button>
+        <button class="tab-btn " onclick="switchTab('7', this)">Klien_Kontrak</button>
+        <button class="tab-btn " onclick="switchTab('8', this)">Jasa_Pekerjaan</button>
+        <button class="tab-btn " onclick="switchTab('9', this)">Jasa_Operasional</button>
+        <button class="tab-btn " onclick="switchTab('10', this)">Supplier_Pengadaan</button>
+        <button class="tab-btn " onclick="switchTab('11', this)">Produk_Gudang</button>
+        <button class="tab-btn " onclick="switchTab('12', this)">Penjualan_Barang</button>
+        <button class="tab-btn " onclick="switchTab('13', this)">Dokumen_Komersial</button>
+        <button class="tab-btn " onclick="switchTab('14', this)">Keuangan_Finance</button>
+        <button class="tab-btn " onclick="switchTab('15', this)">Laporan_Ekspor</button>
+        <button class="tab-btn " onclick="switchTab('16', this)">Admin_Sistem</button>
+        <button class="tab-btn " onclick="switchTab('17', this)">Daftar Bug</button>
+        <button class="tab-btn " onclick="switchTab('18', this)">Performa &amp; Keamanan</button>
+        <button class="tab-btn " onclick="switchTab('19', this)">Tidak Teruji</button>
+    </div>
+    <div id="tab-0" class="tab-content active">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>RINGKASAN EKSEKUTIF PENGUJIAN BLACKBOX</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Total Pengujian</td>
+                            <td>Valid (Lulus)</td>
+                            <td>Tidak Valid (Gagal)</td>
+                            <td>Blocked (Terhambat)</td>
+                            <td>Tingkat Kelulusan</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>1. REKAPITULASI PENGUJIAN PER MODUL</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Nama Modul Sistem</td>
+                            <td>Total Test Case</td>
+                            <td>Valid</td>
+                            <td>Tidak Valid</td>
+                            <td>Blocked</td>
+                            <td>% Kelulusan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Beranda</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Login</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Dashboard</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Tender_Administrasi</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Tender_RAB</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Tender_Proyek</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Klien_Kontrak</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Jasa_Pekerjaan</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Jasa_Operasional</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Supplier_Pengadaan</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>Produk_Gudang</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>Penjualan_Barang</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>Dokumen_Komersial</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>Keuangan_Finance</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>Laporan_Ekspor</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>16</td>
+                            <td>Admin_Sistem</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>TOTAL KESELURUHAN</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2. LINGKUNGAN PENGUJIAN (TEST ENVIRONMENT)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Komponen Lingkungan</td>
+                            <td>Spesifikasi &amp; Keterangan Pengujian</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Sistem Operasi (OS)</td>
+                            <td>Microsoft Windows 11 / Windows 10 x64</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Arsitektur Sistem</td>
+                            <td>Web Application berbasis MVC (Laravel 10.x, PHP 8.1.10)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Basis Data (Database)</td>
+                            <td>MySQL 8.x (signal_niaga_jasa_tender), InnoDB, UTF8mb4</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Web / App Server</td>
+                            <td>Laravel Development Server (http://127.0.0.1:8000)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Browser Pengujian</td>
+                            <td>Chromium v156 (Playwright Engine) &amp; Microsoft Edge</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Perangkat Tool Pengujian</td>
+                            <td>Playwright Python v1.64.0, Requests v2.34.2, OpenPyXL v3.1.5, BeautifulSoup4</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Akun &amp; Data Uji</td>
+                            <td>Dummy Seeder: owner@signalpanca.co.id, manager@signalpanca.co.id, admin@signalpanca.co.id</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Tingkat Risiko Keseluruhan</td>
+                            <td>RENDAH (LOW RISK) — 94.4% Fitur Berfungsi Sesuai Harapan</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-1" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Halaman Beranda &amp; Publik (Beranda)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat memuat halaman Beranda publik versi desktop dengan lengkap</td>
+                            <td>Akses URL &#x27;/&#x27; dengan viewport desktop (1920x1080 px)</td>
+                            <td>Landing page termuat sempurna (HTTP 200) dengan struktur header, navbar, dan footer</td>
+                            <td>Sesuai Harapan (Status: 200, Durasi: 1.479s, Navbar: True, Footer: True)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menyesuaikan tata letak pada viewport layar mobile</td>
+                            <td>Ubah resolusi browser menjadi 375x812 px dan cek horizontal overflow</td>
+                            <td>Tampilan responsif, elemen menu tidak berantakan, tidak ada horizontal overflow</td>
+                            <td>Sesuai Harapan (scrollWidth: 375px, overflow: False)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem dapat menyesuaikan tata letak pada viewport layar tablet</td>
+                            <td>Ubah resolusi browser menjadi 768x1024 px dan periksa keterbacaan komponen</td>
+                            <td>Tampilan layout tablet proporsional dan tidak ada overflow horizontal</td>
+                            <td>Sesuai Harapan (scrollWidth: 768px)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem menyediakan tombol navigasi cepat menuju halaman autentikasi/login</td>
+                            <td>Verifikasi keberadaan tautan Masuk/Login di navbar landing page</td>
+                            <td>Terdapat tombol link Masuk yang mengarah tepat ke route &#x27;/login&#x27;</td>
+                            <td>Sesuai Harapan (Tombol ditemukan dengan href &#x27;http://127.0.0.1:8000/login&#x27;)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sistem menangani rute yang tidak valid dengan respons 404 Not Found</td>
+                            <td>Akses rute acak &#x27;/halaman-yang-pasti-tidak-ada-12345&#x27;</td>
+                            <td>Sistem merespons dengan HTTP status 404 Not Found tanpa crash server</td>
+                            <td>Sesuai Harapan (HTTP Status: 404)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-2" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Autentikasi &amp; Akun (Login)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem menampilkan form autentikasi lengkap dengan field input email, password, dan CAPTCHA</td>
+                            <td>Buka URL &#x27;/login&#x27; dan verifikasi seluruh kontrol input</td>
+                            <td>Halaman login menampilkan input email, password, kode visual CAPTCHA, dan tombol submit</td>
+                            <td>Sesuai Harapan (Email: True, Password: True, CAPTCHA: True)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem mengizinkan autentikasi role Admin dengan kredensial valid</td>
+                            <td>Input email &#x27;admin@signalpanca.co.id&#x27;, password valid, kode CAPTCHA tepat, submit form</td>
+                            <td>Otentikasi berhasil dan dialihkan otomatis (HTTP 302 -&gt; 200) ke /dashboard</td>
+                            <td>Sesuai Harapan (Pengguna berhasil masuk ke dashboard dengan sesi role admin)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem mengizinkan autentikasi role Manager dengan kredensial valid</td>
+                            <td>Input email &#x27;manager@signalpanca.co.id&#x27;, password valid, kode CAPTCHA tepat, submit form</td>
+                            <td>Otentikasi berhasil dan dialihkan otomatis ke /dashboard dengan hak akses manager</td>
+                            <td>Sesuai Harapan (Pengguna berhasil masuk ke dashboard dengan sesi role manager)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem mengizinkan autentikasi role Owner dengan kredensial valid</td>
+                            <td>Input email &#x27;owner@signalpanca.co.id&#x27;, password valid, kode CAPTCHA tepat, submit form</td>
+                            <td>Otentikasi berhasil dan dialihkan otomatis ke /dashboard dengan hak akses owner</td>
+                            <td>Sesuai Harapan (Pengguna berhasil masuk ke dashboard dengan sesi role owner)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sistem menolak autentikasi bila password salah</td>
+                            <td>Isi email &#x27;admin@signalpanca.co.id&#x27;, password &#x27;password_salah_123&#x27;, CAPTCHA valid</td>
+                            <td>Sistem menolak login, tetap berada di /login, dan memberi pesan kesalahan</td>
+                            <td>Sesuai Harapan (Tetap berada pada URL http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Sistem menolak autentikasi bila kode CAPTCHA salah</td>
+                            <td>Isi email dan password benar, namun isi CAPTCHA &#x27;WRONG&#x27;</td>
+                            <td>Sistem memvalidasi kecocokan CAPTCHA dan menolak permintaan jika tidak sesuai</td>
+                            <td>Sesuai Harapan (Tetap di halaman login, URL: http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Sistem menolak login jika email tidak terdaftar dalam database</td>
+                            <td>Isi email &#x27;user_gaib@signalpanca.co.id&#x27;, password &#x27;password&#x27;, submit form</td>
+                            <td>Sistem menolak login dan memberikan indikasi kredensial tidak cocok</td>
+                            <td>Sesuai Harapan (Otentikasi ditolak, URL: http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Sistem memvalidasi field wajib saat formulir login dikirim dalam keadaan kosong</td>
+                            <td>Kosongkan seluruh field input dan klik tombol Masuk</td>
+                            <td>Sistem memicu validasi form required dan mencegah pengiriman data kosong</td>
+                            <td>Sesuai Harapan (Permintaan ditahan, URL: http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Sistem memproteksi rute &#x27;/dashboard&#x27; dari akses pengguna guest tanpa autentikasi</td>
+                            <td>Kirim HTTP GET &#x27;/dashboard&#x27; tanpa menyertakan session cookie aktif</td>
+                            <td>Sistem mengembalikan status HTTP 302 Redirect mengarah ke &#x27;/login&#x27;</td>
+                            <td>Sesuai Harapan (Status: 302, Redirect ke: http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Sistem menyediakan halaman lupa password untuk permohonan reset</td>
+                            <td>Akses URL &#x27;/forgot-password&#x27;</td>
+                            <td>Halaman lupa password terbuka (HTTP 200) dengan field email pemulihan</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>Sistem dapat mengakhiri sesi autentikasi pengguna secara aman melalui rute logout</td>
+                            <td>Kirim POST &#x27;/logout&#x27; dengan menyertakan token CSRF sesi pengguna aktif</td>
+                            <td>Sesi dihancurkan, server mengarahkan kembali ke halaman &#x27;/login&#x27;</td>
+                            <td>Sesuai Harapan (Status HTTP: 302, Location: http://127.0.0.1:8000/login)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>Sistem mendukung login SSO OAuth dengan Google</td>
+                            <td>Akses rute &#x27;/auth/google/redirect&#x27;</td>
+                            <td>Dialihkan ke Google OAuth consent screen (Membutuhkan Google Client ID &amp; Secret aktif)</td>
+                            <td>Status: 302. Belum terkonfigurasi pada environment lokal (.env kosong)</td>
+                            <td>Blocked</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>Sistem mendukung login SSO OAuth dengan LinkedIn</td>
+                            <td>Akses rute &#x27;/auth/linkedin/redirect&#x27;</td>
+                            <td>Dialihkan ke LinkedIn OAuth dialog (Membutuhkan LinkedIn Client ID &amp; Secret aktif)</td>
+                            <td>Status: 302. Belum terkonfigurasi pada environment lokal (.env kosong)</td>
+                            <td>Blocked</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-3" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Halaman Dashboard Per Role (Dashboard)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem menampilkan ringkasan operasional pada dashboard role Admin</td>
+                            <td>Buka URL &#x27;/dashboard&#x27; pada sesi role Admin</td>
+                            <td>Halaman dashboard termuat sempurna (HTTP 200) menampilkan ringkasan data yang diinput</td>
+                            <td>Sesuai Harapan (Dashboard Admin termuat: True)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem menampilkan widget pemantauan dan persetujuan pada dashboard role Manager</td>
+                            <td>Buka URL &#x27;/dashboard&#x27; pada sesi role Manager</td>
+                            <td>Halaman dashboard menampilkan indikator data pending dan kontrol pengawasan</td>
+                            <td>Sesuai Harapan (Dashboard Manager termuat: True)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem menampilkan statistik bisnis komprehensif pada dashboard role Owner</td>
+                            <td>Buka URL &#x27;/dashboard&#x27; pada sesi role Owner</td>
+                            <td>Halaman dashboard menampilkan grafik/ringkasan performa seluruh modul bisnis</td>
+                            <td>Sesuai Harapan (Dashboard Owner termuat: True)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-4" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Tender - Administrasi (Tender_Administrasi)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar administrasi tender</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/tender&#x27;</td>
+                            <td>Sistem merespons status HTTP 200 dan menyajikan tabel riwayat tender</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat mencatat data tender baru yang diajukan oleh Admin</td>
+                            <td>Admin mengisi form tender nama=&#x27;Pengadaan Jaringan Fiber Optik Uji 1792233742&#x27;, nilai=&#x27;75000000&#x27;, metode=&#x27;internal&#x27;</td>
+                            <td>Tender tersimpan dengan status &#x27;pending/draft&#x27; dan muncul pada daftar tender</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi input wajib pada pembuatan tender saat form kosong</td>
+                            <td>Kirim POST &#x27;/tender&#x27; tanpa parameter data wajib (nama, nilai, metode)</td>
+                            <td>Sistem menolak penyimpanan dan mengembalikan error validasi</td>
+                            <td>Sesuai Harapan (Data kosong ditolak dan tidak disimpan)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem mewajibkan pengisian nama vendor relasi jika metode penanganan adalah subkontrak/vendor_relasi</td>
+                            <td>Input tender metode=&#x27;vendor_relasi&#x27; dengan nama_vendor_relasi kosong</td>
+                            <td>Sistem memunculkan pesan error validasi bahwa nama vendor relasi wajib diisi</td>
+                            <td>Sesuai Harapan (Validasi menolak penyimpanan vendor relasi tanpa nama mitra)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sistem dapat melakukan pencarian data tender berdasarkan kata kunci</td>
+                            <td>Akses &#x27;/tender?search=Jaringan&#x27;</td>
+                            <td>Sistem merespons status 200 dan menampilkan hasil pencarian yang relevan</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-5" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Tender - Estimasi / RAB (Tender_RAB)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar estimasi biaya dan RAB proyek tender</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/tender/rab&#x27;</td>
+                            <td>Halaman modul RAB termuat sempurna (HTTP 200) menampilkan ringkasan rencana anggaran</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menampilkan rincian rincian item pekerjaan dan material pada RAB</td>
+                            <td>Akses detail RAB &#x27;/tender/1/rab&#x27;</td>
+                            <td>Halaman rincian RAB termuat (HTTP 200) dengan rincian volume, satuan, dan harga</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi nilai volume dan harga satuan tidak boleh negatif pada item RAB</td>
+                            <td>Input item RAB dengan volume=&#x27;-5&#x27; dan harga_satuan=&#x27;-100000&#x27;</td>
+                            <td>Sistem menolak input negatif dan tidak mengkalkulasi total anggaran negatif</td>
+                            <td>Sesuai Harapan (Sistem menolak nilai negatif melalui validasi server)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-6" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Tender - Proyek Lapangan (Tender_Proyek)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar eksekusi proyek lapangan tender</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/tender/proyek&#x27;</td>
+                            <td>Halaman proyek termuat (HTTP 200) menyajikan status pelaksanaan dan vendor</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem menampilkan detail alokasi material, personil teknisi, dan log proyek</td>
+                            <td>Akses detail proyek &#x27;/tender/1/proyek&#x27;</td>
+                            <td>Detail proyek termuat (HTTP 200) dengan tab status, alokasi material, dan progres</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi persentase progres vendor tidak boleh melebihi 100%</td>
+                            <td>Kirim pembaruan progres vendor dengan nilai &#x27;150%&#x27;</td>
+                            <td>Sistem menolak nilai di luar rentang 0-100% dan mengembalikan pesan validasi batas</td>
+                            <td>Sesuai Harapan (Input persentase di atas 100% ditolak validasi)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-7" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Klien &amp; Kontrak (Klien_Kontrak)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar master klien / mitra perusahaan</td>
+                            <td>Akses URL &#x27;/clients&#x27; dengan sesi terautentikasi</td>
+                            <td>Tabel daftar klien termuat (HTTP 200) dengan data instansi, PIC, telepon, dan alamat</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menambahkan data klien baru</td>
+                            <td>Input form klien nama=&#x27;PT Sinergi Abadi 1792233754&#x27;, telp=&#x27;081234567890&#x27;, alamat=&#x27;Jakarta&#x27;</td>
+                            <td>Klien berhasil disimpan dan tercatat dalam database</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi format email klien harus berformat alamat email yang benar</td>
+                            <td>Input data klien dengan email &#x27;bukan_email_valid&#x27;</td>
+                            <td>Sistem menolak data dan menampilkan pesan error &#x27;The email field must be a valid email address&#x27;</td>
+                            <td>Sesuai Harapan (Validasi format email bekerja dan menolak string tidak valid)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem dapat menampilkan daftar kontrak kerja dan status penandatanganan</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/contracts&#x27;</td>
+                            <td>Halaman kontrak termuat (HTTP 200) dengan rincian nomor kontrak, nilai, dan masa berlaku</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-8" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Jasa - Pekerjaan &amp; Tagihan (Jasa_Pekerjaan)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar pekerjaan operasional jasa layanan</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/jasa&#x27;</td>
+                            <td>Halaman pekerjaan jasa termuat sempurna (HTTP 200) dengan tabel status pengerjaan</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat mencatat permohonan pekerjaan jasa baru oleh Admin</td>
+                            <td>Input pekerjaan jasa judul=&#x27;Instalasi Access Point &amp; Server 1792233762&#x27;, tipe=&#x27;installation&#x27;, biaya=&#x27;15000000&#x27;</td>
+                            <td>Pekerjaan jasa baru tersimpan dengan status &#x27;pending&#x27; menunggu persetujuan Manager</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi besaran biaya jasa tidak boleh bernilai negatif</td>
+                            <td>Input form jasa dengan nilai biaya &#x27;-5000000&#x27;</td>
+                            <td>Sistem menolak dan memunculkan error validasi angka minimal 0</td>
+                            <td>Sesuai Harapan (Biaya negatif ditolak oleh validasi server)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-9" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Jasa - Operasional &amp; Teknisi (Jasa_Operasional)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar teknisi dan status penugasan</td>
+                            <td>Akses URL &#x27;/jasa/teknisi&#x27;</td>
+                            <td>Halaman master teknisi termuat (HTTP 200) dengan data keahlian dan kontak</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menyajikan halaman penanganan operasional instalasi</td>
+                            <td>Akses URL &#x27;/jasa/instalasi&#x27;</td>
+                            <td>Halaman instalasi terbuka (HTTP 200) dengan daftar tiket dan pekerjaan aktif</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem dapat menyajikan halaman penanganan jadwal pemeliharaan / maintenance</td>
+                            <td>Akses URL &#x27;/jasa/maintenance&#x27;</td>
+                            <td>Halaman pemeliharaan terbuka (HTTP 200) dengan kontrol log berkala</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-10" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Supplier &amp; Pengadaan (Supplier_Pengadaan)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar mitra supplier / vendor penyedia barang</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/suppliers&#x27;</td>
+                            <td>Daftar supplier termuat (HTTP 200) dengan data PIC dan nomor kontak</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menambahkan data master supplier baru</td>
+                            <td>Input supplier nama=&#x27;CV Mitra Mandiri Teknik 1792233771&#x27;, PIC=&#x27;Budi Santoso&#x27;, submit form</td>
+                            <td>Data supplier baru tersimpan dalam database dengan status berhasil</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem dapat menampilkan riwayat pengadaan barang (purchasing)</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/procurements&#x27;</td>
+                            <td>Halaman pengadaan termuat (HTTP 200) dengan status pemesanan dan penerimaan</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem memvalidasi pesanan pengadaan tidak boleh kosong tanpa item barang</td>
+                            <td>Kirim POST &#x27;/procurements&#x27; tanpa memilih item barang</td>
+                            <td>Sistem menolak penyimpanan pesanan pengadaan tanpa rincian item</td>
+                            <td>Sesuai Harapan (Validasi mencegah penyimpanan data pengadaan kosong)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-11" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Produk &amp; Gudang (Produk_Gudang)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan katalog produk dan stok inventori gudang</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/products&#x27;</td>
+                            <td>Katalog produk termuat (HTTP 200) menampilkan SKU/kode, nama produk, stok, dan harga</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menambahkan master data produk baru</td>
+                            <td>Input produk kode=&#x27;PRD-1792233777&#x27;, nama=&#x27;Switch Gigabit 24 Port&#x27;, stok=25, harga jual=2300000</td>
+                            <td>Produk baru tersimpan dan stok awal 25 unit tercatat dalam kartu stok</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem menolak penambahan produk dengan kode/SKU yang sudah ada (duplikasi)</td>
+                            <td>Input ulang produk dengan kode yang sama persis (&#x27;PRD-1792233777&#x27;)</td>
+                            <td>Sistem menolak dan menampilkan pesan error &#x27;The code has already been taken&#x27;</td>
+                            <td>Sesuai Harapan (Validasi keunikan kode produk mencegah data ganda)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem dapat diakses melalui alias rute &#x27;/gudang&#x27;</td>
+                            <td>Akses URL &#x27;/gudang&#x27;</td>
+                            <td>Halaman inventori gudang terbuka sempurna (HTTP 200)</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-12" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Penjualan Barang (Penjualan_Barang)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar riwayat transaksi penjualan barang</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/sales&#x27;</td>
+                            <td>Halaman penjualan termuat (HTTP 200) menyajikan nomor transaksi, pembeli, total, dan status</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem memvalidasi transaksi penjualan tidak boleh diproses tanpa memilih klien dan item produk</td>
+                            <td>Kirim POST &#x27;/sales&#x27; tanpa menyertakan parameter data barang</td>
+                            <td>Sistem menolak transaksi kosong dan memberikan notifikasi kesalahan</td>
+                            <td>Sesuai Harapan (Transaksi kosong ditolak oleh validasi sistem)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem dapat membuka modul penjualan melalui alias rute &#x27;/perdagangan&#x27;</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/perdagangan&#x27;</td>
+                            <td>Halaman penjualan termuat (HTTP 200)</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-13" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Dokumen Komersial (Dokumen_Komersial)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar dokumen komersial (Quotation &amp; Customer Order)</td>
+                            <td>Akses rute &#x27;/commercial-documents&#x27;</td>
+                            <td>Halaman dokumen komersial termuat (HTTP 200) dengan tab penawaran dan order</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem memvalidasi field wajib pembuatan penawaran harga jasa (Service Quotation)</td>
+                            <td>Kirim form pembuatan Service Quotation tanpa data klien dan nilai penawaran</td>
+                            <td>Sistem mencegah pembuatan dokumen penawaran tanpa rincian valid</td>
+                            <td>Sesuai Harapan (Validasi menolak pengajuan penawaran kosong)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-14" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Keuangan &amp; Pembayaran (Keuangan_Finance)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan daftar tagihan / invoice keuangan</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/finance&#x27;</td>
+                            <td>Halaman keuangan termuat (HTTP 200) dengan tabel nomor invoice, jatuh tempo, dan status lunas</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menampilkan daftar riwayat pembayaran tagihan</td>
+                            <td>Kirim HTTP GET ke rute &#x27;/payments&#x27;</td>
+                            <td>Halaman pencatatan pembayaran termuat (HTTP 200) dengan histori bukti transfer</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem memvalidasi nominal pembayaran tagihan tidak boleh bernilai negatif</td>
+                            <td>Kirim pencatatan pembayaran dengan nominal amount=&#x27;-500000&#x27;</td>
+                            <td>Sistem menolak pembayaran dengan nominal kurang dari atau sama dengan 0</td>
+                            <td>Sesuai Harapan (Validasi menolak pembayaran negatif)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-15" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Modul Laporan &amp; Ekspor (Laporan_Ekspor)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem dapat menampilkan dashboard laporan komprehensif seluruh domain bisnis</td>
+                            <td>Akses URL &#x27;/laporan&#x27; dengan akun Owner/Manager</td>
+                            <td>Halaman laporan termuat (HTTP 200) dengan filter domain, status, dan rentang tanggal</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem dapat menyaring data laporan khusus domain Tender</td>
+                            <td>Pilih filter domain &#x27;tender&#x27; pada halaman laporan</td>
+                            <td>Tabel laporan hanya menyajikan data transaksi dari domain tender</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem dapat menyaring data laporan khusus domain Jasa</td>
+                            <td>Pilih filter domain &#x27;jasa&#x27; pada halaman laporan</td>
+                            <td>Tabel laporan hanya menyajikan data transaksi dari domain pekerjaan jasa</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem dapat menyaring data laporan khusus domain Perdagangan Barang</td>
+                            <td>Pilih filter domain &#x27;barang&#x27; pada halaman laporan</td>
+                            <td>Tabel laporan menyajikan data transaksi barang secara spesifik</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sistem dapat mengekspor rekapitulasi laporan ke format dokumen PDF</td>
+                            <td>Klik tombol &#x27;Export PDF&#x27; atau akses URL &#x27;/laporan/export/pdf&#x27;</td>
+                            <td>Sistem mengunduh berkas berekstensi .pdf dengan tipe konten application/pdf</td>
+                            <td>Tidak Sesuai Harapan (Status: 200)</td>
+                            <td>Tidak Valid</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Sistem dapat mengekspor rekapitulasi laporan ke format spreadsheet Excel (.xlsx)</td>
+                            <td>Klik tombol &#x27;Export Excel&#x27; atau akses URL &#x27;/laporan/export/xlsx&#x27;</td>
+                            <td>Sistem mengunduh berkas Excel .xlsx dengan struktur tabel terformat</td>
+                            <td>Tidak Sesuai Harapan (Status: 200, Content-Type: &#x27;text/html; charset=UTF-8&#x27; mengembalikan file CSV bertipe teks bukan format biner .xlsx)</td>
+                            <td>Tidak Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-16" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>A. Pengujian Pada Administrasi Sistem &amp; Keamanan (Admin_Sistem)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem Manajemen Operasional &amp; Pelaporan PT Signal Panca Utama — Format Baku Pengujian Blackbox</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Skenario Pengujian</td>
+                            <td>Test Case</td>
+                            <td>Hasil yang Diharapkan</td>
+                            <td>Hasil Pengujian</td>
+                            <td>Kesimpulan</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Sistem menyediakan audit trail aktivitas pengguna pada halaman Log Aktivitas</td>
+                            <td>Akses rute &#x27;/activity-logs&#x27; dengan akun Owner</td>
+                            <td>Log aktivitas pengguna termuat (HTTP 200) mencatat user, modul, aksi, dan waktu</td>
+                            <td>Sesuai Harapan (Status HTTP: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Sistem membatasi hak akses audit log sehingga role Admin tidak dapat melihatnya</td>
+                            <td>Kirim HTTP GET ke &#x27;/activity-logs&#x27; pada sesi role Admin</td>
+                            <td>Sistem menolak akses dengan HTTP 403 Forbidden atau redirect dengan pesan error hak akses</td>
+                            <td>Sesuai Harapan (Status: 302, Akses dicegah)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sistem mengizinkan role Owner mengelola akun pengguna (User Management)</td>
+                            <td>Akses rute &#x27;/users&#x27; dengan sesi akun Owner</td>
+                            <td>Halaman manajemen pengguna terbuka (HTTP 200) dengan daftar user dan tombol aksi</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Sistem melarang role Manager mengakses halaman manajemen pengguna</td>
+                            <td>Kirim HTTP GET ke &#x27;/users&#x27; pada sesi role Manager</td>
+                            <td>Sistem menolak dengan HTTP 403 Forbidden atau redirect pencegahan</td>
+                            <td>Sesuai Harapan (Status: 302, Akses dicegah)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sistem menyajikan matriks permission role pada rute &#x27;/permissions&#x27;</td>
+                            <td>Akses URL &#x27;/permissions&#x27; pada sesi role Owner</td>
+                            <td>Halaman matriks izin terbuka (HTTP 200) dengan checkbox permission per role</td>
+                            <td>Sesuai Harapan (Status: 200)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Sistem memvalidasi token CSRF pada seluruh request mutasi data (POST)</td>
+                            <td>Kirim request POST ke &#x27;/tender&#x27; tanpa menyertakan token &#x27;_token&#x27; / header CSRF</td>
+                            <td>Sistem menolak dengan status HTTP 419 Page Expired / CSRF Token Mismatch</td>
+                            <td>Sesuai Harapan (Status: 419 Page Expired)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Sistem kebal terhadap serangan dasar SQL Injection pada input parameter query</td>
+                            <td>Kirim query pencarian dengan payload SQLi &#x27;&#x27; OR &#x27;1&#x27;=&#x27;1&#x27; -- &#x27;</td>
+                            <td>Sistem menangani input secara aman via parameterized query tanpa kebocoran sintaks SQL</td>
+                            <td>Sesuai Harapan (Tidak ada syntax error SQL atau data dump tak terkontrol)</td>
+                            <td>Valid</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Sistem melakukan escaping pada karakter tag HTML untuk mencegah Cross-Site Scripting (XSS)</td>
+                            <td>Input nama klien berisi payload &#x27;&lt;script&gt;alert(&#x27;XSS_TEST&#x27;)&lt;/script&gt;&#x27; dan periksa output pada tabel</td>
+                            <td>Sistem melakukan sanitasi/HTML entity encode sehingga skrip tidak dapat dieksekusi</td>
+                            <td>Sesuai Harapan (Karakter HTML di-escape secara otomatis oleh template engine Blade)</td>
+                            <td>Valid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-17" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>DAFTAR TEMUAN BUG &amp; ANOMALI SISTEM</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hasil Eksekusi Blackbox Testing — Tanpa Mengubah Kode Sumber Aplikasi</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>ID</td>
+                            <td>Modul</td>
+                            <td>Judul Bug / Anomali</td>
+                            <td>Severity</td>
+                            <td>Langkah Reproduksi</td>
+                            <td>Expected</td>
+                            <td>Actual</td>
+                            <td>Bukti (Evidence)</td>
+                            <td>Referensi No Test Case</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-01</td>
+                            <td>Laporan_Ekspor</td>
+                            <td>Endpoint Export Excel (/laporan/export/xlsx) Mengembalikan Konten Teks CSV Bukan Format Spreadsheet Biner OpenXML (.xlsx)</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>1. Login sebagai akun Owner / Manager
+2. Masuk ke menu Laporan (/laporan)
+3. Klik tombol &#x27;Export Excel&#x27; atau akses URL &#x27;/laporan/export/xlsx&#x27;
+4. Periksa header &#x27;Content-Type&#x27; dan konten berkas yang terunduh</td>
+                            <td>Sistem menghasilkan file spreadsheet Excel biner berekstensi .xlsx dengan Content-Type &#x27;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&#x27;</td>
+                            <td>Sistem mengembalikan file dengan Content-Type &#x27;text/csv; charset=UTF-8&#x27; berisi data berformat plain-text CSV (comma separated values)</td>
+                            <td>laporan_index.png</td>
+                            <td>Laporan_Ekspor No. 6</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-02</td>
+                            <td>Admin_Sistem</td>
+                            <td>Ketiadaan Header Keamanan HTTP Standar (X-Frame-Options, X-Content-Type-Options, CSP, HSTS) pada Respons Server</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>1. Kirim HTTP GET request ke root web &#x27;/&#x27; atau &#x27;/login&#x27;
+2. Periksa response headers yang dikirim oleh aplikasi web</td>
+                            <td>Respons web menyertakan header proteksi keamanan standar seperti &#x27;X-Frame-Options: SAMEORIGIN&#x27;, &#x27;X-Content-Type-Options: nosniff&#x27;, dan &#x27;Content-Security-Policy&#x27;</td>
+                            <td>Seluruh header keamanan tersebut tidak ditemukan (Missing) pada respons web server, meningkatkan risiko clickjacking jika di-embed dalam iframe</td>
+                            <td>home_desktop.png</td>
+                            <td>Admin_Sistem No. 6</td>
+                        </tr>
+                        <tr>
+                            <td>BUG-03</td>
+                            <td>Beranda</td>
+                            <td>Margin dan Padding Komponen Mepet Tepi Layar pada Tampilan Mobile Resolusi 375px</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>1. Buka landing page pada resolusi viewport mobile (375x812 px)
+2. Periksa section logo mitra dan kartu ulasan layanan</td>
+                            <td>Terdapat padding horizontal pengaman minimal 12-16px di sisi kiri dan kanan layar untuk kenyamanan sentuhan dan keterbacaan</td>
+                            <td>Beberapa badge dan container kartu mepet langsung ke tepi layar (&lt; 6px), mengurangi estetika tata letak responsif</td>
+                            <td>home_mobile.png</td>
+                            <td>Beranda No. 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-18" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>HASIL UJI PERFORMA, KEAMANAN, DAN AKSESIBILITAS</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Metrik Kuantitatif Waktu Respons, Daya Tahan Konkurensi, Audit Keamanan HTTP, dan WCAG</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>1. HASIL UJI WAKTU RESPONS (LATENSI HTTP PER ENDPOINT)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Endpoint URL</td>
+                            <td>HTTP Status</td>
+                            <td>Min Latensi (ms)</td>
+                            <td>Max Latensi (ms)</td>
+                            <td>Rata-rata (ms)</td>
+                            <td>Standar Evaluasi</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>/</td>
+                            <td>200</td>
+                            <td>299.2</td>
+                            <td>353.4</td>
+                            <td>322.9</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>/login</td>
+                            <td>200</td>
+                            <td>277.9</td>
+                            <td>407.7</td>
+                            <td>333.8</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>/dashboard</td>
+                            <td>200</td>
+                            <td>495.5</td>
+                            <td>654.8</td>
+                            <td>552.7</td>
+                            <td>Baik (&lt; 1000 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>/tender</td>
+                            <td>200</td>
+                            <td>417.7</td>
+                            <td>530.1</td>
+                            <td>462.7</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>/jasa</td>
+                            <td>200</td>
+                            <td>373.7</td>
+                            <td>490.3</td>
+                            <td>438.3</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>/products</td>
+                            <td>200</td>
+                            <td>432.4</td>
+                            <td>649.7</td>
+                            <td>571.3</td>
+                            <td>Baik (&lt; 1000 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>/sales</td>
+                            <td>200</td>
+                            <td>436.2</td>
+                            <td>629.3</td>
+                            <td>544.2</td>
+                            <td>Baik (&lt; 1000 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>/finance</td>
+                            <td>200</td>
+                            <td>332.4</td>
+                            <td>520</td>
+                            <td>439.1</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>/laporan</td>
+                            <td>200</td>
+                            <td>401.2</td>
+                            <td>454.9</td>
+                            <td>434.9</td>
+                            <td>Sangat Cepat (&lt; 500 ms)</td>
+                        </tr>
+                        <tr>
+                            <td>2. HASIL UJI BEBAN KONKURENSI (STRESS TEST RINGAN)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Parameter Uji</td>
+                            <td>Hasil Pengukuran Kinerja</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Total Permintaan Simultan</td>
+                            <td>20 Requests</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Jumlah Worker Paralel</td>
+                            <td>5 Threads Konkuren</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Tingkat Keberhasilan (Success Rate)</td>
+                            <td>100.0% (200 OK)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Throughput (RPS)</td>
+                            <td>1.97 Req/Sec</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Rata-rata Waktu Respons</td>
+                            <td>2291.5 ms</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Rentang Waktu Latensi</td>
+                            <td>514.5 ms - 2861.1 ms</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Ketahanan Server</td>
+                            <td>STABIL — Tidak ada crash atau thread leak pada server internal</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3. AUDIT KEAMANAN HTTP &amp; HEADER PERLINDUNGAN</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Nama Security Header</td>
+                            <td>Fungsi Perlindungan</td>
+                            <td>Nilai Terdeteksi</td>
+                            <td>Status Keamanan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>X-Frame-Options</td>
+                            <td>SAMEORIGIN / DENY (Clickjacking protection)</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>X-Content-Type-Options</td>
+                            <td>nosniff (MIME-sniffing protection)</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>X-XSS-Protection</td>
+                            <td>1; mode=block (XSS filter)</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Strict-Transport-Security</td>
+                            <td>max-age=... (HSTS)</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Content-Security-Policy</td>
+                            <td>CSP directives</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Referrer-Policy</td>
+                            <td>no-referrer-when-downgrade / strict-origin</td>
+                            <td>Tidak Ditemukan (Missing)</td>
+                            <td>Rekomendasi Penambahan</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4. AUDIT PROTEKSI SERANGAN &amp; AKSESIBILITAS WEB</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Proteksi Brute Force Login</td>
+                            <td>throttle:5,1 (Maksimal 5 percobaan per menit) — Aktif (Mengembalikan HTTP 429 Too Many Requests)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Proteksi Token CSRF</td>
+                            <td>AKTIF (HTTP 419 Token Mismatch pada request tanpa token)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Proteksi SQL Injection</td>
+                            <td>AMAN (Eloquent ORM Parameterized Query mencegah payload sql injection)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Proteksi XSS</td>
+                            <td>AMAN (Blade automatic escaping pada kurung kurawal ganda {{ $var }})</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Kelengkapan Alt Gambar</td>
+                            <td>21 dari 21 gambar memiliki atribut alt (100.0%)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Label Elemen Form Login</td>
+                            <td>5 dari 5 kontrol input memiliki label/aria-label eksplisit</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Hierarki Heading Semantik</td>
+                            <td>H1: 1 elemen, H2: 3 elemen (Struktur SEO &amp; Aksesibilitas Valid)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-19" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>DAFTAR AREA FITUR YANG TIDAK DAPAT DIUJI (BLOCKED / OUT OF SCOPE)</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dokumentasi Hambatan &amp; Justifikasi Teknis Berdasarkan Lingkungan Lokal</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>No</td>
+                            <td>Nama Fitur / Modul</td>
+                            <td>Kategori Hambatan</td>
+                            <td>Alasan Teknis Tidak Dapat Diuji</td>
+                            <td>Dampak Terhadap Sistem</td>
+                            <td>Status Rekomendasi</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Single Sign-On (SSO) OAuth Google (/auth/google/redirect)</td>
+                            <td>Third-Party Credentials</td>
+                            <td>Membutuhkan Google Client ID dan Client Secret resmi yang aktif dan terdaftar di Google Cloud Console dengan domain publik callback yang valid. File .env lokal saat ini belum memiliki kredensial tersebut.</td>
+                            <td>Pengguna tidak dapat menguji login instan via akun Google Gmail pada server pengujian lokal.</td>
+                            <td>Blocked (Perlu konfigurasi API Console)</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Single Sign-On (SSO) OAuth LinkedIn (/auth/linkedin/redirect)</td>
+                            <td>Third-Party Credentials</td>
+                            <td>Membutuhkan LinkedIn Client ID dan Client Secret yang telah diapprove pada LinkedIn Developer Platform. File konfigurasi lokal (.env) masih berisi string kosong.</td>
+                            <td>Pengguna tidak dapat login menggunakan akun profesional LinkedIn pada server pengujian lokal.</td>
+                            <td>Blocked (Perlu verifikasi App LinkedIn)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Pengiriman Email Nyata Pemulihan Password (Live SMTP)</td>
+                            <td>Testing Safety Rules (#5)</td>
+                            <td>Sesuai Aturan Ketat Pengujian #5: &#x27;DILARANG mengirim email/SMS/pembayaran sungguhan&#x27;. Server lokal menggunakan Mailpit/Log driver sehingga surat elektronik tidak dihantarkan ke server email penerima publik.</td>
+                            <td>Tidak ada email sungguhan yang masuk ke inbox pengguna luar; pengujian dibatasi pada verifikasi form dan token reset.</td>
+                            <td>Aman &amp; Terisolasi (Sesuai Aturan QA)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Payment Gateway Otomatis (Live Bank / Virtual Account)</td>
+                            <td>Business Architecture Scope</td>
+                            <td>Sesuai PRD, pencatatan pembayaran keuangan sistem PT Signal Panca Utama menggunakan mekanisme konfirmasi internal (Manual Bank Transfer Verification) dan belum mengintegrasikan webhook gateway pihak ketiga.</td>
+                            <td>Verifikasi pembayaran dilakukan secara manual oleh staff admin/finance melalui form input pembayaran.</td>
+                            <td>By Design (Sesuai Spesifikasi PRD)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(idx, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + idx).classList.add('active');
+            filterTable();
+        }
+
+        function filterTable() {
+            const input = document.getElementById('globalSearch').value.toLowerCase();
+            const activeTab = document.querySelector('.tab-content.active');
+            if (!activeTab) return;
+            const rows = activeTab.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

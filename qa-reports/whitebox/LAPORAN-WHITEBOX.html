@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAPORAN WHITEBOX TESTING - SignalNiagaJasaTender</title>
+    <style>
+        :root {
+            --primary: #1F497D;
+            --primary-light: #2C5E9E;
+            --bg: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --border: #E2E8F0;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --pass-bg: #DCFCE7;
+            --pass-text: #166534;
+            --fail-bg: #FEE2E2;
+            --fail-text: #991B1B;
+            --crit-bg: #FEE2E2;
+            --crit-text: #991B1B;
+            --high-bg: #FFEDD5;
+            --high-text: #9A3412;
+            --med-bg: #FEF9C3;
+            --med-text: #854D0E;
+            --low-bg: #DCFCE7;
+            --low-text: #166534;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding: 24px;
+        }
+        header {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 6px solid var(--primary);
+        }
+        header h1 { font-size: 20px; color: var(--primary); font-weight: 700; }
+        header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #F1F5F9; color: var(--text-main); }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 75vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        thead th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 12px 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tbody tr:hover { background: #F8FAFC; }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-pass { background: var(--pass-bg); color: var(--pass-text); }
+        .badge-fail { background: var(--fail-bg); color: var(--fail-text); }
+        .badge-critical { background: var(--crit-bg); color: var(--crit-text); }
+        .badge-high { background: var(--high-bg); color: var(--high-text); }
+        .badge-medium { background: var(--med-bg); color: var(--med-text); }
+        .badge-low { background: var(--low-bg); color: var(--low-text); }
+        
+        .search-box {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            width: 240px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>LAPORAN WHITEBOX TESTING - SignalNiagaJasaTender</h1>
+            <p>File Sumber: LAPORAN-WHITEBOX.xlsx | Total Sheet: 8</p>
+        </div>
+        <div>
+            <input type="text" class="search-box" id="globalSearch" placeholder="Cari data dalam tabel..." onkeyup="filterTable()">
+        </div>
+    </header>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('0', this)">Ringkasan</button>
+        <button class="tab-btn " onclick="switchTab('1', this)">Hasil Test</button>
+        <button class="tab-btn " onclick="switchTab('2', this)">Coverage</button>
+        <button class="tab-btn " onclick="switchTab('3', this)">Temuan</button>
+        <button class="tab-btn " onclick="switchTab('4', this)">Dependency &amp; Secret</button>
+        <button class="tab-btn " onclick="switchTab('5', this)">Kompleksitas &amp; Duplikasi</button>
+        <button class="tab-btn " onclick="switchTab('6', this)">Rekomendasi Test</button>
+        <button class="tab-btn " onclick="switchTab('7', this)">Keterbatasan</button>
+    </div>
+    <div id="tab-0" class="tab-content active">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>LAPORAN EXECUTIVE WHITEBOX TESTING &amp; QUALITY AUDIT</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sistem SignalNiagaJasaTender (Laravel 10 + MySQL / SQLite Testing Env)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>HASIL TEST EXISTING</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>DISTRIBUSI TEMUAN SEVERITY (FORMULA EXCEL)</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Metrik</td>
+                            <td>Nilai</td>
+                            <td>Keterangan</td>
+                            <td></td>
+                            <td>Tingkat Keparahan</td>
+                            <td>Jumlah Temuan</td>
+                            <td>Target Penanganan</td>
+                        </tr>
+                        <tr>
+                            <td>Total Test Existing</td>
+                            <td></td>
+                            <td>Total skenario pengujian di codebase</td>
+                            <td></td>
+                            <td><span class="badge badge-fail">Critical</span></td>
+                            <td></td>
+                            <td>Wajib ditangani segera (BOLA API, Bypass Otorisasi)</td>
+                        </tr>
+                        <tr>
+                            <td>Test Lulus (Pass)</td>
+                            <td></td>
+                            <td>Unit tests yang berhasil dieksekusi</td>
+                            <td></td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td></td>
+                            <td>Wajib ditangani sebelum rilis (Upload File, Stock Race)</td>
+                        </tr>
+                        <tr>
+                            <td>Test Gagal (Fail)</td>
+                            <td></td>
+                            <td>Gagal karena host PHP CLI belum memuat pdo_sqlite</td>
+                            <td></td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td></td>
+                            <td>Prioritas sprint berikutnya (N+1, Random collision)</td>
+                        </tr>
+                        <tr>
+                            <td>Test Dilewati (Skip)</td>
+                            <td></td>
+                            <td>Tidak ada test yang diskip</td>
+                            <td></td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td></td>
+                            <td>Perbaikan berkala &amp; kebersihan kode (Pint style, Hardcoded rate)</td>
+                        </tr>
+                        <tr>
+                            <td>Tingkat Kelulusan</td>
+                            <td></td>
+                            <td>Persentase kelulusan test existing</td>
+                            <td></td>
+                            <td>Total Temuan</td>
+                            <td></td>
+                            <td>Total akumulasi temuan kualitas &amp; keamanan kode</td>
+                        </tr>
+                        <tr>
+                            <td>LINGKUNGAN PENGUJIAN &amp; TOOLCHAIN</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>PENILAIAN RISIKO KESELURUHAN (OVERALL RISK SCORE)</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Komponen / Tool</td>
+                            <td>Versi Terdeteksi</td>
+                            <td>Tujuan / Perintah</td>
+                            <td></td>
+                            <td>Dimensi Evaluasi</td>
+                            <td>Rating</td>
+                            <td>Catatan Rekomendasi</td>
+                        </tr>
+                        <tr>
+                            <td>PHP CLI Runtime</td>
+                            <td>PHP 8.1.10 (x64 ZTS, VS16)</td>
+                            <td>php -v (Laragon environment)</td>
+                            <td></td>
+                            <td>Skor Risiko Keseluruhan</td>
+                            <td>TINGGI (HIGH RISK)</td>
+                            <td>Ditemukan celah otorisasi API kritis dan celah upload dokumen.</td>
+                        </tr>
+                        <tr>
+                            <td>Laravel Framework</td>
+                            <td>10.48.28</td>
+                            <td>php artisan --version</td>
+                            <td></td>
+                            <td>Kesiapan Test Suite</td>
+                            <td>RENDAH (LOW COVERAGE)</td>
+                            <td>14 dari 15 test gagal akibat dependensi driver SQLite pada CLI host.</td>
+                        </tr>
+                        <tr>
+                            <td>Test Runner</td>
+                            <td>PHPUnit 10.5.45</td>
+                            <td>php artisan test</td>
+                            <td></td>
+                            <td>Keamanan Dependensi</td>
+                            <td>SEDANG (MEDIUM)</td>
+                            <td>8 advisory pada composer (termasuk CVE CRLF) &amp; 5 npm vulnerabilities.</td>
+                        </tr>
+                        <tr>
+                            <td>Linter &amp; Code Style</td>
+                            <td>Laravel Pint 1.21.0</td>
+                            <td>php vendor/bin/pint --test</td>
+                            <td></td>
+                            <td>Kualitas &amp; Kompleksitas</td>
+                            <td>SEDANG (MEDIUM)</td>
+                            <td>25 fungsi memiliki CC &gt; 10 (tertinggi SalesService CC 51).</td>
+                        </tr>
+                        <tr>
+                            <td>Dependency Auditor (PHP)</td>
+                            <td>Composer 2.8.12</td>
+                            <td>composer audit</td>
+                            <td></td>
+                            <td>Integritas Transaksi</td>
+                            <td>PERLU PERBAIKAN</td>
+                            <td>Cek stok dan pembayaran belum menggunakan pessimistic locking.</td>
+                        </tr>
+                        <tr>
+                            <td>Dependency Auditor (JS)</td>
+                            <td>NPM 11.13.0 / Node v20+</td>
+                            <td>npm audit</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Database Engine</td>
+                            <td>MySQL 8.0.30 &amp; SQLite In-Memory</td>
+                            <td>Database operasional &amp; DB unit testing</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Static Code Analyzer</td>
+                            <td>Python 3.13.0 Custom AST Parser</td>
+                            <td>Analisis Kompleksitas Siklomatik &amp; Pattern Scanner</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-1" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Modul</th>
+                            <th>Nama Test</th>
+                            <th>Status</th>
+                            <th>Durasi</th>
+                            <th>Pesan Error Ringkas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Unit Example</td>
+                            <td>Tests\Unit\ExampleTest &gt; that true is true</td>
+                            <td><span class="badge badge-pass">Pass</span></td>
+                            <td>0.02s</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Commercial Service</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; service quotation can be created</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sales &amp; Inventory</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; sale rejects insufficient stock</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Finance Payment</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; payment cannot exceed invoice balance</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Sales &amp; Invoice</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; sale creates invoice items</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Tender Evaluation</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; tender evaluation is recorded</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Tender Lifecycle</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; rejected tender moves to lost status</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Tender Documents</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; uploading tender document replaces previous document</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Console Reminders</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; deadline command notifies business roles</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Auth Password</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; local password reset link can be used</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>Auth Registration</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; registration requires super admin approval before login</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>Auth Security</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; login requires a valid server side captcha</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>Auth Security</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; login captcha can be refreshed</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>User Management</td>
+                            <td>Tests\Feature\BusinessFlowTest &gt; user delete requires matching email confirmation</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>Feature Example</td>
+                            <td>Tests\Feature\ExampleTest &gt; the application returns a successful response</td>
+                            <td><span class="badge badge-fail">Fail</span></td>
+                            <td>0.01s</td>
+                            <td>QueryException: could not find driver (Connection: sqlite)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-2" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Modul / File</th>
+                            <th>Statement %</th>
+                            <th>Branch %</th>
+                            <th>Function %</th>
+                            <th>Line %</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>app/Http/Controllers/Api/BusinessApiController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>app/Http/Controllers/TenderProjectController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>app/Http/Controllers/ServiceOperationsController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>app/Http/Controllers/ReportController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>app/Http/Controllers/DashboardController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>app/Http/Controllers/ProductController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>app/Http/Controllers/TenderController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>app/Http/Controllers/SalesController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>app/Http/Controllers/InvoiceController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>app/Http/Controllers/PaymentController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>app/Http/Controllers/ProcurementController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>app/Http/Controllers/ServiceJobController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>app/Http/Controllers/TechnicianController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>app/Http/Controllers/UserManagementController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Test gagal dieksekusi (driver SQLite absen)</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>app/Http/Controllers/AuthController.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Test gagal dieksekusi (driver SQLite absen)</td>
+                        </tr>
+                        <tr>
+                            <td>16</td>
+                            <td>app/Services/SalesService.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Test gagal dieksekusi (driver SQLite absen)</td>
+                        </tr>
+                        <tr>
+                            <td>17</td>
+                            <td>app/Services/PaymentService.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Test gagal dieksekusi (driver SQLite absen)</td>
+                        </tr>
+                        <tr>
+                            <td>18</td>
+                            <td>app/Services/TenderService.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>19</td>
+                            <td>app/Services/ProcurementService.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>20</td>
+                            <td>app/Models/Product.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                        <tr>
+                            <td>21</td>
+                            <td>app/Models/Tender.php</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Belum tercover test otomatis (0%)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-3" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Severity</th>
+                            <th>Kategori</th>
+                            <th>File:Baris</th>
+                            <th>Deskripsi</th>
+                            <th>Dampak</th>
+                            <th>Saran Perbaikan</th>
+                            <th>Sumber</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>T-01</td>
+                            <td><span class="badge badge-fail">Critical</span></td>
+                            <td>Keamanan</td>
+                            <td>app/Http/Controllers/Api/BusinessApiController.php:97</td>
+                            <td>BOLA (Broken Object Level Authorization) &amp; Bypass Approval Hapus Tender via REST API. Endpoint DELETE /api/tenders/{tender} menghapus tender tanpa pengecekan hak akses atau alur izin Owner/Manager.</td>
+                            <td>User dengan token API biasa dapat menghapus tender manapun secara sepihak tanpa melewati alur persetujuan dua pihak.</td>
+                            <td>Terapkan middleware role/permission pada route API dan integrasikan alur request-deletion yang sama dengan web controller.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-02</td>
+                            <td><span class="badge badge-fail">Critical</span></td>
+                            <td>Keamanan</td>
+                            <td>app/Http/Controllers/Api/BusinessApiController.php:80</td>
+                            <td>Bypass Alur Persetujuan Perubahan Harga Produk &amp; Kontrak via API. Endpoint PUT /api/products/{id} dan PUT /api/contracts/{id} mengubah harga secara langsung tanpa permohonan ke Manager.</td>
+                            <td>Pencegahan perubahan harga sepihak yang diatur di web diabaikan melalui API, membuka celah manipulasi finansial.</td>
+                            <td>Tambahkan otorisasi strictly role:owner,manager pada aksi mutasi harga di BusinessApiController.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-03</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Keamanan</td>
+                            <td>app/Http/Controllers/TenderController.php:438</td>
+                            <td>Unrestricted File Upload pada Dokumen Tender. Validasi hanya &#x27;required|file|max:10240&#x27; tanpa pembatasan ekstensi atau MIME type (mimes:pdf,docx,xlsx,png,jpg).</td>
+                            <td>Penyerang dapat mengunggah file berbahaya (.php, .html, .svg) ke direktori public storage, berpotensi Remote Code Execution (RCE) atau Stored XSS.</td>
+                            <td>Tambahkan validasi ketat: &#x27;mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png&#x27; dan simpan file di storage non-public dengan download berotorisasi.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-04</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td><span class="badge badge-fail">Bug</span></td>
+                            <td>app/Services/SalesService.php:20</td>
+                            <td>Race Condition Validasi &amp; Pengurangan Stok Barang. Pengecekan stok $product-&gt;stock tidak menggunakan lock baris (lockForUpdate).</td>
+                            <td>Dua transaksi serentak pada stok produk yang sama dapat lolos validasi bersamaan, menyebabkan kuantitas stok di gudang menjadi negatif.</td>
+                            <td>Gunakan Product::where(&#x27;id&#x27;, $id)-&gt;lockForUpdate()-&gt;firstOrFail() di dalam transaksi DB sebelum validasi kuantitas.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-05</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Keamanan</td>
+                            <td>app/Http/Controllers/AuthController.php:189</td>
+                            <td>Ekspos Tautan Reset Password Beserta Token pada Session/Response di Environment local/testing.</td>
+                            <td>Jika aplikasi dijalankan di server staging publik dengan APP_ENV=local, token reset password terekspos sehingga akun dapat diambil alih tanpa akses email.</td>
+                            <td>Hapus pengembalian reset_url di session response atau batasi strictly hanya jika running di PHPUnit unit test context.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-06</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td><span class="badge badge-fail">Bug</span></td>
+                            <td>app/Services/SalesService.php:40</td>
+                            <td>Penomoran Penjualan dan Invoice Lemah Menggunakan rand(100, 999). Ruang acak hanya 900 kombinasi per hari.</td>
+                            <td>Dalam volume penjualan padat, collision pada unique constraint akan melempar unhandled QueryException dan memicu HTTP 500.</td>
+                            <td>Gunakan auto-increment sequence harian, atomic counter di database/redis, atau format berbasis UUID/timestamp mikrodetik.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-07</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td><span class="badge badge-fail">Bug</span></td>
+                            <td>app/Http/Controllers/ServiceOperationsController.php:137</td>
+                            <td>Permintaan Material Operasional Jasa Mengurangi Stok Gudang Tanpa Pengecekan Ketersediaan.</td>
+                            <td>Jika stok produk di dagang lebih kecil dari permintaan teknisi jasa, stok barang langsung berkurang menjadi negatif tanpa error atau peringatan.</td>
+                            <td>Tambahkan validasi ketersediaan stok fisik sebelum membuat StockMovement OUT.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-08</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Keamanan</td>
+                            <td>routes/web.php:52</td>
+                            <td>Exemption CSRF pada Logout Route dan Penggunaan HTTP GET. URL /logout dapat diakses via GET dan dikecualikan di VerifyCsrfToken.</td>
+                            <td>Penyerang dapat memasang tag &lt;img src=&#x27;.../logout&#x27;&gt; di web eksternal untuk memaksa pengguna logout (Cross-Site Request Forgery Logout).</td>
+                            <td>Hapus &#x27;logout&#x27; dari $except di VerifyCsrfToken dan wajibkan logout hanya menerima HTTP POST dengan valid CSRF token.</td>
+                            <td>Review Konfigurasi &amp; SAST</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-09</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td><span class="badge badge-fail">Bug</span></td>
+                            <td>app/Services/PaymentService.php:15</td>
+                            <td>Ketiadaan Pessimistic Locking pada Pengecekan Overpayment Invoice.</td>
+                            <td>Jika dua pembayaran tercatat serentak untuk invoice yang sama, akumulasi pembayaran dapat melebihi total tagihan sebelum status &#x27;Paid&#x27; terkunci.</td>
+                            <td>Terapkan lockForUpdate() pada query Invoice di dalam DB::transaction.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-10</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Performa</td>
+                            <td>app/Models/Product.php:39</td>
+                            <td>N+1 Query Issue Akibat Appended Accessor &#x27;stock&#x27; pada Model Product. $appends = [&#x27;stock&#x27;] mengeksekusi 3 query terpisah per row jika relasi tidak di-preload.</td>
+                            <td>Pada pagination atau endpoint list produk (50 item), terjadi 150 query agregasi database, menyebabkan latensi response tinggi.</td>
+                            <td>Hapus &#x27;stock&#x27; dari default $appends, gunakan withSum/subquery untuk list agregat, atau preload relasi stockMovements.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-11</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Keamanan</td>
+                            <td>app/Http/Controllers/AuthController.php:37</td>
+                            <td>Penetapan Role Default Tingkat Tinggi (&#x27;admin&#x27;) pada Registrasi Publik Mandiri.</td>
+                            <td>Pengguna publik yang mendaftar langsung dialokasikan ke role &#x27;admin&#x27;. Sekali diaktifkan, mereka memiliki hak akses administratif luas.</td>
+                            <td>Tetapkan role default registrasi ke peran terendah (misal: &#x27;user&#x27;/&#x27;guest&#x27; atau tanpa izin) dan biarkan Owner menentukan role secara manual.</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-12</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Maintainability</td>
+                            <td>app/Services/SalesService.php:80</td>
+                            <td>Hardcoded Nilai Pajak PPN 11% di Kode Sumber ($taxAmount = $totalAmount * 0.11).</td>
+                            <td>Jika tarif pajak regulasi berubah (seperti penyesuaian PPN 12%), perubahan harus dilakukan manual di kode sumber dan rawan diskrepansi perhitungan.</td>
+                            <td>Pindahkan tarif pajak ke konfigurasi dinamis database (tabel settings) atau config(&#x27;finance.tax_rate&#x27;).</td>
+                            <td>Code Review Logika Kritis</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                        <tr>
+                            <td>T-13</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Maintainability</td>
+                            <td>app/Http/Controllers/*.php</td>
+                            <td>71 Ketidaksesuaian Standar Format Kode (PSR-12) Terdeteksi di 140 File oleh Laravel Pint.</td>
+                            <td>Inkonsistensi indentasi, spasi konkatenasi, pengurutan import, dan trailing commas menurunkan keterbacaan kode.</td>
+                            <td>Jalankan &#x27;php vendor/bin/pint&#x27; secara terjadwal atau pasang pre-commit hook untuk standardisasi format kode tim.</td>
+                            <td>Laravel Pint (Static Analysis)</td>
+                            <td>Terverifikasi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-4" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Paket / Lokasi</th>
+                            <th>Versi Terpasang</th>
+                            <th>Kerentanan / Jenis Temuan</th>
+                            <th>Severity</th>
+                            <th>Versi Perbaikan / Saran</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>laravel/framework</td>
+                            <td>v10.48.28</td>
+                            <td>CRLF Injection in default email rule (GHSA-5vg9-5847-vvmq / PKSA-3r5d-mb8f-1qw9)</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Update ke Laravel &gt;= 12.60.0 atau v13.10.0+</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>league/commonmark</td>
+                            <td>2.4.2</td>
+                            <td>Quadratic-time DoS in GFM Table scan (GHSA-3q6v-r5mr-hxv8 / PKSA-m4t9-vsgq-8khn)</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Update league/commonmark &gt; 2.10.1</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>shell-quote (npm)</td>
+                            <td>1.8.1</td>
+                            <td>Command injection via line terminator in token after comment (GHSA-pqg4-j6r4-53mv)</td>
+                            <td><span class="badge badge-fail">Critical</span></td>
+                            <td>Update shell-quote ke &gt;= 1.8.2 / npm audit fix</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>source-map-js (npm)</td>
+                            <td>1.0.2</td>
+                            <td>Event-loop DoS through indexed source-map offsets (GHSA-68fv-2mgg-jv7q)</td>
+                            <td><span class="badge badge-high">High</span></td>
+                            <td>Update source-map-js ke &gt;= 1.2.1</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>laravel/framework</td>
+                            <td>v10.48.28</td>
+                            <td>Temporary Signed URL Path Confusion (GHSA-crmm-hgp2-wgrp / PKSA-m5cs-t1y6-qpcs)</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Update ke Laravel &gt;= 12.61.1</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>league/commonmark</td>
+                            <td>2.4.2</td>
+                            <td>DisallowedRawHtml bypassed when disallowed tag ends literal (GHSA-97jj-33gv-5xf9)</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Update league/commonmark &gt; 2.10.1</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>esbuild / vite (npm)</td>
+                            <td>0.20.2 / 5.1.4</td>
+                            <td>Arbitrary local dev server request reading (GHSA-67mh-4wv8-2f99)</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Update vite &amp; esbuild ke versi patch terbaru</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>firebase/php-jwt</td>
+                            <td>6.10.0</td>
+                            <td>Weak encryption fallback in certain verification modes (CVE-2025-45769)</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Update firebase/php-jwt ke &gt;= 7.0.0</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>laravel/framework</td>
+                            <td>v10.48.28</td>
+                            <td>XSS in Debug Page Information (CVE-2026-102279 / GHSA-jh5r-qr3c-85q8)</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Pastikan APP_DEBUG=false pada production</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>symfony/http-foundation</td>
+                            <td>v6.4.16</td>
+                            <td>ReDoS in HeaderUtils::split() via Cache-Control header (CVE-2026-108082)</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Update symfony/http-foundation ke &gt;= 6.4.46</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>doctrine/cache</td>
+                            <td>2.2.0</td>
+                            <td>Paket ditinggalkan (Abandoned Package) oleh pengembang</td>
+                            <td><span class="badge badge-low">Low</span></td>
+                            <td>Gantikan dengan symfony/cache atau PSR-6 / PSR-16 cache</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>.env (Root Workspace)</td>
+                            <td>N/A</td>
+                            <td>APP_KEY hardcoded terekam di file konfigurasi lokal aktif</td>
+                            <td><span class="badge badge-medium">Medium</span></td>
+                            <td>Pastikan .env masuk .gitignore dan lakukan key rotate di server live</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-5" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>File : Fungsi</th>
+                            <th>Kompleksitas Siklomatik</th>
+                            <th>Duplikasi / Kode Mati</th>
+                            <th>Catatan &amp; Risiko</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>app/Services/SalesService.php:createSale</td>
+                            <td>51</td>
+                            <td>Duplikasi logika subtotal &amp; stock movements</td>
+                            <td>Kompleksitas sangat tinggi; menggabungkan validasi stok, invoice, dan item penjualan.</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>app/Http/Controllers/ReportController.php:export</td>
+                            <td>46</td>
+                            <td>Percabangan format Excel/PDF &amp; query filter</td>
+                            <td>Banyak nested if untuk setiap tipe laporan; disarankan memakai strategy pattern.</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>app/Http/Controllers/DashboardController.php:index</td>
+                            <td>34</td>
+                            <td>Perhitungan KPI terulang di beberapa method</td>
+                            <td>Mengumpulkan puluhan metrik dalam 1 controller; disarankan dipisah ke DashboardService.</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>app/Http/Controllers/TenderController.php:store</td>
+                            <td>31</td>
+                            <td>Validasi manual &amp; pemetaan approval bertingkat</td>
+                            <td>Mengatur status approval owner/manager di method store; rawan inkonsistensi.</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>app/Http/Controllers/ReportController.php:index</td>
+                            <td>25</td>
+                            <td>Filter query duplikat dengan export()</td>
+                            <td>Logika filtering tanggal dan kategori duplikat antara method index dan export.</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>app/Http/Controllers/SalesController.php:store</td>
+                            <td>23</td>
+                            <td>Pengecekan role &amp; input item multi-baris</td>
+                            <td>Menghandle data input customer dan mapping item; delegasi ke service masih minim.</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>app/Http/Controllers/ServiceOperationsController.php:updateProgress</td>
+                            <td>23</td>
+                            <td>Sinkronisasi otomatis ke Modul Tender</td>
+                            <td>Mengupdate status job, technician assignment, dan tender sekaligus; rawan race condition.</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>app/Services/ProcurementService.php:createProcurement</td>
+                            <td>22</td>
+                            <td>Logika perulangan item pengadaan &amp; stok IN</td>
+                            <td>Penanganan transaksi item dan kalkulasi total subtotal dalam 1 blok besar.</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>app/Http/Middleware/AuditActivity.php:handle</td>
+                            <td>19</td>
+                            <td>Parsing parameter route &amp; filter tipe mutasi</td>
+                            <td>Mengekstrak model ID dari berbagai variasi route parameter; sulit dimaintain.</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>app/Services/TenderService.php:convertTenderToContract</td>
+                            <td>19</td>
+                            <td>Pemindahan item tender ke klausul kontrak</td>
+                            <td>Banyak percabangan validasi status tender sebelum konversi diizinkan.</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>app/Http/Controllers/TenderProjectController.php:updateStatus</td>
+                            <td>18</td>
+                            <td>Validasi alur transisi status proyek</td>
+                            <td>Pengecekan prasyarat dokumen sebelum status lapangan dapat bergeser.</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>app/Http/Controllers/ProductController.php:index</td>
+                            <td>17</td>
+                            <td>Kondisional filter status permohonan</td>
+                            <td>4 blok if/elseif untuk menangani filter tab pending, penghapusan, dan penyesuaian.</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>app/Http/Controllers/TenderController.php:index</td>
+                            <td>17</td>
+                            <td>Filter multi-kriteria &amp; subquery counting</td>
+                            <td>Menggabungkan pencarian teks dengan filter status approval dan submission.</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>app/Http/Controllers/ProductController.php:approveChangeRequest</td>
+                            <td>16</td>
+                            <td>Percabangan dua jenis request (stok vs harga)</td>
+                            <td>Sebaiknya dipisah menjadi 2 method tersendiri: approveStock dan approvePrice.</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>app/Http/Controllers/CommercialDocumentController.php:storeServiceQuotation</td>
+                            <td>15</td>
+                            <td>Perhitungan total &amp; PPN item quotation</td>
+                            <td>Pola perhitungan PPN 11% berulang dengan SalesService.</td>
+                        </tr>
+                        <tr>
+                            <td>16</td>
+                            <td>app/Http/Controllers/TechnicianController.php:index</td>
+                            <td>14</td>
+                            <td>Filter kompetensi &amp; ketersediaan teknisi</td>
+                            <td>Query filter status teknisi dan mapping tugas aktif.</td>
+                        </tr>
+                        <tr>
+                            <td>17</td>
+                            <td>app/Http/Controllers/TenderRabController.php:storeItem</td>
+                            <td>14</td>
+                            <td>Kalkulasi margin profit &amp; subtotal RAB</td>
+                            <td>Perhitungan margin berulang untuk internal vs subkontraktor.</td>
+                        </tr>
+                        <tr>
+                            <td>18</td>
+                            <td>app/Http/Controllers/AuthController.php:handleProviderCallback</td>
+                            <td>14</td>
+                            <td>Penanganan Socialite multi-provider</td>
+                            <td>Banyak pengecekan fallback email, linking oauth, dan aktivasi akun.</td>
+                        </tr>
+                        <tr>
+                            <td>19</td>
+                            <td>app/Http/Controllers/ServiceJobController.php:store</td>
+                            <td>13</td>
+                            <td>Pemetaan klien baru vs klien terdaftar</td>
+                            <td>Logika resolve klien serupa dengan yang ada di TenderController (duplikasi).</td>
+                        </tr>
+                        <tr>
+                            <td>20</td>
+                            <td>app/Http/Controllers/DashboardController.php:calculateKpi</td>
+                            <td>12</td>
+                            <td>Perhitungan persentase margin &amp; rasio</td>
+                            <td>Pembagian angka tanpa penanganan pembagi nol (zero division risk).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-6" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Modul / Fungsi</th>
+                            <th>Cabang / Kondisi yang Belum Teruji</th>
+                            <th>Skenario yang Disarankan</th>
+                            <th>Prioritas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>SalesService::createSale</td>
+                            <td>Transaksi penjualan serentak pada produk dengan stok terbatas.</td>
+                            <td>Uji konkurensi (2 request paralel) saat sisa stok = 10 dan masing-masing meminta 10. Pastikan 1 berhasil dan 1 gagal dengan exception stok tidak cukup.</td>
+                            <td><span class="badge badge-high">P1 (Critical)</span></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>BusinessApiController::destroyTender</td>
+                            <td>Akses penghapusan tender oleh role admin via API token.</td>
+                            <td>Kirim DELETE /api/tenders/{id} menggunakan token user role &#x27;admin&#x27;. Pastikan sistem mengembalikan HTTP 403 Forbidden.</td>
+                            <td><span class="badge badge-high">P1 (Critical)</span></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>TenderController::uploadDocument</td>
+                            <td>Validasi file berbahaya (.php, .exe, .html, .svg) pada dokumen tender.</td>
+                            <td>Unggah file exploit.php atau xss.html. Pastikan validator mengembalikan error 422 dan file tidak tersimpan di storage public.</td>
+                            <td><span class="badge badge-high">P1 (Critical)</span></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>BusinessApiController::updateProduct</td>
+                            <td>Bypass perubahan harga produk tanpa persetujuan Manager.</td>
+                            <td>Kirim PUT /api/products/{id} dengan payload selling_price baru oleh user non-manajemen. Pastikan request ditolak.</td>
+                            <td><span class="badge badge-high">P1 (Critical)</span></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>ServiceOperationsController::requestMaterial</td>
+                            <td>Permintaan material melebihi stok barang di gudang Dagang.</td>
+                            <td>Pilih product_id dengan stok = 2 dan request quantity = 10. Pastikan sistem melempar validasi error bahwa stok gudang tidak mencukupi.</td>
+                            <td><span class="badge badge-medium">P2 (High)</span></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>PaymentService::recordPayment</td>
+                            <td>Pembayaran ganda bersamaan pada sisa saldo invoice.</td>
+                            <td>Kirim dua pembayaran simultan Rp 600.000 pada invoice bersisa Rp 1.000.000. Pastikan total terbayar tidak melebihi sisa tagihan.</td>
+                            <td><span class="badge badge-medium">P2 (High)</span></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>AuthController::logout</td>
+                            <td>Serangan CSRF Logout via GET request dari domain eksternal.</td>
+                            <td>Simulasikan request GET /logout tanpa valid CSRF token. Pastikan session tidak diinvalidation jika request berupa GET tanpa proteksi.</td>
+                            <td><span class="badge badge-medium">P2 (High)</span></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>AuthController::sendResetLink</td>
+                            <td>Ekspos token reset password pada mode staging/local.</td>
+                            <td>Request forgot password pada akun terdaftar. Pastikan response JSON/Session tidak mengembalikan reset_url saat diuji di staging/production.</td>
+                            <td><span class="badge badge-medium">P2 (High)</span></td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>SalesService::createSale</td>
+                            <td>Collision penomoran sale_number akibat rand(100, 999).</td>
+                            <td>Simulasikan 100 transaksi penjualan dalam 1 detik. Pastikan semua sale_number unik dan tidak terjadi QueryException duplicate key.</td>
+                            <td><span class="badge badge-low">P3 (Medium)</span></td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Product::getStockAttribute</td>
+                            <td>Evaluasi jumlah query (N+1) pada pemanggilan list produk.</td>
+                            <td>Panggil Product::paginate(50)-&gt;toArray() dan ukur DB::getQueryLog(). Pastikan jumlah query tidak melompat menjadi &gt; 150 query.</td>
+                            <td><span class="badge badge-low">P3 (Medium)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="tab-7" class="tab-content ">
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Aspek / Modul</th>
+                            <th>Kendala yang Ditemui</th>
+                            <th>Penyebab Teknis</th>
+                            <th>Dampak pada Pengujian</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Eksekusi Feature Tests</td>
+                            <td>14 dari 15 test gagal dieksekusi saat &#x27;php artisan test&#x27; dijalankan.</td>
+                            <td>PHP CLI 8.1.10 pada Laragon belum mengaktifkan ekstensi pdo_sqlite, sedangkan phpunit.xml mengarahkan koneksi ke SQLite In-Memory.</td>
+                            <td>Pengujian integrasi otomatis tidak dapat memvalidasi alur bisnis secara dinamis; pengujian dikompensasi via code review mendalam.</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Dynamic Code Coverage Profiling</td>
+                            <td>Tidak dapat menghasilkan laporan persentase line/branch coverage real-time.</td>
+                            <td>Ekstensi driver coverage (Xdebug atau PCOV) tidak terpasang di runtime PHP CLI lokal.</td>
+                            <td>Cakupan pengujian (coverage) dilaporkan berdasarkan ketiadaan tes fungsional yang lulus pada modul-modul bersangkutan.</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Aturan Ketat Non-Mutasi Kode</td>
+                            <td>Tidak diperkenankan mengubah phpunit.xml atau mengaktifkan ekstensi host.</td>
+                            <td>Aturan Strict Rule 1 &amp; Rule 7 melarang modifikasi kode atau file konfigurasi proyek, serta melarang &#x27;memperbaiki&#x27; kegagalan test.</td>
+                            <td>Kondisi dilaporkan secara objektif dan faktual apa adanya dalam laporan QA.</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Audit Secret di History Git</td>
+                            <td>Analisis riwayat git commits terbatas pada shallow clone lokal.</td>
+                            <td>Repositori lokal berada di direktori SignalNiagaJasaTender dan sebagian file log tidak dimasukkan ke version control.</td>
+                            <td>Pemindaian kredensial difokuskan pada file konfigurasi (.env, config/) dan tree kode sumber aktif.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(idx, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + idx).classList.add('active');
+            filterTable();
+        }
+
+        function filterTable() {
+            const input = document.getElementById('globalSearch').value.toLowerCase();
+            const activeTab = document.querySelector('.tab-content.active');
+            if (!activeTab) return;
+            const rows = activeTab.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

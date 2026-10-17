@@ -1,0 +1,306 @@
+﻿
+  [30;43;1m WARN [39;49;22m Your XML configuration validates against a deprecated schema. Migrate your XML configuration using "--migrate-configuration"!
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                                                            0.02s  
+
+   FAIL  Tests\Feature\BusinessFlowTest
+  ⨯ service quotation can be created
+  ⨯ sale rejects insufficient stock
+  ⨯ payment cannot exceed invoice balance
+  ⨯ sale creates invoice items
+  ⨯ tender evaluation is recorded
+  ⨯ rejected tender moves to lost status
+  ⨯ uploading tender document replaces previous document
+  ⨯ deadline command notifies business roles
+  ⨯ local password reset link can be used
+  ⨯ registration requires super admin approval before login
+  ⨯ login requires a valid server side captcha
+  ⨯ login captcha can be refreshed
+  ⨯ user delete requires matching email confirmation
+
+   FAIL  Tests\Feature\ExampleTest
+  ⨯ the application returns a successful response
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > service quotation can be created                           QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > sale rejects insufficient stock                            QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > payment cannot exceed invoice balance                      QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > sale creates invoice items                                 QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > tender evaluation is recorded                              QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > rejected tender moves to lost status                       QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > uploading tender document replaces previous document       QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > deadline command notifies business roles                   QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > local password reset link can be used                      QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > registration requires super admin approval before login    QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > login requires a valid server side captcha                 QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > login captcha can be refreshed                             QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\BusinessFlowTest > user delete requires matching email confirmation           QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ExampleTest > the application returns a successful response                   QueryException   
+  could not find driver (Connection: sqlite, SQL: PRAGMA foreign_keys = ON;)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connectors\Connector.php:65
+      NunoMaduro\Collision\Exceptions\TestException::("could not find driver")
+
+
+  Tests:    14 failed, 1 passed (1 assertions)
+  Duration: 1.34s

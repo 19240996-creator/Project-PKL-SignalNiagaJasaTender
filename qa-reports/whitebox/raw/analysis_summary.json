@@ -1,0 +1,219 @@
+{
+  "category_stats": {
+    "Controllers": {
+      "files": 25,
+      "loc": 5013
+    },
+    "Models": {
+      "files": 37,
+      "loc": 1650
+    },
+    "Services": {
+      "files": 4,
+      "loc": 296
+    },
+    "Middleware": {
+      "files": 12,
+      "loc": 307
+    },
+    "Commands": {
+      "files": 1,
+      "loc": 46
+    },
+    "Migrations": {
+      "files": 24,
+      "loc": 1443
+    },
+    "Seeders": {
+      "files": 1,
+      "loc": 347
+    },
+    "Routes": {
+      "files": 4,
+      "loc": 325
+    },
+    "Views": {
+      "files": 31,
+      "loc": 13322
+    }
+  },
+  "high_complexity_count": 25,
+  "high_complexity_functions": [
+    {
+      "file": "app/Services/SalesService.php",
+      "function": "createSale",
+      "line": 16,
+      "complexity": 51,
+      "loc": 96
+    },
+    {
+      "file": "app/Http/Controllers/ReportController.php",
+      "function": "export",
+      "line": 191,
+      "complexity": 46,
+      "loc": 116
+    },
+    {
+      "file": "app/Http/Controllers/DashboardController.php",
+      "function": "index",
+      "line": 19,
+      "complexity": 34,
+      "loc": 254
+    },
+    {
+      "file": "app/Http/Controllers/TenderController.php",
+      "function": "store",
+      "line": 85,
+      "complexity": 31,
+      "loc": 84
+    },
+    {
+      "file": "app/Http/Controllers/ReportController.php",
+      "function": "index",
+      "line": 25,
+      "complexity": 25,
+      "loc": 137
+    },
+    {
+      "file": "app/Http/Controllers/SalesController.php",
+      "function": "store",
+      "line": 53,
+      "complexity": 23,
+      "loc": 84
+    },
+    {
+      "file": "app/Http/Controllers/ServiceOperationsController.php",
+      "function": "updateProgress",
+      "line": 157,
+      "complexity": 23,
+      "loc": 86
+    },
+    {
+      "file": "app/Services/ProcurementService.php",
+      "function": "createProcurement",
+      "line": 12,
+      "complexity": 22,
+      "loc": 47
+    },
+    {
+      "file": "app/Http/Middleware/AuditActivity.php",
+      "function": "handle",
+      "line": 12,
+      "complexity": 19,
+      "loc": 44
+    },
+    {
+      "file": "app/Services/TenderService.php",
+      "function": "convertTenderToContract",
+      "line": 15,
+      "complexity": 19,
+      "loc": 39
+    },
+    {
+      "file": "app/Http/Controllers/TenderProjectController.php",
+      "function": "storeLog",
+      "line": 235,
+      "complexity": 18,
+      "loc": 56
+    },
+    {
+      "file": "app/Http/Controllers/ServiceOperationsController.php",
+      "function": "store",
+      "line": 51,
+      "complexity": 17,
+      "loc": 46
+    },
+    {
+      "file": "app/Http/Controllers/ServiceJobController.php",
+      "function": "store",
+      "line": 63,
+      "complexity": 16,
+      "loc": 51
+    },
+    {
+      "file": "app/Services/PaymentService.php",
+      "function": "recordPayment",
+      "line": 12,
+      "complexity": 16,
+      "loc": 37
+    },
+    {
+      "file": "app/Http/Controllers/ReportController.php",
+      "function": "resolveDates",
+      "line": 162,
+      "complexity": 15,
+      "loc": 29
+    },
+    {
+      "file": "app/Http/Controllers/SalesController.php",
+      "function": "destroy",
+      "line": 171,
+      "complexity": 15,
+      "loc": 67
+    },
+    {
+      "file": "app/Http/Controllers/ActivityLogController.php",
+      "function": "latestLogs",
+      "line": 34,
+      "complexity": 13,
+      "loc": 25
+    },
+    {
+      "file": "app/Http/Controllers/ServiceJobController.php",
+      "function": "destroy",
+      "line": 172,
+      "complexity": 13,
+      "loc": 55
+    },
+    {
+      "file": "app/Http/Controllers/TenderProjectController.php",
+      "function": "syncConnectedServiceJobs",
+      "line": 334,
+      "complexity": 13,
+      "loc": 32
+    },
+    {
+      "file": "app/Http/Controllers/ProductController.php",
+      "function": "approveChangeRequest",
+      "line": 322,
+      "complexity": 12,
+      "loc": 97
+    },
+    {
+      "file": "app/Http/Controllers/TenderController.php",
+      "function": "update",
+      "line": 169,
+      "complexity": 12,
+      "loc": 74
+    },
+    {
+      "file": "app/Http/Controllers/AuthController.php",
+      "function": "handleProviderCallback",
+      "line": 97,
+      "complexity": 11,
+      "loc": 75
+    },
+    {
+      "file": "app/Http/Controllers/TenderController.php",
+      "function": "requestDeletion",
+      "line": 289,
+      "complexity": 11,
+      "loc": 48
+    },
+    {
+      "file": "app/Http/Controllers/TenderController.php",
+      "function": "approveDeletion",
+      "line": 337,
+      "complexity": 11,
+      "loc": 54
+    },
+    {
+      "file": "app/Http/Middleware/CheckRole.php",
+      "function": "handle",
+      "line": 18,
+      "complexity": 11,
+      "loc": 30
+    }
+  ],
+  "findings": []
+}
