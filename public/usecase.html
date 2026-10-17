@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use Case Diagram - SignalNiagaJasaTender</title>
+    <script src="mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #070b14;
+            --surface: #0f172a;
+            --border: #334155;
+            --text: #cbd5e1;
+            --muted: #94a3b8;
+            --title: #f8fafc;
+            --accent: #38bdf8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        header {
+            padding: 24px clamp(20px, 5vw, 72px);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--accent);
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--title);
+            font-size: clamp(1.4rem, 3vw, 2.2rem);
+        }
+
+        .subtitle {
+            max-width: 720px;
+            margin: 10px 0 0;
+            color: var(--muted);
+        }
+
+        main {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px clamp(12px, 3vw, 48px) 48px;
+        }
+
+        .diagram-shell {
+            overflow: auto;
+            min-height: 620px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #0b1120;
+        }
+
+        .mermaid {
+            min-width: 1500px;
+            text-align: center;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .legend span::before {
+            content: "";
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .legend span:last-child::before {
+            background: #f8fafc;
+            border: 1px solid #64748b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <p class="eyebrow">PT Signal Panca Utama</p>
+        <h1>Use Case Diagram — SignalNiagaJasaTender</h1>
+        <p class="subtitle">Aktor, modul bisnis, alur persetujuan, pelaporan, dan administrasi sistem.</p>
+    </header>
+
+    <main>
+        <section class="diagram-shell" aria-label="Use case diagram">
+            <pre class="mermaid">
+flowchart LR
+    admin([Admin])
+    manager([Manager])
+    owner([Owner])
+    teknisi([Teknisi])
+
+    subgraph sistem["SISTEM MANAJEMEN OPERASIONAL & PELAPORAN"]
+        direction TB
+        auth([Autentikasi & akses berbasis role])
+        dashboard([Melihat dashboard])
+        laporan([Melihat laporan & filter])
+        export([Export laporan PDF / XLSX])
+
+        subgraph tender["MODUL TENDER"]
+            direction LR
+            tenderAdmin([Kelola administrasi tender])
+            tenderDoc([Kelola dokumen tender])
+            rab([Kelola RAB / estimasi])
+            proyek([Kelola proyek lapangan])
+            evaluasi([Mencatat evaluasi tender])
+            kontrak([Konversi tender menjadi kontrak])
+        end
+
+        subgraph jasa["MODUL JASA"]
+            direction LR
+            jasaData([Kelola pekerjaan jasa])
+            jasaApprove([Setujui / tolak pekerjaan jasa])
+            teknisiData([Kelola teknisi & ketersediaan])
+            operasional([Kelola instalasi, maintenance & progres])
+            tagihan([Buat tagihan jasa])
+        end
+
+        subgraph barang["MODUL PERDAGANGAN & BARANG"]
+            direction LR
+            klien([Kelola klien])
+            supplier([Kelola supplier])
+            pengadaan([Kelola pengadaan & penerimaan])
+            produk([Kelola produk & stok])
+            penjualan([Kelola penjualan barang])
+        end
+
+        subgraph komersial["DOKUMEN KOMERSIAL & KEUANGAN"]
+            direction LR
+            penawaran([Kelola quotation])
+            order([Kelola customer order])
+            invoice([Melihat invoice])
+            pembayaran([Catat pembayaran])
+        end
+
+        subgraph administrasi["ADMINISTRASI SISTEM"]
+            direction LR
+            pengguna([Kelola pengguna & permission])
+            audit([Melihat activity log])
+        end
+    end
+
+    admin --> auth
+    manager --> auth
+    owner --> auth
+    teknisi --> auth
+    admin --> dashboard
+    manager --> dashboard
+    owner --> dashboard
+
+    admin --> tenderAdmin
+    admin --> tenderDoc
+    admin --> rab
+    admin --> proyek
+    admin --> jasaData
+    admin --> klien
+    admin --> supplier
+    admin --> pengadaan
+    admin --> produk
+    admin --> penjualan
+    admin --> penawaran
+    admin --> order
+    admin --> invoice
+    admin --> pembayaran
+    admin --> laporan
+
+    manager --> tenderAdmin
+    manager --> tenderDoc
+    manager --> rab
+    manager --> proyek
+    manager --> evaluasi
+    manager --> kontrak
+    manager --> jasaData
+    manager --> jasaApprove
+    manager --> klien
+    manager --> supplier
+    manager --> pengadaan
+    manager --> produk
+    manager --> penjualan
+    manager --> penawaran
+    manager --> order
+    manager --> invoice
+    manager --> pembayaran
+    manager --> laporan
+    manager --> export
+
+    owner --> tenderAdmin
+    owner --> tenderDoc
+    owner --> rab
+    owner --> proyek
+    owner --> evaluasi
+    owner --> kontrak
+    owner --> jasaData
+    owner --> jasaApprove
+    owner --> teknisiData
+    owner --> klien
+    owner --> supplier
+    owner --> pengadaan
+    owner --> produk
+    owner --> penjualan
+    owner --> penawaran
+    owner --> order
+    owner --> invoice
+    owner --> pembayaran
+    owner --> laporan
+    owner --> export
+    owner --> pengguna
+    owner --> audit
+
+    teknisi --> teknisiData
+    teknisi --> operasional
+    tenderAdmin -.->|include| tenderDoc
+    tenderAdmin -.->|include| rab
+    laporan -.->|include| export
+            </pre>
+        </section>
+        <div class="legend">
+            <span>Use case / fungsi sistem</span>
+            <span>Aktor eksternal</span>
+            <span>Garis putus-putus menunjukkan relasi include</span>
+        </div>
+    </main>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            securityLevel: "strict",
+            theme: "base",
+            themeVariables: {
+                primaryColor: "#e0f2fe",
+                primaryTextColor: "#082f49",
+                primaryBorderColor: "#0369a1",
+                lineColor: "#94a3b8",
+                clusterBkg: "#111827",
+                clusterBorder: "#475569",
+                tertiaryColor: "#0f172a",
+                fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+            }
+        });
+    </script>
+</body>
+</html>
